@@ -1,0 +1,112 @@
+`timescale 1ns / 1ps
+//////////////////////////////////////////////////////////////////////////////////
+// Company: 
+// Engineer: 
+// 
+// Create Date:    16:43:08 10/18/2017 
+// Design Name: 
+// Module Name:    Interfaz_Tx 
+// Project Name: 
+// Target Devices: 
+// Tool versions: 
+// Description: 
+//
+// Dependencies: 
+//
+// Revision: 
+// Revision 0.01 - File Created
+// Additional Comments: 
+//
+//////////////////////////////////////////////////////////////////////////////////
+module Interfaz_Tx(
+	//INPUT
+	input clk,
+	input reset,
+	input wire [31:0] in_data,
+	input wire new_result,
+	input tx_done,
+	// OUTPUT
+	output wire [7:0] out_data,
+	output wire tx_start
+	
+    );
+
+	reg [7:0] data_out;
+	
+	reg [2:0]state;
+	reg start;
+	
+	reg [31:0] inData;
+	localparam idle = 2'b00;
+	localparam send_value = 2'b01;
+	localparam send_valor = 2'b10;
+	localparam finish = 2'b11;
+
+	
+	assign out_data = data_out;
+	assign tx_start =start;
+
+	integer bit_msb,bit_lsb;
+	
+	always @ (posedge clk, posedge reset)
+	if(reset)
+	begin
+		state= idle;
+		start =1'b0;
+		bit_lsb=24;
+		bit_msb=31;
+	end
+	else
+	begin
+		case(state)
+			idle:
+				begin
+					start=1'b0;
+					if(new_result)
+						begin
+							state=send_value;
+							inData=in_data;
+							bit_msb=31;
+							bit_lsb=24;
+						end
+					else
+						state=idle;
+				end
+			send_value:
+				begin
+					//if(tx_done)
+					//	begin
+							data_out = inData[31:24]+48;
+							inData= inData << 8;
+							start=1'b1;
+							bit_msb=bit_msb-8;
+							bit_lsb=bit_lsb-8;
+							state=send_valor;
+					//	end
+				end
+			send_valor:
+				begin
+					if(tx_done)
+						begin
+							data_out = inData[31:24]+48;
+							inData= inData << 8;
+							start=1'b1;
+							bit_lsb=bit_lsb-8;
+							if(bit_lsb<0)
+								state=finish;
+						end
+					else
+						begin
+							start=1'b0;
+							state=send_valor;
+						end
+				end
+			finish:
+				begin
+					start=1'b0;
+				end
+			endcase
+end
+
+
+endmodule
