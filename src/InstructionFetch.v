@@ -23,7 +23,9 @@ module InstructionFetch(
     input rst,
 	 
 //Input Signals
-	 input 			inPCSel,
+    input           inIF_ID_write,
+    input           inPC_write,
+	input 			inPCSel,
     input [31:0] 	inPCJump,
 	 
 //Output Signals
@@ -58,9 +60,10 @@ begin
 		instruction_address<=0;
 	else
 		begin
-			case (inPCSel)
-				1'b0: instruction_address <= pc + 1;
-				1'b1: instruction_address <= inPCJump;
+			casez ({inPCSel,inPC_write})
+				2'b00: instruction_address <= pc;
+				2'b01: instruction_address <= pc + 1;
+				2'b1?: instruction_address <= inPCJump;
 			endcase
 		end
 end
@@ -72,7 +75,7 @@ begin
 			pc <= 32'd0;
 			//instruction <= 32'bX;
 		end
-	else
+	else if (inIF_ID_write)
 		begin
 			pc <= instruction_address;
 			//instruction <= mem_instruction;

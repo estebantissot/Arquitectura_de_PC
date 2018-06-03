@@ -48,8 +48,11 @@ wire [31:0]	idecode0_outInstructionAddress; //idecode0:outInstructionAddress -> 
 wire [31:0]	idecode0_outRegA; 	//idecode0:outRegA -> execute0:inRegA
 wire [31:0]	idecode0_outRegB; 	//idecode0:outRegB -> execute0:inRegB
 wire [31:0]	idecode0_outInstruction_ls; //idecode0:outInstruction_ls -> execute0:inInstruction_ls
-wire [4:0]	idecode0_outLD_rt; //idecode0:outLD_rt -> execute0:inLD_rt
+wire [4:0]	idecode0_out_rs; //idecode0:out_rs -> execute0:in_rs
+wire [4:0]	idecode0_out_rt; //idecode0:out_rt -> execute0:in_rt
 wire [4:0]	idecode0_outRT_rd; //idecode0:outRT_rd -> execute0:inRT_rd
+wire    idecode0_outPC_write;
+wire    idecode0_outIF_ID_write;
 
 //-- Modulo Execute --
 wire [1:0]	execute0_outWB; 		//execute0:outWB -> memaccess0:inWB
@@ -62,15 +65,15 @@ wire [4:0]	execute0_outRegF_wreg; //execute0:outRegF_wreg -> memaccess0:inRegF_w
 
 //-- Modulo MemoryAccess --
 wire [1:0]	memaccess0_outWB; 			//memaccess0:outWB -> wb0:inWB
-wire 			memaccess0_outPCSel; 		//memaccess0:outPCSel -> ifetch0:inPCSel
+wire 		memaccess0_outPCSel; 		//memaccess0:outPCSel -> ifetch0:inPCSel
 wire [31:0]	memaccess0_outPCJump; 	//memaccess0:outPCJump -> ifetch0:inPCJump
 wire [31:0] memaccess0_outRegF_wd; 	//memaccess0:outRegF_wd -> wb0:inRegF_wd
-wire [31:0] memaccess0_outALUResult; //memaccess0:outALUResult -> wb0:inALUResult
+wire [31:0] memaccess0_outALUResult; //memaccess0:outALUResult -> wb0:inALUResult & MEM_AluResult(execute stage)
 wire [4:0]	memaccess0_outRegF_wreg; //memaccess0:outRegF_wreg -> idecode0:inRegF_wreg
 
 //-- Modulo Write Back --
-wire 			wb0_outRegF_wr; // wb0:outRegF_wr -> idecode0:inRegF_wr
-wire [31:0]	wb0_outRegF_wd; // wb0:outRegF_wd -> idecode0:inRegF_wd
+wire 		wb0_outRegF_wr; // wb0:outRegF_wr -> idecode0:inRegF_wr & WB_regF_wr (execute stage)
+wire [31:0]	wb0_outRegF_wd; // wb0:outRegF_wd -> idecode0:inRegF_wd & WB_regF_wd(execute stage)
 
 
 
@@ -94,6 +97,8 @@ InstructionFetch ifetch0(
 	.rst(soft_rst),
 	
 	//Input Signals
+	.inPC_write(idecode0_outPC_write),
+	.inIF_ID_write(idecode0_outIF_ID_write),
 	.inPCSel(memaccess0_outPCSel),
 	.inPCJump(memaccess0_outPCJump),
 	
@@ -115,6 +120,8 @@ InstructionDecode idecode0(
 	.inInstruction(ifetch0_outInstruction),
 	.inRegF_wreg(memaccess0_outRegF_wreg),
 	.inRegF_wd(wb0_outRegF_wd),
+	.EXE_mem_read(idecode0_outMEM[1]),
+	.EXE_rd(idecode0_out_rt), //rt (registro destino en la instruccion load).
 
 	//Output Signals
 	.outWB(idecode0_outWB),
@@ -124,8 +131,12 @@ InstructionDecode idecode0(
 	.outRegA(idecode0_outRegA),
 	.outRegB(idecode0_outRegB),
 	.outInstruction_ls(idecode0_outInstruction_ls),
-	.outLD_rt(idecode0_outLD_rt),
-	.outRT_rd(idecode0_outRT_rd)
+	.out_rs(idecode0_out_rs),
+	.out_rt(idecode0_out_rt),
+	.outRT_rd(idecode0_outRT_rd),
+	.outPC_write(idecode0_outPC_write),
+    .outIF_ID_write(idecode0_outIF_ID_write)
+	
 );
 
 // Instancia del modulo Execute
@@ -139,11 +150,18 @@ Execute execute0(
 	.inMEM(idecode0_outMEM),
 	.inEXE(idecode0_outEXE),
 	.inInstructionAddress(idecode0_outInstructionAddress),
+	.MEM_AluResult(execute0_outALUResult),
+	.WB_regF_wd(wb0_outRegF_wd),
 	.inRegA(idecode0_outRegA),
 	.inRegB(idecode0_outRegB),
 	.inInstruction_ls(idecode0_outInstruction_ls),
-	.inLD_rt(idecode0_outLD_rt),
+	.in_rs(idecode0_out_rs),
+	.in_rt(idecode0_out_rt),
 	.inRT_rd(idecode0_outRT_rd),
+	.MEM_rd(execute0_outRegF_wreg), 
+	.MEM_regF_wr(execute0_outWB[1]),
+	.WB_rd(memaccess0_outRegF_wreg),
+	.WB_regF_wr(wb0_outRegF_wr),
 
 	//Output Signals
 	.outWB(execute0_outWB),

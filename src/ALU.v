@@ -18,7 +18,8 @@
 // Additional Comments: 
 //
 //////////////////////////////////////////////////////////////////////////////////
-module ALU #(parameter bits = 8)(A,B,select,Zero,C);
+module ALU #(parameter bits = 8)(rst,A,B,select,Zero,C);
+        input  rst;
 		input  signed [bits-1:0]A;
 		input  signed [bits-1:0]B;
 		input  [3:0]select;
