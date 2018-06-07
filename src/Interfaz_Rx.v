@@ -1,35 +1,49 @@
 `timescale 1ns / 1ps
 
-module Interfaz_Rx(clk,reset,start,din,MIPS_enable);//,din,dout,A,B,C);
+module Interfaz_Rx(
+	
+	input 	clk,
+	input 	reset,
+	
+	input 	start,
+	input 	[7:0]din,
 
-	input clk,reset;
-	input start;
-	input wire[7:0]din;
-	//output[7:0]dout;
-	output MIPS_enable;
-	
-	//output A,B,C;
-	//reg a_bA,a_bB,a_bC;
-	
-	//reg [7:0] num;	
-	reg aux_start;
-	assign MIPS_enable=aux_start;
-	
-	//assign dout=num;
 
-	//reg[7:0] cnto;
-	
-	
-always@(posedge clk, posedge reset)
-	if(reset)
+	output 	MIPS_enable,
+	output 	ready,
+	output	[31:0]dout,
+	);
+
+	reg [7:0] num;	
+	reg	[1:0] nData;
+
+	assign dout;
+
+always@(posedge clk)
 		begin
-			//cnto=0;
-			aux_start=0;
-		end
-	else
-		begin
-			if(1'b1)
-				aux_start=1;
+			if(reset)
+				begin
+					nData	<=	2'b00;
+					dout	<=	32'b0;
+				end
+			else
+				begin
+				if(start)
+					begin
+						nData	<=	nData+1;
+						if(nData != 2'b11)
+							begin
+								ready	<=	1'b0;
+								num		<=	din-48;
+								dout	<=	{dout,num};
+								dout	<=	dout<<8;
+							end
+						else
+							begin
+								ready	<= 1'b1;
+							end
+					end
+				end
 		end
 		
 endmodule

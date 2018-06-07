@@ -32,11 +32,11 @@ module MemoryAccess(
     input [4:0] 	inRegF_wreg,
 
 //Output Signals    
-	 output [1:0]	outWB,
-	 output			outPCSel,
-    output [31:0] outPCJump,
-    output [31:0] outRegF_wd,
-    output [31:0] outALUResult,
+	output [1:0]	outWB,
+	output			outPCSel,
+    output [31:0]   outPCJump,
+    output [31:0]   outRegF_wd,
+    output [31:0]   outALUResult,
     output [4:0] 	outRegF_wreg
     );
 

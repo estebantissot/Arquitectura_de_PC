@@ -18,24 +18,13 @@
 //
 //////////////////////////////////////////////////////////////////////////////////
 module top_level(
-    input CLK100MHZ,
-    input CPU_RESETN,
-	input UART_TXD_IN,
-	output UART_RXD_OUT
+    input clk,
+    input rst,
+	input RX,
+	output TX
     );
 
 // Cables
-wire clk;
-wire rst;
-wire RX;
-wire TX;
-
-assign clk = CLK100MHZ;
-assign rst = CPU_RESETN;
-assign RX = UART_TXD_IN;
-assign TX = UART_RXD_OUT;
-
-
 //-- Modulo Instruction Fetch --
 wire [31:0]	ifetch0_outInstructionAddress; //ifetch0:outInstructionAddress -> idecode0:inInstructionAddress
 wire [31:0]	ifetch0_outInstruction; 			//ifetch0:outInstruction -> idecode0:inInstruction
@@ -210,5 +199,16 @@ WriteBack wb0(
 	.outRegF_wd(wb0_outRegF_wd)
 );
 
+
+DebugUnit debug(
+
+    .clk(clk),
+    .rst(rst),
+    .RX(RX),
+    .Instruction(ifetch0_outInstructionAddress),
+    .TX(TX),
+    .soft_rst(soft_rst)
+
+);
 
 endmodule

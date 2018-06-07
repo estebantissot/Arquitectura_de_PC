@@ -28,7 +28,7 @@ module Execute(
     input [3:0] 	inEXE,
     input [31:0] 	inInstructionAddress,
     input [31:0] 	MEM_AluResult,
-    input [31:0]    WB_regF_wd,
+    input [31:0]    	WB_regF_wd,
     input [31:0] 	inRegA,
     input [31:0] 	inRegB,
     input [31:0] 	inInstruction_ls,

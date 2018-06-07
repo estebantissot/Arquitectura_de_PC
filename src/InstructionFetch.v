@@ -27,6 +27,7 @@ module InstructionFetch(
     input           inPC_write,
 	input 			inPCSel,
     input [31:0] 	inPCJump,
+    input           inFlush,
 	 
 //Output Signals
     output [31:0] outInstructionAddress,
@@ -56,7 +57,7 @@ InstructionMemory imem0 (
 // Logica del Bloque
 always @ (*)
 begin
-	if(rst)
+	if(rst || inFlush)
 		instruction_address<=0;
 	else
 		begin
