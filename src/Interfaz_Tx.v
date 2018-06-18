@@ -27,21 +27,21 @@ module Interfaz_Tx(
 	input tx_done,
 	// OUTPUT
 	output wire [7:0] out_data,
-	output wire tx_start
-	
+	output wire tx_start,
+	output data_done
     );
 
 	reg [7:0] data_out;
 	
 	reg [2:0]state;
 	reg start;
-	
+	//debug
+	reg dataDone;
 	reg [31:0] inData;
 	localparam idle = 2'b00;
 	localparam send_value = 2'b01;
 	localparam send_valor = 2'b10;
-	localparam finish = 2'b11;
-
+	
 	
 	assign out_data = data_out;
 	assign tx_start =start;
@@ -61,7 +61,9 @@ module Interfaz_Tx(
 		case(state)
 			idle:
 				begin
+				    dataDone=1'b0;
 					start=1'b0;
+					data_out=1'b0;
 					if(new_result)
 						begin
 							state=send_value;
@@ -93,17 +95,16 @@ module Interfaz_Tx(
 							start=1'b1;
 							bit_lsb=bit_lsb-8;
 							if(bit_lsb<0)
-								state=finish;
+								begin
+									dataDone=1'b1;
+									state=idle;
+								end
 						end
 					else
 						begin
 							start=1'b0;
 							state=send_valor;
 						end
-				end
-			finish:
-				begin
-					start=1'b0;
 				end
 			endcase
 end

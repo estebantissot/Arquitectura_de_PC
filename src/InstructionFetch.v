@@ -28,7 +28,8 @@ module InstructionFetch(
 	input 			inPCSel,
     input [31:0] 	inPCJump,
     input           inFlush,
-	 
+    input 			stopPC_debug,
+ 	 
 //Output Signals
     output [31:0] outInstructionAddress,
     output [31:0] outInstruction
@@ -76,10 +77,11 @@ begin
 			pc <= 32'd0;
 			//instruction <= 32'bX;
 		end
-	else if (inIF_ID_write)
+	else if (inIF_ID_write && stopPC_debug)
 		begin
 			pc <= instruction_address;
 			//instruction <= mem_instruction;
 		end
-	end
+end
+
 endmodule

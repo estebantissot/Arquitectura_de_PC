@@ -64,7 +64,8 @@ wire [4:0]	memaccess0_outRegF_wreg; //memaccess0:outRegF_wreg -> idecode0:inRegF
 wire 		wb0_outRegF_wr; // wb0:outRegF_wr -> idecode0:inRegF_wr & WB_regF_wr (execute stage)
 wire [31:0]	wb0_outRegF_wd; // wb0:outRegF_wd -> idecode0:inRegF_wd & WB_regF_wd(execute stage)
 
-
+//debug
+wire stopPC_debug;
 
 wire soft_rst; 
 wire tx_start;
@@ -84,7 +85,11 @@ InstructionFetch ifetch0(
 	//Clock and Reset Signals
 	.clk(clk),
 	.rst(soft_rst),
-	
+		
+	//debug
+	.stopPC_debug(stopPC_debug),
+
+
 	//Input Signals
 	.inPC_write(idecode0_outPC_write),
 	.inIF_ID_write(idecode0_outIF_ID_write),
@@ -202,13 +207,24 @@ WriteBack wb0(
 
 DebugUnit debug(
 
-    .clk(clk),
-    .rst(rst),
-    .RX(RX),
-    .Instruction(ifetch0_outInstructionAddress),
-    .TX(TX),
-    .soft_rst(soft_rst)
+	.clk(),
+    .rst(),
+    .RX(),
+
+    .PC(),
+
+    .addressInstrucction(),
+    .InstructionRecive(),
+    .write_read(),
+    .TX(),
+    .soft_rst(),
+    .stopPC_debug()
 
 );
+
+
+    
+
+
 
 endmodule

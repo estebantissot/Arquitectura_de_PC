@@ -6,44 +6,71 @@ module Interfaz_Rx(
 	input 	reset,
 	
 	input 	start,
-	input 	[7:0]din,
+	input 	[7:0] din,
 
 
 	output 	MIPS_enable,
-	output 	ready,
-	output	[31:0]dout,
+
+	output 	go,
+	output  [31:0] address,
+	output	[31:0] dout
 	);
 
-	reg [7:0] num;	
-	reg	[1:0] nData;
+	reg [7:0] 	num;
+	reg [31:0]	Data;		
+	reg	[2:0] 	nData;
+	reg 		state;
+	reg 		ready;
+    reg [31:0]  new_address;
+	localparam gather	=	1'b0;
+	localparam send		=	1'b1;
 
-	assign dout;
 
-always@(posedge clk)
-		begin
-			if(reset)
-				begin
-					nData	<=	2'b00;
-					dout	<=	32'b0;
-				end
-			else
-				begin
-				if(start)
+	assign dout	=	Data;
+	assign go	=	ready;
+	assign address = new_address;
+
+always@(posedge clk, posedge reset)
+	begin
+		if(reset)
+			begin
+				nData	=	3'b0;
+				Data	=	32'b0;
+				state	=	2'b00;
+				new_address = 32'b0;
+			end
+		else
+			begin
+			case(state)
+			gather:
+				begin	
+					if(start)
 					begin
-						nData	<=	nData+1;
-						if(nData != 2'b11)
+						nData	=	nData+1;
+						if(nData != 3'b101)
 							begin
-								ready	<=	1'b0;
-								num		<=	din-48;
-								dout	<=	{dout,num};
-								dout	<=	dout<<8;
+								ready	=	1'b0;
+								num		=	din-48;
+								Data	=	Data<<8;
+								Data	=	{Data[31:8],num};
 							end
 						else
 							begin
-								ready	<= 1'b1;
+								nData	=	3'b000;
+								new_address = new_address +1;
+								state	=	send;
 							end
 					end
 				end
+			
+			send:
+				begin
+					ready	= 	1'b1;
+					state 	=	gather;
+				end
+
+			endcase
+
 		end
-		
+	end		
 endmodule
