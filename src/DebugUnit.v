@@ -1,22 +1,21 @@
 `timescale 1ns / 1ps
 //////////////////////////////////////////////////////////////////////////////////
-// Company: 
-// Engineer: 
+// Materia: Arquitectura de Computadoras
+// Alumnos: Tissot Esteban
+//			Manero Matias
 // 
-// Create Date: 03.06.2018 18:37:22
+// Create Date:    15:50:01 03/01/2018 
 // Design Name: 
-// Module Name: DebugUnit
-// Project Name: 
-// Target Devices: 
-// Tool Versions: 
-// Description: 
-// 
+// Module Name:    DebugUnit 
+// Project Name: 	 TP4-PIPELINE 
+// Description:   
+//
 // Dependencies: 
-// 
-// Revision:
+//
+// Revision: 
 // Revision 0.01 - File Created
-// Additional Comments:
-// 
+// Additional Comments: 
+//
 //////////////////////////////////////////////////////////////////////////////////
 
 
@@ -25,8 +24,15 @@ module DebugUnit(
     input rst,
     input RX,
 
-    input [31:0] PC,
-
+    input [31:0] inLatch,
+    input [31:0] inPC,
+    input [31:0] inFRData,
+    input [31:0] inMemData,
+    
+    output        out_debug_on,
+    output [31:0] outDebugAddress,
+    
+    output [6:0] outControlLatchMux,
     output [31:0] addressInstrucction,
     output [31:0] InstructionRecive,
     output write_read,
@@ -47,11 +53,22 @@ reg 		stopPC;
 reg 		tx_start;
 reg         WriteRead;
 //-----------------Maquina de Estados-----------------------------
-reg [1:0] 	state_send;
-localparam [1:0] send_init = 2'b00;
-localparam [1:0] send_Rmem = 2'b01;
-localparam [1:0] send_waitFinish = 2'b10;
-reg [1:0] state_prev;
+reg [2:0] 	state_send;
+localparam [2:0] send_init = 3'b000;
+localparam [2:0] send_PC = 3'b001;
+localparam [2:0] send_Rmem = 3'b010;
+localparam [2:0] send_Mem = 3'b011;
+localparam [2:0] send_Latch = 3'b100;
+localparam [2:0] send_waitFinish = 3'b101;
+localparam [2:0] send_Finish = 3'b110;
+
+localparam [3:0] cant_senal_fetch = 4'b0001;
+localparam [3:0] cant_senal_decode = 4'b1000;
+localparam [3:0] cant_senal_execute = 4'b1010;
+localparam [3:0] cant_senal_memory = 4'b0100;
+localparam [3:0] cant_senal_wb = 4'b0001;
+
+reg [2:0] state_prev;
 
 
 // Registros --- Maquina Receptora de instrucciones 
@@ -63,6 +80,17 @@ localparam rx_enviar = 1'b0;
 localparam rx_stop = 1'b1;
 //---------------------------------------------------------------
 
+// Cables
+wire [31:0] outDebugAddress;
+wire [31:0] outRegData;
+wire [31:0] outMemData;
+wire out_debug_on;
+
+// Registros
+reg debug;
+reg [31:0] address;
+reg [3:0]senal;
+reg [2:0]etapa;
 
 
 assign stopPC_debug =stopPC;
@@ -74,11 +102,16 @@ assign write_read   =   WriteRead;
 
 //assign tx_start = (Instruction==32'd19)? 1'b1:1'b0;
 
+assign outDebugAddress = address;
+assign outControlLatchMux = {etapa,senal};
+assign out_debug_on = debug;
+
 
 wire write;
 wire [31:0] dout;
 wire tx_dataready;
 
+// Instancia de UART
 Top_UART uart(
 	.clk(clk),
 	.reset(rst),
@@ -93,6 +126,7 @@ Top_UART uart(
 );
 
 
+// Maquina de estado de RX
 always @ (posedge clk, posedge rst)
 begin
 	if(rst)
@@ -130,7 +164,10 @@ begin
 end
 
 
-
+/* maquina de estado del TX 
+* send_init: Estado inicial. Solo se pasa si no se esta recibiendo datos por la interfaz RX.
+* send_Rmem: 
+*/
 always @(posedge clk,posedge rst)
 begin
 	if(rst)
@@ -138,42 +175,150 @@ begin
 			stopPC<=1'b1;
 			tx_start<=1'b1;
 			state_send <= send_init;
+			etapa <= 3'b0;
+			senal <= 4'b0;
+			debug <= 1'b0;
 		end
 	else
 		begin
 		case(state_send)
-		send_init:
-			begin
-				if(state_rx!=rx_stop)
-					state_send<=send_init;
-				else
-					state_send<=send_Rmem;
-			end
-		send_Rmem:
-			begin
-				stopPC<=1'b1;
-				sendData<=PC;
-				tx_start<=1'b1;
-				state_prev<=send_Rmem;
-				state_send<=send_waitFinish;
-			end
-		send_waitFinish:
-			begin
-				stopPC<=1'b0;
-				if(tx_dataready == 1'b0)
-					begin
-						state_send <= state_prev;
-						tx_start<=1'b0;
-					end
-			end
-
-
-		endcase
-
-
-		end
+            send_init:
+                begin
+                    if(state_rx!=rx_stop)
+                    begin
+                        state_send<=send_init;
+                        debug <= 1'b1;
+                    end
+                    else
+                        state_send<=send_PC;
+                end
+                
+            send_PC:
+                begin
+                    stopPC<=1'b0; 
+                    sendData<=inPC;
+                    tx_start<=1'b1;
+                    state_prev<=send_Rmem;
+                    state_send<=send_waitFinish;
+                end
+               
+            send_Rmem:
+                begin
+                    sendData <= inFRData;
+                    if (address == 32'd31)
+                        begin
+                            address <= 32'b0;
+                            state_prev<=send_Mem;
+                            state_send<=send_waitFinish;
+                        end
+                    else
+                        begin
+                            address <= address+1;
+                            state_prev<=send_Rmem;
+                            state_send<=send_waitFinish;
+                        end
+                end
+             
+             send_Mem:
+                begin
+                    sendData <= inMemData;
+                    if (address == 32'h00000009)
+                        begin
+                            address <= 32'b0;
+                            state_prev<=send_Finish;
+                            state_send<=send_waitFinish;
+                        end
+                    else
+                        begin
+                            address <= address+1;
+                            state_prev<=send_Mem;
+                            state_send<=send_waitFinish;
+                        end
+             end
+             
+             send_Latch:
+                 begin
+                    sendData <= inLatch;
+                    state_send <= send_waitFinish;
+                    if(etapa == 3'b000)
+                        begin
+                            state_prev <= send_Latch;
+                            if (senal == cant_senal_fetch)
+                                begin
+                                    etapa <= 3'b001;
+                                    senal <= 4'b0;
+                                end
+                            else
+                                senal <= senal+1;
+                        end
+                    if(etapa == 3'b001)
+                        begin
+                        state_prev <= send_Latch;
+                        if (senal == cant_senal_decode)
+                            begin
+                                etapa <= 3'b010;
+                                senal <= 4'b0;
+                            end
+                        else
+                            senal <= senal+1;
+                    end
+                    if(etapa == 3'b010)
+                        begin
+                        state_prev <= send_Latch;
+                            if (senal == cant_senal_execute)
+                                begin
+                                    etapa <= 3'b011;
+                                    senal <= 4'b0;
+                                end
+                            else
+                                senal <= senal+1;
+                        end
+                    if(etapa == 3'b011)
+                        begin
+                        state_prev <= send_Latch;
+                            if (senal == cant_senal_memory)
+                                begin
+                                    etapa <= 3'b100;
+                                    senal <= 4'b0;
+                                end
+                            else
+                                senal <= senal+1;
+                        end
+                      if(etapa == 3'b100)
+                          begin
+                              if (senal == cant_senal_wb)
+                                  begin
+                                      etapa <= 3'b000;
+                                      senal <= 4'b0;
+                                      state_prev <= send_Finish;
+                                  end
+                              else
+                                begin
+                                  senal <= senal+1;
+                                  state_prev <= send_Latch;
+                                end
+                          end
+                 end
+                
+            send_waitFinish:
+                begin
+                    stopPC<=1'b1; 
+                    if(tx_dataready == 1'b0)
+                        begin
+                            state_send <= state_prev;
+                            tx_start<=1'b0;
+                        end
+                end
+                
+            send_Finish:
+                begin
+                    debug <= 1'b0;
+                    // se debe esperar hasta que se quiera mandar todo de nuevo.
+                end
+            
+            endcase
+            end
 	
-
 end
 
     

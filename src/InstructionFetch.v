@@ -77,7 +77,7 @@ begin
 			pc <= 32'd0;
 			//instruction <= 32'bX;
 		end
-	else if (inIF_ID_write && stopPC_debug)
+	else if (inIF_ID_write && !stopPC_debug)
 		begin
 			pc <= instruction_address;
 			//instruction <= mem_instruction;
