@@ -42,9 +42,8 @@ module InstructionDecode(
     output [4:0] 	out_rs,
     output [4:0] 	out_rt,
     output [4:0] 	outRT_rd,
-    output 	    outPC_write,
-    output 	    outIF_ID_write,
-    output          outFlush
+    output 	    	outPC_write,
+    output 	    	outIF_ID_write,
     );
 
 //Registros
@@ -108,9 +107,6 @@ FileRegister regF0 (
 	.out_reg1(outRegA),
 	.out_reg2(outRegB)
 );
-
-//Equals unit
-assign outFlush=(outRegA==outRegB)?  1'b1:1'b0;
 
 //Logica del Bloque
 always @(negedge clk, posedge rst)

@@ -28,18 +28,7 @@ module DataMemory(
     );
 
 // Registros
-reg [31:0] Data;
-reg [31:0]New_Data1;
-reg [31:0]New_Data2;
-reg [31:0]New_Data3;
-reg [31:0]New_Data4;
-reg [31:0]New_Data5;
-reg [31:0]New_Data6;
-reg [31:0]New_Data7;
-reg [31:0]New_Data8;
-reg [31:0]New_Data9;
-reg [31:0]New_Data10;
-
+reg [31:0] Data[31:0]
 // Asignaciones
 assign outData = Data;
 
@@ -49,16 +38,7 @@ begin
 	if(rst)
 	begin
 		Data <=32'hZZZZZZZZ;
-		New_Data1<=32'h00000000;
-		New_Data2<=32'h00000000;
-		New_Data3<=32'h00000000;
-		New_Data4<=32'h00000104;
-		New_Data5<=32'h00000000;
-		New_Data6<=32'h00000000;
-		New_Data7<=32'h00000107;
-		New_Data8<=32'h00000000;
-		New_Data9<=32'h00000000;
-		New_Data10<=32'h00000000;
+
 	end
 	else
 	begin
