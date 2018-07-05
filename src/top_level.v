@@ -18,13 +18,22 @@
 //
 //////////////////////////////////////////////////////////////////////////////////
 module top_level(
-    input clk,
-    input rst,
-	input RX,
-	output TX
+    input CLK100MHZ,
+    input CPU_RESETN,
+	input UART_TXD_IN,
+	output UART_RXD_OUT
     );
 
 // Cables
+wire clk;
+wire rst;
+wire RX;
+wire TX;
+assign clk = CLK100MHZ;
+assign rst = CPU_RESETN;
+assign RX = UART_TXD_IN;
+assign TX = UART_RXD_OUT;
+
 //-- Modulo Instruction Fetch --
 wire [31:0]	ifetch0_outInstructionAddress; //ifetch0:outInstructionAddress -> idecode0:inInstructionAddress
 wire [31:0]	ifetch0_outInstruction; 			//ifetch0:outInstruction -> idecode0:inInstruction
@@ -66,15 +75,21 @@ wire [31:0]	wb0_outRegF_wd; // wb0:outRegF_wd -> idecode0:inRegF_wd & WB_regF_wd
 
 //debug
 wire stopPC_debug;
+wire [31:0] muxLatch_outData;
+wire [6:0]  ControlLatchMux;
 
 wire soft_rst; 
 wire tx_start;
 wire MIPS_enable;
+wire Debug_on;
+wire [4:0] FRData;
+wire [31:0] MemData;
+wire [31:0] DebugAddress;
 
 assign soft_rst = rst;
 assign tx_start = (ifetch0_outInstructionAddress==32'd19)? 1'b1:1'b0;
 
-Top_UART uart(.clk(clk),.reset(rst),.TX_start(tx_start),.UART_data(execute0_outALUResult),.RX(RX),.MIPS_enable(MIPS_enable),.TX(TX));
+//Top_UART uart(.clk(clk),.reset(rst),.TX_start(tx_start),.UART_data(execute0_outALUResult),.RX(RX),.MIPS_enable(MIPS_enable),.TX(TX));
 
 
 
@@ -116,6 +131,8 @@ InstructionDecode idecode0(
 	.inRegF_wd(wb0_outRegF_wd),
 	.EXE_mem_read(idecode0_outMEM[1]),
 	.EXE_rd(idecode0_out_rt), //rt (registro destino en la instruccion load).
+	.Debug_on(Debug_on),
+	.Debug_read_reg(DebugAddress[4:0]),
 
 	//Output Signals
 	.outWB(idecode0_outWB),
@@ -129,7 +146,8 @@ InstructionDecode idecode0(
 	.out_rt(idecode0_out_rt),
 	.outRT_rd(idecode0_outRT_rd),
 	.outPC_write(idecode0_outPC_write),
-    .outIF_ID_write(idecode0_outIF_ID_write)
+    .outIF_ID_write(idecode0_outIF_ID_write),
+    .out_regDebug(FRData)
 	
 );
 
@@ -181,6 +199,8 @@ MemoryAccess memaccess0(
 	.inALUZero(execute0_outALUZero),
 	.inRegB(execute0_outRegB),
 	.inRegF_wreg(execute0_outRegF_wreg),
+	.Debug_on(Debug_on),
+	.Debug_read_mem(DebugAddress),
 
 	//Output Signals    
 	.outWB(memaccess0_outWB),
@@ -188,7 +208,8 @@ MemoryAccess memaccess0(
 	.outPCJump(memaccess0_outPCJump),
 	.outRegF_wd(memaccess0_outRegF_wd),
 	.outALUResult(memaccess0_outALUResult),
-	.outRegF_wreg(memaccess0_outRegF_wreg)
+	.outRegF_wreg(memaccess0_outRegF_wreg),
+	.outMemDebug(MemData)
 );
 
 
@@ -204,27 +225,79 @@ WriteBack wb0(
 	.outRegF_wd(wb0_outRegF_wd)
 );
 
+// Instancia del Mux para enviar los Latch de cada etapa
+MuxLatch ml0(
+    .clk(clk),
+    .rst(rst),
+    .inControl(ControlLatchMux),
+    
+    //-- Modulo Instruction Fetch --
+    .ifetch0_outInstructionAddress(ifetch0_outInstructionAddress), 
+    .ifetch0_outInstruction(ifetch0_outInstruction), 			
+    
+    //-- Modulo Instruction Decode --
+    .idecode0_outWB(idecode0_outWB), 	
+    .idecode0_outMEM(idecode0_outMEM), 	
+    .idecode0_outEXE(idecode0_outEXE), 	
+    .idecode0_outInstructionAddress(idecode0_outInstructionAddress), 
+    .idecode0_outRegA(idecode0_outRegA),
+    .idecode0_outRegB(idecode0_outRegB),
+    .idecode0_outInstruction_ls(idecode0_outInstruction_ls),
+    .idecode0_out_rs(idecode0_out_rs), 
+    .idecode0_out_rt(idecode0_out_rt), 
+    .idecode0_outRT_rd(idecode0_outRT_rd), 
+    .idecode0_outPC_write(idecode0_outPC_write),
+    .idecode0_outIF_ID_write(idecode0_outIF_ID_write),
+    
+    //-- Modulo Execute --
+    .execute0_outWB(execute0_outWB), 		
+    .execute0_outMEM(execute0_outMEM), 	
+    .execute0_outPCJump(execute0_outPCJump), 	
+    .execute0_outALUResult(execute0_outALUResult),
+    .execute0_outALUZero(execute0_outALUZero), 	
+    .execute0_outRegB(execute0_outRegB), 		
+    .execute0_outRegF_wreg(execute0_outRegF_wreg), 
+    
+    //-- Modulo MemoryAccess --
+    .memaccess0_outWB(memaccess0_outWB), 			
+    .memaccess0_outPCSel(memaccess0_outPCSel), 		
+    .memaccess0_outPCJump(memaccess0_outPCJump), 	
+    .memaccess0_outRegF_wd(memaccess0_outRegF_wd), 	
+    .memaccess0_outALUResult(memaccess0_outALUResult), 
+    .memaccess0_outRegF_wreg(memaccess0_outRegF_wreg), 
+    
+    //-- Modulo Write Back --
+    .wb0_outRegF_wr(wb0_outRegF_wr), 
+    .wb0_outRegF_wd(wb0_outRegF_wd), 
+    
+    .out_data(muxLatch_outData)
+    );
 
+
+// Instancia de la unidad de Debugging
 DebugUnit debug(
 
-	.clk(),
-    .rst(),
-    .RX(),
+	.clk(clk),
+    .rst(rst),
+    .RX(RX),
 
-    .PC(),
+    .inLatch(muxLatch_outData),
+    .inPC(ifetch0_outInstructionAddress),
+    .inFRData(FRData),
+    .inMemData(MemData),
+    
+    .out_debug_on(Debug_on),
+    .outDebugAddress(DebugAddress),
 
     .addressInstrucction(),
     .InstructionRecive(),
     .write_read(),
-    .TX(),
+    .TX(TX),
     .soft_rst(),
-    .stopPC_debug()
+    .stopPC_debug(),
+    .outControlLatchMux(ControlLatchMux)
 
 );
-
-
-    
-
 
 
 endmodule

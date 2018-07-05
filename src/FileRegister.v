@@ -19,32 +19,45 @@
 //
 //////////////////////////////////////////////////////////////////////////////////
 module FileRegister(
-	 input clk,
+	input clk,
     input rst,
     input write,
     input [4:0] read_reg1,
     input [4:0] read_reg2,
+    input [4:0] read_regDebug,
     input [4:0] write_addr,
     input [31:0] write_data,
+    input Debug_on,
     output [31:0] out_reg1,
-    output [31:0] out_reg2
+    output [31:0] out_reg2,
+    output [31:0] out_regDebug
     );
 	 
 
 reg [31:0] registros[31:0];// Matriz de 32X32
 reg [31:0] reg1;
 reg [31:0] reg2;
+reg [31:0] reg_Debug;
 
 // Lectura combinacional, manipulado por el clock desendente que se encuentra en el modulo superior
 assign out_reg1 = reg1;
 assign out_reg2 = reg2;
 
+assign out_regDebug = reg_Debug;
+
 //Lectura por flanco descendente
 
 always @(negedge clk)
 begin
-	reg1 <= registros[read_reg1];
-	reg2 <= registros[read_reg2];
+    if (Debug_on)
+        begin
+            reg_Debug <= registros[read_regDebug];
+        end
+    else
+        begin
+            reg1 <= registros[read_reg1];
+            reg2 <= registros[read_reg2];
+        end
 end
 
 

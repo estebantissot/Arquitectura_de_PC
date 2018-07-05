@@ -36,11 +36,18 @@ reg [31:0] Data;
 assign outData=Data; 
 
 always @ (negedge clk, posedge rst)
-begin
-    if(wr)
-        RegisterMemory[inAddr]=inData;
+begin    
+    if (rst)
+    begin
+        Data <= 32'bZ;
+    end
     else
-        Data=RegisterMemory[inAddr];
+    begin
+        if(wr)
+            RegisterMemory[inAddr]=inData;
+        else
+            Data=RegisterMemory[inAddr];
+    end
 end
 
 /*always @ (negedge clk, posedge rst)

@@ -30,20 +30,24 @@ module InstructionDecode(
     input [31:0] 	inRegF_wd,
     input           EXE_mem_read,
     input [4:0]     EXE_rd,
+    input           Debug_on,
+    input [4:0]     Debug_read_reg,
 	 
 //Output Signals
-    output [1:0] 	outWB,
-    output [2:0] 	outMEM,
-    output [3:0] 	outEXE,
-    output [31:0]   outInstructionAddress,
-    output [31:0]   outRegA,
-    output [31:0]   outRegB,
-    output [31:0]   outInstruction_ls,
-    output [4:0] 	out_rs,
-    output [4:0] 	out_rt,
-    output [4:0] 	outRT_rd,
-    output 	    	outPC_write,
-    output 	    	outIF_ID_write,
+    output  [1:0]   outWB,
+    output  [2:0] 	outMEM,
+    output  [3:0] 	outEXE,
+    output  [31:0]  outInstructionAddress,
+    output  [31:0]  outRegA,
+    output  [31:0]  outRegB,
+    output  [31:0]  outInstruction_ls,
+    output  [4:0] 	out_rs,
+    output  [4:0] 	out_rt,
+    output  [4:0] 	outRT_rd,
+    output 	        outPC_write,
+    output 	        outIF_ID_write,
+    output          outFlush,
+    output  [31:0]  out_regDebug
     );
 
 //Registros
@@ -63,6 +67,7 @@ reg [4:0] 	RT_rd;
 //wire [31:0] RegF_outRegB;
 wire [8:0] outControl;
 wire ControlMux;
+wire write;
 
 //Asignaciones
 assign outWB = WB;
@@ -75,6 +80,8 @@ assign outInstruction_ls = Instruction_ls >>> 16;
 assign out_rs = rs;
 assign out_rt = rt;
 assign outRT_rd = RT_rd;
+
+assign write = (Debug_on) ? 1'b0:inRegF_wr;
 
 // Instancia de "Hazard Detection Unit"
 HazardDetectionUnit hdu0 (
@@ -99,14 +106,20 @@ ControlBlock ctrl0 (
 FileRegister regF0 (
 	.clk(clk),
 	.rst(rst),
-	.write(inRegF_wr),
+	.write(write),
+	.Debug_on(Debug_on),
 	.read_reg1(inInstruction[25:21]),
 	.read_reg2(inInstruction[20:16]),
+	.read_regDebug(Debug_read_reg),
 	.write_addr(inRegF_wreg),
 	.write_data(inRegF_wd),
 	.out_reg1(outRegA),
-	.out_reg2(outRegB)
+	.out_reg2(outRegB),
+	.out_regDebug(out_regDebug)
 );
+
+//Equals unit
+//assign outFlush=(outRegA==outRegB)?  1'b1:1'b0;
 
 //Logica del Bloque
 always @(negedge clk, posedge rst)
