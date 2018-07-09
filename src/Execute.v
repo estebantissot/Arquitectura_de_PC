@@ -28,7 +28,7 @@ module Execute(
     input [3:0] 	inEXE,
     input [31:0] 	inInstructionAddress,
     input [31:0] 	MEM_AluResult,
-    input [31:0]    	WB_regF_wd,
+    input [31:0]    WB_regF_wd,
     input [31:0] 	inRegA,
     input [31:0] 	inRegB,
     input [31:0] 	inInstruction_ls,
@@ -39,14 +39,14 @@ module Execute(
     input           MEM_regF_wr,
     input [4:0]     WB_rd,     
     input           WB_regF_wr,
-	 
+	input [6:0]		inInmmediateOpcode,				 
 //Output Signals
     output [1:0] 	outWB,
     output [2:0] 	outMEM,
-    output [31:0] outPCJump,
-    output [31:0] outALUResult,
+    output [31:0] 	outPCJump,
+    output [31:0] 	outALUResult,
     output 			outALUZero,
-    output [31:0] outRegB,
+    output [31:0] 	outRegB,
     output [4:0] 	outRegF_wreg
     );
 
@@ -71,7 +71,7 @@ module Execute(
     wire 			alu_zero;
     wire [1:0] control_muxA; //control mux de inAluA 
     wire [1:0] control_muxB; //control mux de inAluB.
-    
+    wire [5:0] Opcode;
     // Asignaciones
     assign outWB = WB;
     assign outMEM = MEM;
@@ -93,12 +93,12 @@ ALU #(.bits(32)) alu0 (
 	.C(alu_result)
 );
 
-
+assign Opcode = (inEXE[2:1] == 2'b11)? inInmmediateOpcode:inInstruction_ls[5:0];
 //Instancia de "ALUControl"
 ALUControl alu_contol0 (
 	.rst(rst),
 	.inALUop(inEXE[2:1]),
-	.inInstructionOpcode(inInstruction_ls[5:0]),
+	.inInstructionOpcode(Opcode),
 	.outALUControl(ALUControl)
 );
 

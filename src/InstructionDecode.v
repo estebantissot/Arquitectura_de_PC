@@ -47,7 +47,8 @@ module InstructionDecode(
     output 	        outPC_write,
     output 	        outIF_ID_write,
     output          outFlush,
-    output  [31:0]  out_regDebug
+    output  [31:0]  out_regDebug,
+    output  [6:0]	outInmmediateOpcode	 	
     );
 
 //Registros
@@ -80,7 +81,8 @@ assign outInstruction_ls = Instruction_ls >>> 16;
 assign out_rs = rs;
 assign out_rt = rt;
 assign outRT_rd = RT_rd;
-
+assign outInmmediateOpcode	=	inInstruction[31:26];
+ 
 assign write = (Debug_on) ? 1'b0:inRegF_wr;
 
 // Instancia de "Hazard Detection Unit"

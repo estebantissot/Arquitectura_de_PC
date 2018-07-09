@@ -20,7 +20,7 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 module DataMemory(
-	 input clk,
+	input clk,
     input rst,
     input Debug_on,
     input [1:0] read_write,
@@ -51,7 +51,7 @@ assign outData = Data;
 assign outMemDebug = DataDebug;
 // Matriz de memoria
 
-reg [31:0] data_memory [31:0];
+reg [7:0] data_memory [31:0];
 
 
 // Logica de Lectura - Escritura de Memoria.

@@ -38,8 +38,8 @@ module ALU #(parameter bits = 8)(rst,A,B,select,Zero,C);
 				4'b0000:e=A&B;
 				4'b0001:e=A|B;
 				4'b0111:e=-1;
-				/*6'b100110:e=A^B;
-				6'b000011:e=A>>>B;
+				4'b1001:e=A^B;
+				/*6'b000011:e=A>>>B;
 				6'b000010:e=A>>B;
 				6'b100111: 	begin
 									e=A|B;
