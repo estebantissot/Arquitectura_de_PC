@@ -25,8 +25,8 @@ module InstructionMemory(
 	output [31:0] outData,
 	
 	//Debug unit
-    input wr,
-    input [31:0] inData
+    input wr_instruction,
+    input [31:0] data_instruction
     
 	);
 
@@ -35,6 +35,7 @@ reg [31:0] Data;
 
 assign outData=Data; 
 
+/*
 always @ (negedge clk, posedge rst)
 begin    
     if (rst)
@@ -43,14 +44,15 @@ begin
     end
     else
     begin
-        if(wr)
-            RegisterMemory[inAddr]=inData;
+        if(wr_instruction)
+            RegisterMemory[inAddr]=data_instruction;
         else
             Data=RegisterMemory[inAddr];
     end
 end
+*/
 
-/*always @ (negedge clk, posedge rst)
+always @ (negedge clk, posedge rst)
 begin
 	if(rst) 
 		begin
@@ -58,6 +60,8 @@ begin
 		end
 	else
 		begin
+			Data=32'b000000_00001_00010_00011_00000_100000;//R-type add
+		/*
 			case(inAddr)
 				32'd0: Data=32'b000000_00001_00010_00011_00000_100000;//R-type add
 				32'd1: Data=32'b000000_00001_00010_00100_00000_100010;//R-type sub
@@ -86,7 +90,8 @@ begin
 				default:
 					Data=32'd123;
 			endcase
+			*/
 		end
-end*/
+end
 
 endmodule

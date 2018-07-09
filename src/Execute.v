@@ -144,6 +144,8 @@ always @(*)
 	begin
 		if(rst)
 			begin
+			     regA_ALU <= 32'b0;
+			    Jump <= 32'b0;
 				wreg<=0;
 				regB_ALU<=0;
 			end

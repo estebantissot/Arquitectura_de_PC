@@ -18,21 +18,21 @@
 //
 //////////////////////////////////////////////////////////////////////////////////
 module top_level(
-    input CLK100MHZ,
-    input CPU_RESETN,
+    input clk,
+    input rst,
 	input UART_TXD_IN,
 	output UART_RXD_OUT
     );
 
 // Cables
-wire clk;
-wire rst;
-wire RX;
-wire TX;
-assign clk = CLK100MHZ;
-assign rst = CPU_RESETN;
-assign RX = UART_TXD_IN;
-assign TX = UART_RXD_OUT;
+//wire clk;
+//wire rst;
+//wire RX;
+//wire TX;
+//assign clk = CLK100MHZ;
+//assign rst = CPU_RESETN;
+//assign RX = UART_TXD_IN;
+//assign TX = UART_RXD_OUT;
 
 //-- Modulo Instruction Fetch --
 wire [31:0]	ifetch0_outInstructionAddress; //ifetch0:outInstructionAddress -> idecode0:inInstructionAddress
@@ -82,12 +82,14 @@ wire soft_rst;
 wire tx_start;
 wire MIPS_enable;
 wire Debug_on;
-wire [4:0] FRData;
+wire [31:0] FRData;
 wire [31:0] MemData;
 wire [31:0] DebugAddress;
+wire wr_program_instruction;
+wire [31:0] program_instruction;
+wire [31:0] rx_address;
 
-assign soft_rst = rst;
-assign tx_start = (ifetch0_outInstructionAddress==32'd19)? 1'b1:1'b0;
+//assign tx_start = (ifetch0_outInstructionAddress==32'd19)? 1'b1:1'b0;
 
 //Top_UART uart(.clk(clk),.reset(rst),.TX_start(tx_start),.UART_data(execute0_outALUResult),.RX(RX),.MIPS_enable(MIPS_enable),.TX(TX));
 
@@ -102,8 +104,9 @@ InstructionFetch ifetch0(
 	.rst(soft_rst),
 		
 	//debug
+    .data_instruction(program_instruction),
+    .wr_instruction(wr_program_instruction),
 	.stopPC_debug(stopPC_debug),
-
 
 	//Input Signals
 	.inPC_write(idecode0_outPC_write),
@@ -279,22 +282,23 @@ DebugUnit debug(
 
 	.clk(clk),
     .rst(rst),
-    .RX(RX),
-
+    // INPUT
+    .RX(UART_TXD_IN),
     .inLatch(muxLatch_outData),
     .inPC(ifetch0_outInstructionAddress),
     .inFRData(FRData),
     .inMemData(MemData),
     
+    // OUTPUT
     .out_debug_on(Debug_on),
     .outDebugAddress(DebugAddress),
-
     .addressInstrucction(),
-    .InstructionRecive(),
-    .write_read(),
-    .TX(TX),
-    .soft_rst(),
-    .stopPC_debug(),
+    .InstructionRecive(program_instruction),
+    .write_instruction(wr_program_instruction),
+    .rx_address(rx_address),
+    .TX(UART_RXD_OUT),
+    .soft_rst(soft_rst),
+    .stopPC_debug(stopPC_debug),
     .outControlLatchMux(ControlLatchMux)
 
 );

@@ -21,13 +21,14 @@
 module Top_UART(
 		input  clk,
 		input  reset,
+		
 		input  TX_start,
 		input  [31:0] UART_data,
 		input  RX,
 
 		output MIPS_enable,
 		output TX,
-		output [31:0] address,
+		output [31:0] rx_address,
 		output write,
 		output [31:0] dout,
 		output tx_dataready
@@ -42,11 +43,23 @@ wire start_tx;
 
 BRG baud(clk,s_tick);
 
-Interfaz_Rx rx(.clk(clk),.reset(reset),.start(rx_done),.din(data),.MIPS_enable(MIPS_enable),.go(write),.address(address),.dout(dout));//,data,out_rx,A,B,C);
+Interfaz_Rx rx(.clk(clk),.reset(reset),.start(rx_done),.din(data),.MIPS_enable(MIPS_enable),.go(write),.rx_address(rx_address),.dout(dout));//,data,out_rx,A,B,C);
 Receptor rec(clk,reset,RX,s_tick,rx_done,data);
 
 
-Interfaz_Tx tx(clk,reset,UART_data,TX_start,tx_done,out_data,start_tx,tx_dataready);
+Interfaz_Tx tx(
+    .clk(clk),
+    .reset(reset),
+    
+    .in_data(UART_data),
+    .new_result(TX_start),
+    .tx_done(tx_done),
+    // Output
+    .out_data(out_data),
+    .tx_start(start_tx),
+    .data_done(tx_dataready)
+);
+
 Transmisor trans(clk,reset,start_tx,s_tick,out_data,tx_done,TX);
 
 

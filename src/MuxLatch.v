@@ -99,12 +99,14 @@ begin
 	            	data <= idecode0_outRegB;
 				7'b001_0101: 
 	            	data <= idecode0_outInstruction_ls;	        
+            	/*
             	7'b001_0110: 
             		data <= idecode0_out_rs;	        
 	            7'b001_0111: 
 	            	data <= idecode0_out_rt;
-	            7'b001_1000:
-	            	data <= {{6'b0,idecode0_outPC_write,idecode0_outIF_ID_write} , {4'b0,idecode0_out_rs} , {4'b0,idecode0_out_rt} , {4'b0,idecode0_outRT_rd}}; 	 
+	            */
+	            7'b001_0110:
+	            	data <= {{4'b0,idecode0_out_rs} , {4'b0,idecode0_out_rt} , {4'b0,idecode0_outRT_rd} , {6'b0,idecode0_outPC_write,idecode0_outIF_ID_write}}; 	 
 
 	            // Send the Latchs of the state Execute   
 	      		7'b010_0000:

@@ -46,7 +46,7 @@ module InstructionDecode(
     output  [4:0] 	outRT_rd,
     output 	        outPC_write,
     output 	        outIF_ID_write,
-    output          outFlush,
+   // output          outFlush,
     output  [31:0]  out_regDebug
     );
 

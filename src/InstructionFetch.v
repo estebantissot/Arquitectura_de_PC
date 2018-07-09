@@ -27,8 +27,10 @@ module InstructionFetch(
     input           inPC_write,
 	input 			inPCSel,
     input [31:0] 	inPCJump,
-    input           inFlush,
+   // input           inFlush,
     input 			stopPC_debug,
+    input [31:0]    data_instruction,
+    input           wr_instruction,
  	 
 //Output Signals
     output [31:0] outInstructionAddress,
@@ -51,6 +53,8 @@ assign outInstructionAddress = pc;
 InstructionMemory imem0 (
 	.clk(clk),
 	.rst(rst),
+	.wr_instruction(wr_instruction),
+	.data_instruction(data_instruction),
 	.inAddr(instruction_address),
 	.outData(outInstruction)
 );
@@ -58,7 +62,7 @@ InstructionMemory imem0 (
 // Logica del Bloque
 always @ (*)
 begin
-	if(rst || inFlush)
+	if(rst)
 		instruction_address<=0;
 	else
 		begin
@@ -77,7 +81,8 @@ begin
 			pc <= 32'd0;
 			//instruction <= 32'bX;
 		end
-	else if (inIF_ID_write && !stopPC_debug)
+	//else if (inIF_ID_write && !stopPC_debug)
+	else if (inIF_ID_write)
 		begin
 			pc <= instruction_address;
 			//instruction <= mem_instruction;
