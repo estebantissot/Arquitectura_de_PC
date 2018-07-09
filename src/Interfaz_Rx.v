@@ -12,7 +12,7 @@ module Interfaz_Rx(
 	output 	MIPS_enable,
 
 	output 	go,
-	output  [31:0] address,
+	output  [31:0] rx_address,
 	output	[31:0] dout
 	);
 
@@ -28,7 +28,7 @@ module Interfaz_Rx(
 
 	assign dout	=	Data;
 	assign go	=	ready;
-	assign address = new_address;
+	assign rx_address = new_address;
 
 always@(posedge clk, posedge reset)
 	begin

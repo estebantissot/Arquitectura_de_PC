@@ -22,20 +22,21 @@
 module DebugUnit(
     input clk,
     input rst,
+    
     input RX,
-
     input [31:0] inLatch,
     input [31:0] inPC,
     input [31:0] inFRData,
     input [31:0] inMemData,
-    
+   
     output        out_debug_on,
     output [31:0] outDebugAddress,
     
+    output [31:0] rx_address,
     output [6:0] outControlLatchMux,
     output [31:0] addressInstrucction,
     output [31:0] InstructionRecive,
-    output write_read,
+    output write_instruction,
     output TX,
     output soft_rst,
     output stopPC_debug
@@ -63,7 +64,7 @@ localparam [2:0] send_waitFinish = 3'b101;
 localparam [2:0] send_Finish = 3'b110;
 
 localparam [3:0] cant_senal_fetch = 4'b0001;
-localparam [3:0] cant_senal_decode = 4'b1000;
+localparam [3:0] cant_senal_decode = 4'b0110;
 localparam [3:0] cant_senal_execute = 4'b1010;
 localparam [3:0] cant_senal_memory = 4'b0100;
 localparam [3:0] cant_senal_wb = 4'b0001;
@@ -81,10 +82,8 @@ localparam rx_stop = 1'b1;
 //---------------------------------------------------------------
 
 // Cables
-wire [31:0] outDebugAddress;
 wire [31:0] outRegData;
 wire [31:0] outMemData;
-wire out_debug_on;
 
 // Registros
 reg debug;
@@ -97,8 +96,8 @@ assign stopPC_debug =stopPC;
 assign InstructionRecive	=	rx_Instruccion;
 assign addressInstrucction	=	rx_direccion;
 
-assign soft_rst = (rst || (!MIPS_enable));
-assign write_read   =   WriteRead;
+assign soft_rst = rst;//(rst || (!MIPS_enable));
+assign write_instruction   =   WriteRead;
 
 //assign tx_start = (Instruction==32'd19)? 1'b1:1'b0;
 
@@ -115,9 +114,11 @@ wire tx_dataready;
 Top_UART uart(
 	.clk(clk),
 	.reset(rst),
+	
 	.TX_start(tx_start),
 	.UART_data(sendData),
 	.RX(RX),
+    .rx_address(rx_address),
 	.MIPS_enable(MIPS_enable),
 	.TX(TX),
 	.write(write),
@@ -125,7 +126,7 @@ Top_UART uart(
 	.tx_dataready(tx_dataready)
 );
 
-
+/*
 // Maquina de estado de RX
 always @ (posedge clk, posedge rst)
 begin
@@ -162,6 +163,7 @@ begin
 		end
 
 end
+*/
 
 
 /* maquina de estado del TX 
@@ -173,7 +175,7 @@ begin
 	if(rst)
 		begin
 			stopPC<=1'b1;
-			tx_start<=1'b1;
+			tx_start<=1'b0;
 			state_send <= send_init;
 			etapa <= 3'b0;
 			senal <= 4'b0;
@@ -184,13 +186,13 @@ begin
 		case(state_send)
             send_init:
                 begin
-                    if(state_rx!=rx_stop)
+                    if(inPC == 32'd16)//if(state_rx!=rx_stop)
                     begin
-                        state_send<=send_init;
+                        state_send<=send_PC;
                         debug <= 1'b1;
                     end
                     else
-                        state_send<=send_PC;
+                        state_send<=send_init;
                 end
                 
             send_PC:
@@ -200,11 +202,13 @@ begin
                     tx_start<=1'b1;
                     state_prev<=send_Rmem;
                     state_send<=send_waitFinish;
+                    address <= 32'b00000000_00000000_00000000_00000000;
                 end
                
             send_Rmem:
                 begin
                     sendData <= inFRData;
+                    tx_start<=1'b1;
                     if (address == 32'd31)
                         begin
                             address <= 32'b0;
@@ -217,15 +221,17 @@ begin
                             state_prev<=send_Rmem;
                             state_send<=send_waitFinish;
                         end
+            
                 end
              
              send_Mem:
                 begin
                     sendData <= inMemData;
-                    if (address == 32'h00000009)
+                    tx_start<=1'b1;                    
+                    if (address == 32'd19)  //if (address == 32'd20)
                         begin
                             address <= 32'b0;
-                            state_prev<=send_Finish;
+                            state_prev<=send_Latch;
                             state_send<=send_waitFinish;
                         end
                     else
@@ -238,8 +244,11 @@ begin
              
              send_Latch:
                  begin
+                    //sendData<=32'b01111111_00000110_00000111_00001000;
+                    tx_start<=1'b1;
                     sendData <= inLatch;
                     state_send <= send_waitFinish;
+                    
                     if(etapa == 3'b000)
                         begin
                             state_prev <= send_Latch;
@@ -298,15 +307,17 @@ begin
                                   state_prev <= send_Latch;
                                 end
                           end
+                
                  end
                 
             send_waitFinish:
                 begin
                     stopPC<=1'b1; 
-                    if(tx_dataready == 1'b0)
+                    tx_start<=1'b0;
+                    if(tx_dataready == 1'b1)
                         begin
                             state_send <= state_prev;
-                            tx_start<=1'b0;
+                            //tx_start<=1'b0;
                         end
                 end
                 

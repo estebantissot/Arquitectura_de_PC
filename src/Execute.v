@@ -28,7 +28,7 @@ module Execute(
     input [3:0] 	inEXE,
     input [31:0] 	inInstructionAddress,
     input [31:0] 	MEM_AluResult,
-    input [31:0]    WB_regF_wd,
+    input [31:0]    	WB_regF_wd,
     input [31:0] 	inRegA,
     input [31:0] 	inRegB,
     input [31:0] 	inInstruction_ls,
@@ -43,10 +43,10 @@ module Execute(
 //Output Signals
     output [1:0] 	outWB,
     output [2:0] 	outMEM,
-    output [31:0] 	outPCJump,
-    output [31:0] 	outALUResult,
+    output [31:0] outPCJump,
+    output [31:0] outALUResult,
     output 			outALUZero,
-    output [31:0] 	outRegB,
+    output [31:0] outRegB,
     output [4:0] 	outRegF_wreg
     );
 
@@ -144,6 +144,8 @@ always @(*)
 	begin
 		if(rst)
 			begin
+			     regA_ALU <= 32'b0;
+			    Jump <= 32'b0;
 				wreg<=0;
 				regB_ALU<=0;
 			end

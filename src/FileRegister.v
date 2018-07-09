@@ -66,8 +66,7 @@ always@ (posedge clk, posedge rst)
 begin
 	if (rst)
 		begin
-			//[31:0] registros[31:0] = 0;
-			registros[0][31:0] <= 32'h00000000;
+			registros[0][31:0] <= 32'h00000001;
 			registros[1][31:0] <= 32'h00000011;
 			registros[2][31:0] <= 32'h00000012;
 			registros[3][31:0] <= 32'h00000013;
@@ -84,6 +83,21 @@ begin
 			registros[14][31:0] <= 32'h00000025;
 			registros[15][31:0] <= 32'h00000026;
 			registros[16][31:0] <= 32'h00000027;
+            registros[17][31:0] <= 32'h00000000;
+            registros[18][31:0] <= 32'h00000000;
+            registros[19][31:0] <= 32'h00000000;
+            registros[20][31:0] <= 32'h00000000;
+            registros[21][31:0] <= 32'h00000000;
+            registros[22][31:0] <= 32'h00000000;
+            registros[23][31:0] <= 32'h00000000;
+            registros[24][31:0] <= 32'h00000000;
+            registros[25][31:0] <= 32'h00000000;
+            registros[26][31:0] <= 32'h00000000;
+            registros[27][31:0] <= 32'h00000000;
+            registros[28][31:0] <= 32'h00000000;
+            registros[29][31:0] <= 32'h00000000;
+            registros[30][31:0] <= 32'h00000000;
+            registros[31][31:0] <= 32'd42;  //Z en ascii
 		end
 	else
 		begin

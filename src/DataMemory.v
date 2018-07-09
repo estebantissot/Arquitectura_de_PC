@@ -20,7 +20,7 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 module DataMemory(
-	input clk,
+	 input clk,
     input rst,
     input Debug_on,
     input [1:0] read_write,
@@ -60,6 +60,17 @@ begin
 	if(rst)
 	begin
 		Data <=32'hZZZZZZZZ;
+		/*
+		data_memory[0][31:0]<= 32'd2;
+		data_memory[1][31:0]<= 32'd4;
+		data_memory[2][31:0]<= 32'd6;
+		data_memory[3][31:0]<= 32'd8;
+		*/
+		
+		for (i=32'd0; i == 32'd32; i=i+32'b1)
+            begin
+               data_memory[i][31:0]<= 32'b0;
+            end
 		/*
 		New_Data1<=32'h00000000;
 		New_Data2<=32'h00000000;
