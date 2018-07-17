@@ -5,19 +5,17 @@ module Interfaz_Rx(
 	input 	clk,
 	input 	reset,
 	
-	input 	start,
+	(*dont_touch="true",mark_debug="true"*)input 	start,
 	input 	[7:0] din,
 
-
 	output 	MIPS_enable,
-
 	output 	go,
 	output  [31:0] rx_address,
 	output	[31:0] dout
 	);
 
 	reg [7:0] 	num;
-	reg [31:0]	Data;		
+	(*dont_touch="true",mark_debug="true"*)reg [31:0]	Data;		
 	reg	[2:0] 	nData;
 	reg 		state;
 	reg 		ready;

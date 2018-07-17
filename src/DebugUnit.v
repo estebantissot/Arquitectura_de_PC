@@ -23,13 +23,18 @@ module DebugUnit(
     input clk,
     input rst,
     
-    input RX,
+    //input BTNC,
+    input SW0,
+    (*dont_touch="true",mark_debug="true"*)input RX,
     input [31:0] inLatch,
     input [31:0] inPC,
     input [31:0] inFRData,
     input [31:0] inMemData,
-   
-    output        out_debug_on,
+        
+    output        out_led2,    
+    output        out_led1,
+    output        out_led0,
+    (*dont_touch="true",mark_debug="true"*)output        out_debug_on,
     output [31:0] outDebugAddress,
     
     output [31:0] rx_address,
@@ -37,7 +42,7 @@ module DebugUnit(
     output [31:0] addressInstrucction,
     output [31:0] InstructionRecive,
     output write_instruction,
-    output TX,
+    (*dont_touch="true",mark_debug="true"*)output TX,
     output soft_rst,
     output stopPC_debug
     
@@ -54,7 +59,7 @@ reg 		stopPC;
 reg 		tx_start;
 reg         WriteRead;
 //-----------------Maquina de Estados-----------------------------
-reg [2:0] 	state_send;
+(*dont_touch="true",mark_debug="true"*)reg [2:0] 	state_send;
 localparam [2:0] send_init = 3'b000;
 localparam [2:0] send_PC = 3'b001;
 localparam [2:0] send_Rmem = 3'b010;
@@ -63,11 +68,11 @@ localparam [2:0] send_Latch = 3'b100;
 localparam [2:0] send_waitFinish = 3'b101;
 localparam [2:0] send_Finish = 3'b110;
 
-localparam [3:0] cant_senal_fetch = 4'b0001;
-localparam [3:0] cant_senal_decode = 4'b0110;
-localparam [3:0] cant_senal_execute = 4'b1010;
-localparam [3:0] cant_senal_memory = 4'b0100;
-localparam [3:0] cant_senal_wb = 4'b0001;
+localparam [2:0] cant_senal_fetch = 3'd2;
+localparam [2:0] cant_senal_decode = 3'd6;
+localparam [2:0] cant_senal_execute = 3'd6;
+localparam [2:0] cant_senal_memory = 3'd5;
+localparam [2:0] cant_senal_wb = 3'd2;
 
 reg [2:0] state_prev;
 
@@ -84,14 +89,19 @@ localparam rx_stop = 1'b1;
 // Cables
 wire [31:0] outRegData;
 wire [31:0] outMemData;
+wire rx_done;
 
 // Registros
 reg debug;
 reg [31:0] address;
 reg [3:0]senal;
 reg [2:0]etapa;
+reg led;
 
-
+assign out_led0 = !state_send[0];
+assign out_led1 = !state_send[1];
+assign out_led2 = !state_send[2];
+//assign out_led1 = SW0;
 assign stopPC_debug =stopPC;
 assign InstructionRecive	=	rx_Instruccion;
 assign addressInstrucction	=	rx_direccion;
@@ -119,6 +129,7 @@ Top_UART uart(
 	.UART_data(sendData),
 	.RX(RX),
     .rx_address(rx_address),
+    //.rx_done(rx_done),
 	.MIPS_enable(MIPS_enable),
 	.TX(TX),
 	.write(write),
@@ -180,23 +191,28 @@ begin
 			etapa <= 3'b0;
 			senal <= 4'b0;
 			debug <= 1'b0;
+			led <= 1'b0;
 		end
 	else
 		begin
 		case(state_send)
             send_init:
                 begin
-                    if(inPC == 32'd16)//if(state_rx!=rx_stop)
-                    begin
+                  //led <= 1'b1;
+                  if(RX == 1'b0)//if(write)//if(state_rx!=rx_stop)
+                   begin
+                        //led <= 1'b1;
                         state_send<=send_PC;
                         debug <= 1'b1;
-                    end
-                    else
+                   end
+                   else
+                       //led <= 1'b1;
                         state_send<=send_init;
                 end
                 
             send_PC:
                 begin
+                    //led <= 1'b0;
                     stopPC<=1'b0; 
                     sendData<=inPC;
                     tx_start<=1'b1;
@@ -252,7 +268,7 @@ begin
                     if(etapa == 3'b000)
                         begin
                             state_prev <= send_Latch;
-                            if (senal == cant_senal_fetch)
+                            if (senal == cant_senal_fetch-1)
                                 begin
                                     etapa <= 3'b001;
                                     senal <= 4'b0;
@@ -263,7 +279,7 @@ begin
                     if(etapa == 3'b001)
                         begin
                         state_prev <= send_Latch;
-                        if (senal == cant_senal_decode)
+                        if (senal == cant_senal_decode-1)
                             begin
                                 etapa <= 3'b010;
                                 senal <= 4'b0;
@@ -274,7 +290,7 @@ begin
                     if(etapa == 3'b010)
                         begin
                         state_prev <= send_Latch;
-                            if (senal == cant_senal_execute)
+                            if (senal == cant_senal_execute-1)
                                 begin
                                     etapa <= 3'b011;
                                     senal <= 4'b0;
@@ -285,7 +301,7 @@ begin
                     if(etapa == 3'b011)
                         begin
                         state_prev <= send_Latch;
-                            if (senal == cant_senal_memory)
+                            if (senal == cant_senal_memory-1)
                                 begin
                                     etapa <= 3'b100;
                                     senal <= 4'b0;
@@ -295,7 +311,7 @@ begin
                         end
                       if(etapa == 3'b100)
                           begin
-                              if (senal == cant_senal_wb)
+                              if (senal == cant_senal_wb-1)
                                   begin
                                       etapa <= 3'b000;
                                       senal <= 4'b0;
@@ -324,6 +340,8 @@ begin
             send_Finish:
                 begin
                     debug <= 1'b0;
+                    state_send <= send_init;
+                   // led <= 1'b1;
                     // se debe esperar hasta que se quiera mandar todo de nuevo.
                 end
             
