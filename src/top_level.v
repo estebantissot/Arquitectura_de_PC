@@ -20,8 +20,13 @@
 module top_level(
     input clk,
     input rst,
+  //  input BTNC,
+    input SW0,
 	input UART_TXD_IN,
-	output UART_RXD_OUT
+	output UART_RXD_OUT,
+	output led0,
+	output led1,
+	output led2
     );
 
 // Cables
@@ -291,6 +296,8 @@ DebugUnit debug(
 	.clk(clk),
     .rst(rst),
     // INPUT
+   // .BTNC(BTNC),
+    .SW0(SW0),
     .RX(UART_TXD_IN),
     .inLatch(muxLatch_outData),
     .inPC(ifetch0_outInstructionAddress),
@@ -298,6 +305,9 @@ DebugUnit debug(
     .inMemData(MemData),
     
     // OUTPUT
+    .out_led2(led2),
+    .out_led1(led1),
+    .out_led0(led0),
     .out_debug_on(Debug_on),
     .outDebugAddress(DebugAddress),
     .addressInstrucction(),

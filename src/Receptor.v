@@ -7,7 +7,7 @@ module Receptor
 	(
 	input wire clk, reset,
 	input wire rx, s_tick,
-	output reg rx_done_tick,
+	(*dont_touch="true",mark_debug="true"*)output reg rx_done_tick,
 	output wire [7:0] dout
 	);
 	

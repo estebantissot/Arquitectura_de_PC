@@ -25,11 +25,12 @@ module Top_UART(
 		input  TX_start,
 		input  [31:0] UART_data,
 		input  RX,
-
+        
+        //output rx_done,
 		output MIPS_enable,
 		output TX,
 		output [31:0] rx_address,
-		output write,
+		(*dont_touch="true",mark_debug="true"*)output write,
 		output [31:0] dout,
 		output tx_dataready
 );
@@ -43,9 +44,18 @@ wire start_tx;
 
 BRG baud(clk,s_tick);
 
-Interfaz_Rx rx(.clk(clk),.reset(reset),.start(rx_done),.din(data),.MIPS_enable(MIPS_enable),.go(write),.rx_address(rx_address),.dout(dout));//,data,out_rx,A,B,C);
-Receptor rec(clk,reset,RX,s_tick,rx_done,data);
+Interfaz_Rx rx(
+    .clk(clk),
+    .reset(reset),
+    .start(rx_done),
+    .din(data),
+    .MIPS_enable(MIPS_enable),
+    .go(write),
+    .rx_address(rx_address),
+    .dout(dout)
+);//,data,out_rx,A,B,C);
 
+Receptor rec(clk,reset,RX,s_tick,rx_done,data);
 
 Interfaz_Tx tx(
     .clk(clk),
