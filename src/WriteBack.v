@@ -24,7 +24,7 @@ module WriteBack(
     input [31:0] inALUResult,
 
 //Output Signals
-    output 			outRegF_wr,
+    output 		  outRegF_wr,
     output [31:0] outRegF_wd
     );
 	 

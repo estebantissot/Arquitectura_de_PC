@@ -186,7 +186,7 @@ begin
 		case(state_send)
             send_init:
                 begin
-                    if(inPC == 32'd16)//if(state_rx!=rx_stop)
+                    if(inPC == 32'd28)//if(state_rx!=rx_stop)
                     begin
                         state_send<=send_PC;
                         debug <= 1'b1;

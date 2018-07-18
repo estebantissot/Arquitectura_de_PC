@@ -51,12 +51,13 @@ reg [4:0] 	RegF_wreg;
 
 // Cables
 wire [31:0] dm0_RegF_wd;
-wire [1:0]read_write;
+wire [1:0]  read_write;
 
 //Asignaciones
 assign outWB = WB;
-assign outPCJump = inPCJump;
-assign outPCSel = (inMEM[2] && inALUZero);
+//assign outPCJump = inPCJump;
+//assign outPCSel = (inMEM[2] && inALUZero);
+
 //assign outRegF_wd = RegF_wd;
 assign outALUResult = ALUResult;
 assign outRegF_wreg = RegF_wreg;

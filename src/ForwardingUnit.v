@@ -49,6 +49,8 @@ assign ExHazard=(MEM_regF_wr) && (MEM_rd!=0);
             end
         else
             begin
+            muxA = 2'b00;
+            muxB = 2'b00;    
             if(ExHazard)
                 begin
                     if(MEM_rd==rs) muxA = 2'b10;

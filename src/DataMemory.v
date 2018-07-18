@@ -34,6 +34,7 @@ module DataMemory(
 // Registros
 reg [31:0] Data;
 reg [31:0] DataDebug;
+integer i;
 /*
 reg [31:0]New_Data1;
 reg [31:0]New_Data2;
@@ -51,7 +52,7 @@ assign outData = Data;
 assign outMemDebug = DataDebug;
 // Matriz de memoria
 
-reg [7:0] data_memory [31:0];
+reg [31:0] data_memory [31:0];
 
 
 // Logica de Lectura - Escritura de Memoria.
@@ -67,7 +68,7 @@ begin
 		data_memory[3][31:0]<= 32'd8;
 		*/
 		
-		for (i=32'd0; i == 32'd32; i=i+32'b1)
+		for (i=32'd0; i <= 32'd32; i=i+32'b1)
             begin
                data_memory[i][31:0]<= 32'b0;
             end

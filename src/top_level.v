@@ -49,8 +49,9 @@ wire [31:0]	idecode0_outInstruction_ls; //idecode0:outInstruction_ls -> execute0
 wire [4:0]	idecode0_out_rs; //idecode0:out_rs -> execute0:in_rs
 wire [4:0]	idecode0_out_rt; //idecode0:out_rt -> execute0:in_rt
 wire [4:0]	idecode0_outRT_rd; //idecode0:outRT_rd -> execute0:inRT_rd
-wire    idecode0_outPC_write;
-wire    idecode0_outIF_ID_write;
+wire        idecode0_outPC_write;
+wire        idecode0_outIF_ID_write;
+wire [6:0]  idecode0_outInmmediateOpcode;
 
 //-- Modulo Execute --
 wire [1:0]	execute0_outWB; 		//execute0:outWB -> memaccess0:inWB
@@ -112,7 +113,7 @@ InstructionFetch ifetch0(
 	.inPC_write(idecode0_outPC_write),
 	.inIF_ID_write(idecode0_outIF_ID_write),
 	.inPCSel(memaccess0_outPCSel),
-	.inPCJump(memaccess0_outPCJump),
+	.inPCJump(execute0_outPCJump),
 	
 	//Output Signals
 	.outInstructionAddress(ifetch0_outInstructionAddress),
@@ -137,6 +138,9 @@ InstructionDecode idecode0(
 	.Debug_on(Debug_on),
 	.Debug_read_reg(DebugAddress[4:0]),
 
+	//Branch
+	.ID_flush(memaccess0_outPCSel),
+	
 	//Output Signals
 	.outWB(idecode0_outWB),
 	.outMEM(idecode0_outMEM),
@@ -150,7 +154,8 @@ InstructionDecode idecode0(
 	.outRT_rd(idecode0_outRT_rd),
 	.outPC_write(idecode0_outPC_write),
     .outIF_ID_write(idecode0_outIF_ID_write),
-    .out_regDebug(FRData)
+    .out_regDebug(FRData),
+    .outInmmediateOpcode(idecode0_outInmmediateOpcode)
 	
 );
 
@@ -177,11 +182,14 @@ Execute execute0(
 	.MEM_regF_wr(execute0_outWB[1]),
 	.WB_rd(memaccess0_outRegF_wreg),
 	.WB_regF_wr(wb0_outRegF_wr),
-
+    .inInmmediateOpcode(idecode0_outInmmediateOpcode),
 	//Output Signals
 	.outWB(execute0_outWB),
 	.outMEM(execute0_outMEM),
+	//Branch
+    .outPCSel(memaccess0_outPCSel),
 	.outPCJump(execute0_outPCJump),
+	
 	.outALUResult(execute0_outALUResult),
 	.outALUZero(execute0_outALUZero),
 	.outRegB(execute0_outRegB),
@@ -197,7 +205,7 @@ MemoryAccess memaccess0(
 	//Input Signals
 	.inWB(execute0_outWB),
 	.inMEM(execute0_outMEM),
-	.inPCJump(execute0_outPCJump),
+	//.inPCJump(execute0_outPCJump),
 	.inALUResult(execute0_outALUResult),
 	.inALUZero(execute0_outALUZero),
 	.inRegB(execute0_outRegB),

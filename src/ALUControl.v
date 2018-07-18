@@ -43,6 +43,14 @@ begin
 		8'b10_100101 :	ALUControl = 4'b0001; // or
 		8'b10_101010 :	ALUControl = 4'b0111; // set on less than
 		8'b10_100110 :	ALUControl = 4'b1001; // XOR
+		8'b10_100111 : 	ALUControl = 4'b0101; // NOR
+		// Shift 
+		8'b10_000011 :	ALUControl = 4'b0100; // sra -- Shift right arithmetic
+		8'b10_000111 :	ALUControl = 4'b0100; // srav-- Shift right arithmetic varibale
+		8'b10_000010 :	ALUControl = 4'b0011; // srl -- Shift right logical
+		8'b10_000110 :	ALUControl = 4'b0011; // srlv -- Shift right logical varibale
+		8'b10_000000 :	ALUControl = 4'b1011; // sll -- Shift left logical
+		8'b10_000100 :	ALUControl = 4'b1011; // sllv -- Shift left logical varibale
 
 		//------------------------------Inmediatos-----------------------------------
 		

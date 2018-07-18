@@ -33,19 +33,19 @@ module ALU #(parameter bits = 8)(rst,A,B,select,Zero,C);
 		begin
 			alu_zero=0;
 			case(select)
-				4'b0010:e=A+B;
-				4'b0110:e=A-B;
 				4'b0000:e=A&B;
 				4'b0001:e=A|B;
+				4'b0010:e=A+B;
+				4'b0011:e=A>>>B;
+				4'b0100:e=A>>B;
+				4'b0101:e=~(A|B);
+				4'b0110:e=A-B;
 				4'b0111:e=-1;
 				4'b1001:e=A^B;
-				/*6'b000011:e=A>>>B;
-				6'b000010:e=A>>B;
-				6'b100111: 	begin
-									e=A|B;
-									e=~e;
-								end
-				6'b000000:e=A;
+				4'b1011:e=A<<B;
+
+				
+				/*6'b000000:e=A;
 				6'b000001:e=B;*/
 				default: e=-1;
 			endcase
