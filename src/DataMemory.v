@@ -72,6 +72,9 @@ begin
             begin
                data_memory[i][31:0]<= 32'b0;
             end
+            
+            data_memory[20][31:0]<= 32'hAAA;
+            
 		/*
 		New_Data1<=32'h00000000;
 		New_Data2<=32'h00000000;

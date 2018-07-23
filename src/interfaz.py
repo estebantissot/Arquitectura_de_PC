@@ -33,7 +33,7 @@ def switch_demo(argument,byte1,byte2,byte3,byte4):
 
 
 print ('\t\t\t\tMIPS - UNIDAD DE DEBUGGING')
-ser = serial.Serial('/dev/ttyUSB1',38400,timeout=1)
+ser = serial.Serial('/dev/ttyUSB1',19200,timeout=1)
 print ('\t\tSerialPort: {} , BaudRate: {} , ByteSize: {}\n'.format(ser.name,ser.baudrate, ser.bytesize))
 
 inline = ""

@@ -24,7 +24,7 @@ module DebugUnit(
     input rst,
     
     //input BTNC,
-    (*dont_touch="true",mark_debug="true"*)input RX,
+    (*dont_touch="true",mark_debug="true"*)input Rx,
     input [31:0] inLatch,
     input [31:0] inPC,
     input [31:0] inFRData,
@@ -52,10 +52,11 @@ reg mode;
 reg state_mode;
 reg [31:0]	sendData;
 reg 		stopPC;
-reg 		tx_start;
+(*dont_touch="true",mark_debug="true"*)reg 		tx_start;
 reg         WriteRead;
 //-----------------Maquina de Estados-----------------------------
 (*dont_touch="true",mark_debug="true"*)reg [2:0] 	state_send;
+
 localparam [2:0] send_init = 3'b000;
 localparam [2:0] send_PC = 3'b001;
 localparam [2:0] send_Rmem = 3'b010;
@@ -70,7 +71,7 @@ localparam [2:0] cant_senal_execute = 3'd6;
 localparam [2:0] cant_senal_memory = 3'd5;
 localparam [2:0] cant_senal_wb = 3'd2;
 
-reg [2:0] state_prev;
+(*dont_touch="true",mark_debug="true"*)reg [2:0] state_prev;
 
 
 // Registros --- Maquina Receptora de instrucciones 
@@ -120,7 +121,7 @@ Top_UART uart(
 	
 	.TX_start(tx_start),
 	.UART_data(sendData),
-	.RX(RX),
+	.RX(Rx),
     .rx_address(rx_address),
 	.MIPS_enable(MIPS_enable),
 	.TX(TX),
@@ -190,26 +191,24 @@ begin
             send_init:
                 begin
                   //led <= 1'b1;
-                  if(RX == 1'b0)//inPC == 32'd28//if(write)//if(state_rx!=rx_stop)
-                   begin
+                  if(!Rx)//inPC == 32'd28//if(write)//if(state_rx!=rx_stop)
+                     begin
                         //led <= 1'b1;
                         state_send<=send_PC;
                         debug <= 1'b1;
-                   end
-                   else
-                        state_send<=send_init;
+                        
+                    end
                 end
                 
             send_PC:
                 begin
-                    stopPC<=1'b0; 
-                    sendData<=inPC;
-                    tx_start<=1'b1;
-                    state_prev<=send_Rmem;
-                    state_send<=send_waitFinish;
-                    address <= 32'b00000000_00000000_00000000_00000000;
+                     //stopPC<=1'b0; 
+                     sendData<=inPC;
+                     tx_start<=1'b1;
+                     state_prev<=send_Rmem;
+                     state_send<=send_waitFinish;
+                     address <= 32'b00000000_00000000_00000000_00000000;
                 end
-               
             send_Rmem:
                 begin
                     sendData <= inFRData;
@@ -304,6 +303,7 @@ begin
                                   begin
                                       etapa <= 3'b000;
                                       senal <= 4'b0;
+                                      stopPC<=1'b0; 
                                       state_prev <= send_Finish;
                                   end
                               else
@@ -317,7 +317,7 @@ begin
                 
             send_waitFinish:
                 begin
-                    stopPC<=1'b1; 
+                     
                     tx_start<=1'b0;
                     if(tx_dataready == 1'b1)
                         begin
@@ -328,8 +328,11 @@ begin
                 
             send_Finish:
                 begin
+                    stopPC<=1'b1;
                     debug <= 1'b0;
+                    tx_start<=1'b0;
                     state_send <= send_init;
+                    
                    // led <= 1'b1;
                     // se debe esperar hasta que se quiera mandar todo de nuevo.
                 end

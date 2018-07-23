@@ -19,14 +19,11 @@
 //////////////////////////////////////////////////////////////////////////////////
 module top_level(
     input clk,
-    input rst,
+    input reset,
   //  input BTNC,
-    input SW0,
+    //input SW0,
 	input UART_TXD_IN,
-	output UART_RXD_OUT,
-	output led0,
-	output led1,
-	output led2
+	output UART_RXD_OUT
     );
 
 // Cables
@@ -94,13 +91,13 @@ wire [31:0] DebugAddress;
 wire wr_program_instruction;
 wire [31:0] program_instruction;
 wire [31:0] rx_address;
-
+wire rst;
 //assign tx_start = (ifetch0_outInstructionAddress==32'd19)? 1'b1:1'b0;
 
 //Top_UART uart(.clk(clk),.reset(rst),.TX_start(tx_start),.UART_data(execute0_outALUResult),.RX(RX),.MIPS_enable(MIPS_enable),.TX(TX));
 
 
-
+assign rst = (!reset);
 
 // Instancias
 // Instancia del modulo Instruction Fetch
@@ -220,8 +217,6 @@ MemoryAccess memaccess0(
 
 	//Output Signals    
 	.outWB(memaccess0_outWB),
-	.outPCSel(memaccess0_outPCSel),
-	.outPCJump(memaccess0_outPCJump),
 	.outRegF_wd(memaccess0_outRegF_wd),
 	.outALUResult(memaccess0_outALUResult),
 	.outRegF_wreg(memaccess0_outRegF_wreg),
@@ -275,9 +270,7 @@ MuxLatch ml0(
     .execute0_outRegF_wreg(execute0_outRegF_wreg), 
     
     //-- Modulo MemoryAccess --
-    .memaccess0_outWB(memaccess0_outWB), 			
-    .memaccess0_outPCSel(memaccess0_outPCSel), 		
-    .memaccess0_outPCJump(memaccess0_outPCJump), 	
+    .memaccess0_outWB(memaccess0_outWB), 			 	
     .memaccess0_outRegF_wd(memaccess0_outRegF_wd), 	
     .memaccess0_outALUResult(memaccess0_outALUResult), 
     .memaccess0_outRegF_wreg(memaccess0_outRegF_wreg), 
@@ -296,18 +289,14 @@ DebugUnit debug(
 	.clk(clk),
     .rst(rst),
     // INPUT
-   // .BTNC(BTNC),
-    .SW0(SW0),
-    .RX(UART_TXD_IN),
+
+    .Rx(UART_TXD_IN),
     .inLatch(muxLatch_outData),
     .inPC(ifetch0_outInstructionAddress),
     .inFRData(FRData),
     .inMemData(MemData),
     
     // OUTPUT
-    .out_led2(led2),
-    .out_led1(led1),
-    .out_led0(led0),
     .out_debug_on(Debug_on),
     .outDebugAddress(DebugAddress),
     .addressInstrucction(),
@@ -320,6 +309,5 @@ DebugUnit debug(
     .outControlLatchMux(ControlLatchMux)
 
 );
-
 
 endmodule

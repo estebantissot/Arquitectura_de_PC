@@ -34,7 +34,7 @@ module InstructionDecode(
     input [4:0]     Debug_read_reg,
 	 
 // Branch
-	output 			ID_flush,
+	input 			ID_flush,
 
 //Output Signals
     output  [1:0]   outWB,
@@ -66,7 +66,7 @@ reg [4:0]   rs;
 reg [4:0] 	rt;
 reg [4:0] 	RT_rd;
 reg [6:0]	InmmediateOpcode;
-reg [31:0] PCJump;
+reg [31:0]  PCJump;
 //Cables
 //wire [31:0] RegF_outRegA;
 //wire [31:0] RegF_outRegB;

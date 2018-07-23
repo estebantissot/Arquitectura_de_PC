@@ -50,17 +50,20 @@ assign ExHazard=(MEM_regF_wr) && (MEM_rd!=0);
         else
             begin
             muxA = 2'b00;
-            muxB = 2'b00;    
+            muxB = 2'b00;
+
             if(ExHazard)
                 begin
                     if(MEM_rd==rs) muxA = 2'b10;
                     if(MEM_rd==rt) muxB = 2'b10;
                 end
-            if((WB_regF_wr) && (WB_rd!=0) && (!(MEM_rd != rs && ExHazard)))
-                begin
-                    if(WB_rd==rs) muxA = 2'b01;
-                    if(WB_rd==rt) muxB = 2'b01;
-                end
+            
+            if((WB_regF_wr) && (WB_rd!=0) && (!((MEM_rd == rs) && ExHazard)) && (WB_rd==rs))
+                muxA = 2'b01;
+            
+            if((WB_regF_wr) && (WB_rd!=0) && (!((MEM_rd == rt) && ExHazard)) && (WB_rd==rt))
+                muxB = 2'b01;
+                
             end
 
     end   
