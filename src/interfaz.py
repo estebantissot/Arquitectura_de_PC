@@ -118,7 +118,7 @@ print ('  ----------------------------------------------------------------------
 
 print ('\t\t\t\tMIPS - UNIDAD DE DEBUGGING')
 try:
-	ser = serial.Serial('/dev/ttyUSB1',38400,timeout=1) #38400 #19200
+	ser = serial.Serial('/dev/ttyUSB1',19200,timeout=1) #38400 #19200
 	print ('\t\tSerialPort: {} , BaudRate: {} , ByteSize: {}\n'.format(ser.name,ser.baudrate, ser.bytesize))
 except:
 	print('ERROR - Asegurese de conectar el dispositivo ')
@@ -196,7 +196,7 @@ j=0
 while 1:
 	j=0
 	var = raw_input("Write or Read? [w/r]: ")
-	
+	ser.write("fasdf4444")	
 	#inline = ser.readline() # Lee hasta que se vacie el buffer.
 	inline = ser.read(296) #Lee 296 bytes del buffer. 
 	if (inline != ""):

@@ -36,12 +36,29 @@ begin
 		8'b00_??????:	ALUControl = 4'b0010;  // add
 		// Branch equal
 		8'b01_??????:	ALUControl = 4'b0110; // subtract
-		// R-Type
-		8'b10_100000:	ALUControl = 4'b0010; // add
-		8'b10_100010:	ALUControl = 4'b0110; // subtract
-		8'b10_100100:	ALUControl = 4'b0000; // and
-		8'b10_100101:	ALUControl = 4'b0001; // or
-		8'b10_101010:	ALUControl = 4'b0111; // set on less than
+		//------------------------------- R-Type ------------------------------------
+		8'b10_100000 :	ALUControl = 4'b0010; // add
+		8'b10_100010 :	ALUControl = 4'b0110; // subtract
+		8'b10_100100 :	ALUControl = 4'b0000; // and
+		8'b10_100101 :	ALUControl = 4'b0001; // or
+		8'b10_101010 :	ALUControl = 4'b0111; // set on less than
+		8'b10_100110 :	ALUControl = 4'b1001; // XOR
+		8'b10_100111 : 	ALUControl = 4'b0101; // NOR
+		// Shift 
+		8'b10_000011 :	ALUControl = 4'b0100; // sra -- Shift right arithmetic
+		8'b10_000111 :	ALUControl = 4'b0100; // srav-- Shift right arithmetic varibale
+		8'b10_000010 :	ALUControl = 4'b0011; // srl -- Shift right logical
+		8'b10_000110 :	ALUControl = 4'b0011; // srlv -- Shift right logical varibale
+		8'b10_000000 :	ALUControl = 4'b1011; // sll -- Shift left logical
+		8'b10_000100 :	ALUControl = 4'b1011; // sllv -- Shift left logical varibale
+
+		//------------------------------Inmediatos-----------------------------------
+		
+		8'b11_001000 :	ALUControl = 4'b0010; // add
+		8'b11_001100 :	ALUControl = 4'b0000; // and
+		8'b11_001101 :	ALUControl = 4'b0001; // or
+		8'b11_001110 :	ALUControl = 4'b1001; // XOR
+		
 		default:			ALUControl= 4'b0010;
 	endcase
 end

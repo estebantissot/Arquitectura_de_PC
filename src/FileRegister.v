@@ -66,38 +66,37 @@ always@ (posedge clk, posedge rst)
 begin
 	if (rst)
 		begin
-			registros[0][31:0] <= 32'h00000001;
-			registros[1][31:0] <= 32'h00000011;
-			registros[2][31:0] <= 32'h00000012;
-			registros[3][31:0] <= 32'h00000013;
-			registros[4][31:0] <= 32'h00000014;
-			registros[5][31:0] <= 32'h00000015;
-			registros[6][31:0] <= 32'h00000016;
-			registros[7][31:0] <= 32'h00000017;
-			registros[8][31:0] <= 32'h00000004;
-			registros[9][31:0] <= 32'h00000019;
-			registros[10][31:0] <= 32'h00000021;
-			registros[11][31:0] <= 32'h00000022;
-			registros[12][31:0] <= 32'h00000023;
-			registros[13][31:0] <= 32'h00000024;
-			registros[14][31:0] <= 32'h00000025;
-			registros[15][31:0] <= 32'h00000026;
-			registros[16][31:0] <= 32'h00000027;
-            registros[17][31:0] <= 32'h00000000;
-            registros[18][31:0] <= 32'h00000000;
-            registros[19][31:0] <= 32'h00000000;
-            registros[20][31:0] <= 32'h00000000;
-            registros[21][31:0] <= 32'h00000000;
-            registros[22][31:0] <= 32'h00000000;
-            registros[23][31:0] <= 32'h00000000;
-            registros[24][31:0] <= 32'h00000000;
-            registros[25][31:0] <= 32'h00000000;
-            registros[26][31:0] <= 32'h00000000;
-            registros[27][31:0] <= 32'h00000000;
-            registros[28][31:0] <= 32'h00000000;
-            registros[29][31:0] <= 32'h00000000;
-            registros[30][31:0] <= 32'h00000000;
-            registros[31][31:0] <= 32'd42;  //Z en ascii
+			registros[31'd0][31:0] <= 32'h00000001;
+			registros[31'd1][31:0] <= 32'h00000011;
+			registros[31'd2][31:0] <= 32'h00000012;
+			registros[31'd3][31:0] <= 32'h00000013;
+			registros[31'd4][31:0] <= 32'h00000014;
+			registros[31'd5][31:0] <= 32'h00000015;
+			registros[31'd6][31:0] <= 32'h00000016;
+			registros[31'd7][31:0] <= 32'h00000017;
+			registros[31'd8][31:0] <= 32'h00000004;
+			registros[31'd9][31:0] <= 32'h00000019;
+			registros[31'd10][31:0] <= 32'h00000021;
+			registros[31'd12][31:0] <= 32'h00000013;
+			registros[31'd13][31:0] <= 32'h00000024;
+			registros[31'd14][31:0] <= 32'h00000025;
+			registros[31'd15][31:0] <= 32'h00000026;
+			registros[31'd16][31:0] <= 32'h00000027;
+            registros[31'd17][31:0] <= 32'h00000000;
+            registros[31'd18][31:0] <= 32'h00000000;
+            registros[31'd19][31:0] <= 32'h00000000;
+            registros[31'd20][31:0] <= 32'h00000000;
+            registros[31'd21][31:0] <= 32'd16;
+            registros[31'd22][31:0] <= 32'd31;
+            registros[31'd23][31:0] <= 32'd31;
+            registros[31'd24][31:0] <= 32'h00000024;
+            registros[31'd25][31:0] <= 32'h00000012;
+            registros[31'd26][31:0] <= 32'h00000000;
+            registros[31'd27][31:0] <= 32'h00000028;
+            registros[31'd28][31:0] <= 32'h00000029;
+            registros[31'd29][31:0] <= 32'h00000000;
+            registros[31'd30][31:0] <= 32'h00000000;
+            registros[31'd31][31:0] <= 32'd42;  //Z en ascii
 		end
 	else
 		begin

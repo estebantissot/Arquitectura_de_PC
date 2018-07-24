@@ -66,14 +66,11 @@ begin
 		instruction_address<=0;
 	else
 		begin
-		  if(instruction_address < 32'd17)
-		  begin
 			casez ({inPCSel,inPC_write})
 				2'b00: instruction_address <= pc;
 				2'b01: instruction_address <= pc + 1;
 				2'b1?: instruction_address <= inPCJump;
 			endcase
-		  end
 		end
 end
 
@@ -84,10 +81,11 @@ begin
 			pc <= 32'd0;
 			//instruction <= 32'bX;
 		end
-	//else if (inIF_ID_write && !stopPC_debug)
-	else if (inIF_ID_write)
+	else if (inIF_ID_write && (!stopPC_debug))
+	//else if (inIF_ID_write)
 		begin
 			pc <= instruction_address;
+			//pc <= pc;
 			//instruction <= mem_instruction;
 		end
 end

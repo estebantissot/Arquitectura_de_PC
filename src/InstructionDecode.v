@@ -33,6 +33,9 @@ module InstructionDecode(
     input           Debug_on,
     input [4:0]     Debug_read_reg,
 	 
+// Branch
+	input 			ID_flush,
+
 //Output Signals
     output  [1:0]   outWB,
     output  [2:0] 	outMEM,
@@ -46,8 +49,9 @@ module InstructionDecode(
     output  [4:0] 	outRT_rd,
     output 	        outPC_write,
     output 	        outIF_ID_write,
-   // output          outFlush,
-    output  [31:0]  out_regDebug
+    output          outFlush,
+    output  [31:0]  out_regDebug,
+    output  [6:0]	outInmmediateOpcode	 	
     );
 
 //Registros
@@ -61,7 +65,8 @@ reg signed [31:0]	Instruction_ls;
 reg [4:0]   rs;
 reg [4:0] 	rt;
 reg [4:0] 	RT_rd;
-
+reg [6:0]	InmmediateOpcode;
+reg [31:0]  PCJump;
 //Cables
 //wire [31:0] RegF_outRegA;
 //wire [31:0] RegF_outRegB;
@@ -76,11 +81,12 @@ assign outEXE = EXE;
 assign outInstructionAddress = InstructionAddress;
 //assign outRegA = RegF_outRegA;
 //assign outRegB = RegF_outRegB;
-assign outInstruction_ls = Instruction_ls >>> 16;
+assign outInstruction_ls = ((EXE[2:1]==2'b11) && (inInstruction[31:26]!=6'd8))? Instruction_ls>>16:Instruction_ls >>> 16;
 assign out_rs = rs;
 assign out_rt = rt;
 assign outRT_rd = RT_rd;
-
+assign outInmmediateOpcode	=	InmmediateOpcode;
+ 
 assign write = (Debug_on) ? 1'b0:inRegF_wr;
 
 // Instancia de "Hazard Detection Unit"
@@ -119,7 +125,7 @@ FileRegister regF0 (
 );
 
 //Equals unit
-//assign outFlush=(outRegA==outRegB)?  1'b1:1'b0;
+//assign Branch_equals = (outRegA==outRegB)?  1'b1:1'b0;
 
 //Logica del Bloque
 always @(negedge clk, posedge rst)
@@ -139,7 +145,7 @@ if (rst)
 	end
 else // Escritura de todos los registros de salida
 	begin
-	   case (ControlMux)
+	   case (ControlMux & (!ID_flush))
             1'b0:
             begin
                 WB = 2'b0;
@@ -155,8 +161,10 @@ else // Escritura de todos los registros de salida
         endcase
 
 		InstructionAddress = inInstructionAddress;
+		InmmediateOpcode = inInstruction[31:26];
 		//RegA = RegF_outRegA;
 		//RegB = RegF_outRegB;
+		//ID_flush = outPCSel;
 		Instruction_ls = {inInstruction[15:0],16'b0};
 		rs = inInstruction[25:21];
 		rt = inInstruction[20:16];

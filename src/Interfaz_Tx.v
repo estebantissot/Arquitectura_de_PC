@@ -22,11 +22,11 @@ module Interfaz_Tx(
 	//INPUT
 	input clk,
 	input reset,
-	input wire [31:0] in_data,
+	(*dont_touch="true",mark_debug="true"*)input wire [31:0] in_data,
 	input wire new_result,
 	input tx_done,
 	// OUTPUT
-	output wire [7:0] out_data,
+	(*dont_touch="true",mark_debug="true"*)output wire [7:0] out_data,
 	output wire tx_start,
 	output data_done
     );

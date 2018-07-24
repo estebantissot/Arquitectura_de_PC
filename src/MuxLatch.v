@@ -53,8 +53,6 @@ module MuxLatch(
 
 	//-- Modulo MemoryAccess --
 	input [1:0]		memaccess0_outWB, 			//memaccess0:outWB -> wb0:inWB
-	input 			memaccess0_outPCSel, 		//memaccess0:outPCSel -> ifetch0:inPCSel
-	input [31:0]	memaccess0_outPCJump, 	//memaccess0:outPCJump -> ifetch0:inPCJump
 	input [31:0]	memaccess0_outRegF_wd, 	//memaccess0:outRegF_wd -> wb0:inRegF_wd
 	input [31:0] 	memaccess0_outALUResult, //memaccess0:outALUResult -> wb0:inALUResult & MEM_AluResult(execute stage)
 	input [4:0]		memaccess0_outRegF_wreg, //memaccess0:outRegF_wreg -> idecode0:inRegF_wreg
@@ -123,14 +121,14 @@ begin
 	            // Send the Latchs of the state Memory
 	            7'b011_0000:
 	            	data <= {8'b0 , 8'b0 , 8'b0 , {6'b0,memaccess0_outWB}};
-	            7'b011_0001:
-	            	data <= memaccess0_outPCJump;
+	           // 7'b011_0001:
+	            	//data <= memaccess0_outPCJump;
 	            7'b011_0010:
 	            	data <= memaccess0_outRegF_wd;
 	            7'b011_0011:
 	            	data <= memaccess0_outALUResult;
-            	7'b011_0100:		
-	            	data <= {8'b0 , 8'b0 , {7'b0,memaccess0_outPCSel} , {3'b0,memaccess0_outRegF_wreg}};
+            	//7'b011_0100:		
+	            	//data <= {8'b0 , 8'b0 , {7'b0,memaccess0_outPCSel} , {3'b0,memaccess0_outRegF_wreg}};
 	            	
 	            // Send the Latchs of the state Wite Back
 	            7'b100_0000:

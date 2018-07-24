@@ -19,13 +19,9 @@
 //////////////////////////////////////////////////////////////////////////////////
 module top_level(
     input clk,
-    input rst,
-  //  input BTNC,
+    input reset,
 	input UART_TXD_IN,
-	output UART_RXD_OUT,
-	output led0,
-	output led1,
-	output led2
+	output UART_RXD_OUT
     );
 
 // Cables
@@ -45,8 +41,9 @@ wire [31:0]	idecode0_outInstruction_ls; //idecode0:outInstruction_ls -> execute0
 wire [4:0]	idecode0_out_rs; //idecode0:out_rs -> execute0:in_rs
 wire [4:0]	idecode0_out_rt; //idecode0:out_rt -> execute0:in_rt
 wire [4:0]	idecode0_outRT_rd; //idecode0:outRT_rd -> execute0:inRT_rd
-wire    idecode0_outPC_write;
-wire    idecode0_outIF_ID_write;
+wire        idecode0_outPC_write;
+wire        idecode0_outIF_ID_write;
+wire [6:0]  idecode0_outInmmediateOpcode;
 
 //-- Modulo Execute --
 wire [1:0]	execute0_outWB; 		//execute0:outWB -> memaccess0:inWB
@@ -84,13 +81,13 @@ wire [31:0] DebugAddress;
 wire wr_program_instruction;
 wire [31:0] program_instruction;
 wire [31:0] rx_address;
-
+wire rst;
 //assign tx_start = (ifetch0_outInstructionAddress==32'd19)? 1'b1:1'b0;
 
 //Top_UART uart(.clk(clk),.reset(rst),.TX_start(tx_start),.UART_data(execute0_outALUResult),.RX(RX),.MIPS_enable(MIPS_enable),.TX(TX));
 
 
-
+assign rst = (!reset);
 
 // Instancias
 // Instancia del modulo Instruction Fetch
@@ -108,7 +105,7 @@ InstructionFetch ifetch0(
 	.inPC_write(idecode0_outPC_write),
 	.inIF_ID_write(idecode0_outIF_ID_write),
 	.inPCSel(memaccess0_outPCSel),
-	.inPCJump(memaccess0_outPCJump),
+	.inPCJump(execute0_outPCJump),
 	
 	//Output Signals
 	.outInstructionAddress(ifetch0_outInstructionAddress),
@@ -133,6 +130,9 @@ InstructionDecode idecode0(
 	.Debug_on(Debug_on),
 	.Debug_read_reg(DebugAddress[4:0]),
 
+	//Branch
+	.ID_flush(memaccess0_outPCSel),
+	
 	//Output Signals
 	.outWB(idecode0_outWB),
 	.outMEM(idecode0_outMEM),
@@ -146,7 +146,8 @@ InstructionDecode idecode0(
 	.outRT_rd(idecode0_outRT_rd),
 	.outPC_write(idecode0_outPC_write),
     .outIF_ID_write(idecode0_outIF_ID_write),
-    .out_regDebug(FRData)
+    .out_regDebug(FRData),
+    .outInmmediateOpcode(idecode0_outInmmediateOpcode)
 	
 );
 
@@ -173,11 +174,14 @@ Execute execute0(
 	.MEM_regF_wr(execute0_outWB[1]),
 	.WB_rd(memaccess0_outRegF_wreg),
 	.WB_regF_wr(wb0_outRegF_wr),
-
+    	.inInmmediateOpcode(idecode0_outInmmediateOpcode),
 	//Output Signals
 	.outWB(execute0_outWB),
 	.outMEM(execute0_outMEM),
+	//Branch
+   	.outPCSel(memaccess0_outPCSel),
 	.outPCJump(execute0_outPCJump),
+	
 	.outALUResult(execute0_outALUResult),
 	.outALUZero(execute0_outALUZero),
 	.outRegB(execute0_outRegB),
@@ -193,7 +197,7 @@ MemoryAccess memaccess0(
 	//Input Signals
 	.inWB(execute0_outWB),
 	.inMEM(execute0_outMEM),
-	.inPCJump(execute0_outPCJump),
+	//.inPCJump(execute0_outPCJump),
 	.inALUResult(execute0_outALUResult),
 	.inALUZero(execute0_outALUZero),
 	.inRegB(execute0_outRegB),
@@ -203,8 +207,6 @@ MemoryAccess memaccess0(
 
 	//Output Signals    
 	.outWB(memaccess0_outWB),
-	.outPCSel(memaccess0_outPCSel),
-	.outPCJump(memaccess0_outPCJump),
 	.outRegF_wd(memaccess0_outRegF_wd),
 	.outALUResult(memaccess0_outALUResult),
 	.outRegF_wreg(memaccess0_outRegF_wreg),
@@ -258,9 +260,7 @@ MuxLatch ml0(
     .execute0_outRegF_wreg(execute0_outRegF_wreg), 
     
     //-- Modulo MemoryAccess --
-    .memaccess0_outWB(memaccess0_outWB), 			
-    .memaccess0_outPCSel(memaccess0_outPCSel), 		
-    .memaccess0_outPCJump(memaccess0_outPCJump), 	
+    .memaccess0_outWB(memaccess0_outWB), 			 	
     .memaccess0_outRegF_wd(memaccess0_outRegF_wd), 	
     .memaccess0_outALUResult(memaccess0_outALUResult), 
     .memaccess0_outRegF_wreg(memaccess0_outRegF_wreg), 
@@ -279,7 +279,6 @@ DebugUnit debug(
 	.clk(clk),
     .rst(rst),
     // INPUT
-   // .BTNC(BTNC),
     .RX(UART_TXD_IN),
     .inLatch(muxLatch_outData),
     .inPC(ifetch0_outInstructionAddress),
@@ -287,9 +286,6 @@ DebugUnit debug(
     .inMemData(MemData),
     
     // OUTPUT
-    .out_led2(led2),
-    .out_led1(led1),
-    .out_led0(led0),
     .out_debug_on(Debug_on),
     .outDebugAddress(DebugAddress),
     .addressInstrucction(),
@@ -302,6 +298,5 @@ DebugUnit debug(
     .outControlLatchMux(ControlLatchMux)
 
 );
-
 
 endmodule

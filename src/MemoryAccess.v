@@ -25,7 +25,6 @@ module MemoryAccess(
 //Input Signals
     input [1:0] 	inWB,
     input [2:0] 	inMEM,
-    input [31:0] 	inPCJump,
     input [31:0] 	inALUResult,
     input 			inALUZero,
     input [31:0] 	inRegB,
@@ -35,8 +34,6 @@ module MemoryAccess(
 
 //Output Signals    
 	output  [1:0]	outWB,
-	output			outPCSel,
-    output  [31:0]  outPCJump,
     output  [31:0]  outRegF_wd,
     output  [31:0]  outALUResult,
     output  [4:0] 	outRegF_wreg,
@@ -51,12 +48,13 @@ reg [4:0] 	RegF_wreg;
 
 // Cables
 wire [31:0] dm0_RegF_wd;
-wire [1:0]read_write;
+wire [1:0]  read_write;
 
 //Asignaciones
 assign outWB = WB;
-assign outPCJump = inPCJump;
-assign outPCSel = (inMEM[2] && inALUZero);
+//assign outPCJump = inPCJump;
+//assign outPCSel = (inMEM[2] && inALUZero);
+
 //assign outRegF_wd = RegF_wd;
 assign outALUResult = ALUResult;
 assign outRegF_wreg = RegF_wreg;
