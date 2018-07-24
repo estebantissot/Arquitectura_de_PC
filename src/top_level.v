@@ -21,7 +21,6 @@ module top_level(
     input clk,
     input rst,
   //  input BTNC,
-    input SW0,
 	input UART_TXD_IN,
 	output UART_RXD_OUT,
 	output led0,
@@ -30,14 +29,6 @@ module top_level(
     );
 
 // Cables
-//wire clk;
-//wire rst;
-//wire RX;
-//wire TX;
-//assign clk = CLK100MHZ;
-//assign rst = CPU_RESETN;
-//assign RX = UART_TXD_IN;
-//assign TX = UART_RXD_OUT;
 
 //-- Modulo Instruction Fetch --
 wire [31:0]	ifetch0_outInstructionAddress; //ifetch0:outInstructionAddress -> idecode0:inInstructionAddress
@@ -289,7 +280,6 @@ DebugUnit debug(
     .rst(rst),
     // INPUT
    // .BTNC(BTNC),
-    .SW0(SW0),
     .RX(UART_TXD_IN),
     .inLatch(muxLatch_outData),
     .inPC(ifetch0_outInstructionAddress),

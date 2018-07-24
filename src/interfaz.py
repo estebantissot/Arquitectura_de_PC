@@ -2,7 +2,86 @@ import serial
 import time
 
 
-def switch_demo(argument,byte1,byte2,byte3,byte4):
+def instruction_set(argument):
+    instr = {
+        #KEY    :   (instruction, example, description)
+        1  : ('Shift L logical          '    ,'sll  rd  rt shamt'    , 'sll  $t10 $t6 1  '),
+        2  : ('Shift R logical          '    ,'srl  rd  rt      '    , 'srl  $t11 $t6 2  '),
+        3  : ('Shift R arithmetic       '    ,'sra  rd  rt      '    , 'sra  $t12 $t4 3  '),
+        4  : ('Shift L logical variable '    ,'sllv rd  rt  rs  '    , 'sllv $t20 $t6 $t1'),
+        5  : ('Shift R logical variable '    ,'srlv rd  rt  rs  '    , 'srlv $t21 $t6 $t1'),
+        6  : ('Shift R arithmetic variable'  ,'srav rd  rt  rs  '    , 'srav $t22 $t6 $t1'),
+        7  : ('Addition (without overflow)'  ,'addu rd  rt  rs  '    , 'addu $t23 $t6 $t1'),
+        8  : ('Subtract (without overflow)'  ,'subu rd  rt  rs  '    , 'subu $t24 $t6 $t1'),
+        9  : ('AND                      '    ,'and  rd  rt  rs  '    , 'and  $t25 $t6 $t1'),
+        10 : ('OR                       '    ,'or   rd  rt  rs  '    , 'or   $t26 $t6 $t1'),
+        11 : ('Exclusive OR             '    ,'xor  rd  rt  rs  '    , 'xor  $t27 $t6 $t1'),
+        12 : ('NOR                      '    ,'nor  rd  rt  rs  '    , 'nor  $t28 $t6 $t1'),
+        13 : ('Set less than            '    ,'slt  rd  rt  rs  '    , 'slt  $t29 $t6 $t1'),
+        14 : ('load byte                '    ,'lb   rt  offset  '    , 'lb   $t30 16     '),
+        15 : ('Load halfword            '    ,'lh   rt  offset  '    , 'lh   $t31 16     '),
+        16 : ('Load word                '    ,'lw   rt  offset  '    , 'lw   $t32 16     '),
+        17 : ('Load unsigned byte       '    ,'lbu  rt  offset  '    , 'lbu  $t33 16     '),
+        18 : ('load unsigned halfword   '    ,'lhu  rt  offset  '    , 'lhu  $t34 16     '),
+        19 : ('Store byte               '    ,'sb   rt  offset  '    , 'sb   $t35 16     '),
+        20 : ('Store halfword           '    ,'sh   rt  offset  '    , 'sh   $t36 16     '),
+        21 : ('Store word               '    ,'sw   rt  offset  '    , 'sw   $t37 16     '),
+        22 : ('ADD immediate (with overflow)','addi rt  rs imm  '    , 'addi $t40 $t6 16 '),
+        23 : ('AND immediate (with overflow)','andi rt  rs imm  '    , 'andi $t41 $t6 16 '),
+        24 : ('OR immediate             '    ,'ori  rt  rs imm  '    , 'ori  $t42 $t6 16 '),
+        25 : ('XOR immediate            '    ,'xori rt  rs imm  '    , 'xori $t43 $t6 16 '),       
+        26 : ('Set less than immediate  '    ,'slti rt  rs imm  '    , 'slti $t44 $t6 16 '),
+        27 : ('Branch on equal          '    ,'beq  rt  rs imm  '    , 'beq  $t45 $t6 16 '),
+        28 : ('Branch on not equal      '    ,'bne  rt  rs imm  '    , 'bne  $t46 $t6 16 '),
+        29 : ('Load upper immediate     '    ,'lui  rt  imm     '    , 'lui  $t47 16     '),
+        30 : ('Jump                     '    ,'j    target      '    , 'j    26          '),
+        31 : ('Jump and link            '    ,'jal  target      '    , 'jal  26          '),
+        32 : ('Jump register            '    ,'jr   rt          '    , 'jr   $t50        '),
+        33 : ('Jump and link register   '    ,'jalr rd  rs      '    , 'jalr $t51 $t16   ')
+    }
+    return instr.get(argument) 
+
+def opcode(argument):
+    op = {
+    	#KEY	:	(estructura,cant_param, param1,param2,..)
+    	'sll'	:	('000000_00000_RT_RD_SHAMT_000000',4,'REG_D','REG_T','SHAMT'), #
+    	'srl'	:	('000000_00000_RT_RD_SHAMT_000010',4,'REG_D','REG_T','SHAMT'), #
+    	'sra'	:	('000000_00000_RT_RD_SHAMT_000011',4,'REG_D','REG_T','SHAMT'), #
+    	'sllv'	:	('000000_RS_RT_RD_00000_000100',4,'REG_D','REG_T','REG_S'), #
+    	'srlv'	:	('000000_RS_RT_RD_00000_000110',4,'REG_D','REG_T','REG_S'), #
+    	'srav'	:	('000000_RS_RT_RD_00000_000111',4,'REG_D','REG_T','REG_S'), #
+        'addu'	:	('000000_RS_RT_RD_00000_100001',4,'REG_D','REG_T','REG_S'), #100001
+        'subu'	:	('000000_RS_RT_RD_00000_100011',4,'REG_D','REG_T','REG_S'), #100011 
+        'and'	:	('000000_RS_RT_RD_00000_100100',4,'REG_D','REG_T','REG_S'), #100100
+        'or' 	:	('000000_RS_RT_RD_00000_100101',4,'REG_D','REG_T','REG_S'), #100101
+        'xor'	:	('000000_RS_RT_RD_00000_100110',4,'REG_D','REG_T','REG_S'), #100110
+        'nor'	:	('000000_RS_RT_RD_00000_100111',4,'REG_D','REG_T','REG_S'), #100111	
+        'slt'	:	('000000_RS_RT_RD_00000_101010',4,'REG_D','REG_T','REG_S'), #101010
+        'lb'	:	('100000_00000_RT_OFFSET',3,'REG_T','OFFSET'), #Load byte -> lb rt address
+        'lh'	:	('100001_00000_RT_OFFSET',3,'REG_T','OFFSET'), #Load halfword -> lh rt address
+        'lw'	:	('100011_00000_RT_OFFSET',3,'REG_T','OFFSET'), #Load word -> lw rt address
+        'lbu'	:	('100100_00000_RT_OFFSET',3,'REG_T','OFFSET'), #Load unsigned byte -> lbu rt address
+        'lhu'	:	('100101_00000_RT_OFFSET',3,'REG_T','OFFSET'), #Load unsigned halfword -> lhu rt address
+        'sb'	:	('101000_00000_RT_OFFSET',3,'REG_T','OFFSET'), #Store byte -> sb rt address
+        'sh'	:	('101001_00000_RT_OFFSET',3,'REG_T','OFFSET'), #Store halfword -> sh rt address
+        'sw'	:	('101011_00000_RT_OFFSET',3,'REG_T','OFFSET'), #Store word -> sw rt address
+        'addi'	:	('001000_RS_RT_IMMEDIATE',4,'REG_T','REG_S','IMMEDIATE'), #Addition immediate (with overflow) -> addi rt rs im
+        'andi'	:	('001100_RS_RT_IMMEDIATE',4,'REG_T','REG_S','IMMEDIATE'), #AND immediate -> andi rt rs im
+        'ori'	:	('001110_RS_RT_IMMEDIATE',4,'REG_T','REG_S','IMMEDIATE'), #OR immediate -> ori rt rs im
+        'xori'	:	('001111_RS_RT_IMMEDIATE',4,'REG_T','REG_S','IMMEDIATE'), #XOR immediate -> xori rt rs im
+        'lui'	:	('010000_00000_RT_IMMEDIATE',3,'REG_T','IMMEDIATE'), #Load upper immediate -> lui im
+        'slti'	:	('001010_RS_RT_IMMEDIATE',4,'REG_T','REG_S','IMMEDIATE'), #Set less than immediate -> sltirt rs im
+        'beq'	:	('000100_RS_RT_OFFSET',4,'REG_S','REG_T','OFFSET'), #Branch on equal -> beq rs rt label
+        'bne'	:	('000101_RS_RT_OFFSET',4,'REG_S','REG_T','OFFSET'), #Branch on not equal -> bne rs rt label
+        'j'		:	('000010_TARGET',2,'TARGET'), #jump -> j target
+        'jal'	:	('000011_TARGET',2,'TARGET'), #jump and link -> jal target
+        'jr'	:	('000000_RS_000000000000000_001000',2,'REG_S'), #jump register -> jr rs
+        'jalr'	:	('000000_RS_00000_RD_00000_001001',3,'REG_S','REG_D') #jump and link register -> jalr rs,rd  !!!!!
+    }
+    return op.get(argument) 
+
+
+def parseo(argument,byte1,byte2,byte3,byte4):
     switcher = {
         0:  '\n\t\t\t Program Counter\nPC : 0x{:0>2x}{:0>2x}{:0>2x}{:0>2x} : 0b{:0>8b}_{:0>8b}_{:0>8b}_{:0>8b}'.format(byte1,byte2,byte3,byte4,byte1,byte2,byte3,byte4),
         53: '\nStage : Instruction Fetch\nInstructionAddress : 0x{:0>2x}{:0>2x}{:0>2x}{:0>2x} : 0b{:0>8b}_{:0>8b}_{:0>8b}_{:0>8b}'.format(byte1,byte2,byte3,byte4,byte1,byte2,byte3,byte4),
@@ -29,34 +108,94 @@ def switch_demo(argument,byte1,byte2,byte3,byte4):
     }
     print switcher.get(argument, "Error!!")
 
-#switch_demo(1,4)
 
+
+print ('  ------------------------------ INSTRUCTION SET ------------------------------\n')
+print ('| \t\tNAME   \t\t|\tINSTRUCTION \t|\tEXAMPLE \t|')
+for i in range (1,31):
+    print ('| {}\t|   {}\t|   {}\t|'.format(instruction_set(i)[0], instruction_set(i)[1], instruction_set(i)[2] ))
+print ('  -----------------------------------------------------------------------------')
 
 print ('\t\t\t\tMIPS - UNIDAD DE DEBUGGING')
-ser = serial.Serial('/dev/ttyUSB1',38400,timeout=1)
-print ('\t\tSerialPort: {} , BaudRate: {} , ByteSize: {}\n'.format(ser.name,ser.baudrate, ser.bytesize))
+try:
+	ser = serial.Serial('/dev/ttyUSB1',38400,timeout=1) #38400 #19200
+	print ('\t\tSerialPort: {} , BaudRate: {} , ByteSize: {}\n'.format(ser.name,ser.baudrate, ser.bytesize))
+except:
+	print('ERROR - Asegurese de conectar el dispositivo ')
+	
+
+while (1):
+
+    in_comando = raw_input("Write one instruction: ")
+    in_comando = in_comando.lower()
+
+    if (in_comando == "exit"):
+        print("\nGOODBYE  BITCH!!\n")
+        break
+
+    print(in_comando)
+
+    try:
+        instruction = in_comando.split(' ')
+        print(instruction)
+
+        binary_instruction = ''
+        struct = opcode(instruction[0])[0]
+
+        binary_instruction = binary_instruction + '{}'.format(struct)
+        print("")
+
+        print(binary_instruction + ' <- estructura')
+        
+        cant_param = opcode(instruction[0])[1]
+        print(cant_param)
+        for i in range(2,cant_param+1,1):
+
+            if((opcode(instruction[0])[i]) == 'REG_D'):
+                instruction[i-1]=instruction[i-1].replace("$t","")
+                binary_instruction = binary_instruction.replace('RD','{:0>5b}'.format(int(instruction[i-1])))
+                print(binary_instruction + ' <- param{} RD'.format(i-1))
+
+            elif((opcode(instruction[0])[i]) == 'REG_T'):
+                instruction[i-1]=instruction[i-1].replace("$t","")
+                binary_instruction = binary_instruction.replace('RT','{:0>5b}'.format(int(instruction[i-1])))
+                print(binary_instruction + ' <- param{} RT'.format(i-1))
+
+            elif((opcode(instruction[0])[i]) == 'REG_S'):
+                instruction[i-1]=instruction[i-1].replace("$t","")
+                binary_instruction = binary_instruction.replace('RS','{:0>5b}'.format(int(instruction[i-1])))
+                print(binary_instruction + ' <- param{} RS'.format(i-1))
+
+            elif((opcode(instruction[0])[i]) == 'SHAMT'):
+                binary_instruction = binary_instruction.replace('SHAMT','{:0>5b}'.format(int(instruction[i-1])))
+                print(binary_instruction + ' <- param{} SHAMT'.format(i-1))
+
+            elif((opcode(instruction[0])[i]) == 'OFFSET'):
+                binary_instruction = binary_instruction.replace('OFFSET','{:0>16b}'.format(int(instruction[i-1])))
+                print(binary_instruction + ' <- param{} OFFSET'.format(i-1))
+
+            elif((opcode(instruction[0])[i]) == 'IMMEDIATE'):
+                binary_instruction = binary_instruction.replace('IMMEDIATE','{:0>16b}'.format(int(instruction[i-1])))
+                print(binary_instruction + ' <- param{} IMMEDIATE'.format(i-1))
+            
+            elif((opcode(instruction[0])[i]) == 'TARGET'):
+                binary_instruction = binary_instruction.replace('TARGET','{:0>26b}'.format(int(instruction[i-1])))
+                print(binary_instruction + ' <- param{} TARGET'.format(i-1))
+
+        binary_instruction = binary_instruction.replace("_","")
+        print('\nInstruccion: {}\nLongitud: {}'.format(binary_instruction, len(binary_instruction)))
+        #ser.write("fasdf4444")
+
+    except:
+        print("\nERROR - INSTRUCCION INVALIDA\n\n") 
+
 
 inline = ""
 j=0
 
-
-#var = raw_input("Write or Read? [w/r]: ")
-	
-	#if (var == "w"):
-#print(" Escribimos ")
-#ser.write("fasdf4444")
-
 while 1:
 	j=0
-	#ser.write("fasdf4444")
 	var = raw_input("Write or Read? [w/r]: ")
-	
-	if (var == "w"):
-		print(" Escribimos ")
-		ser.write('la puta madre...')
-
-	#if (var == "r"):
-	#	print(" Leemos!! ")
 	
 	#inline = ser.readline() # Lee hasta que se vacie el buffer.
 	inline = ser.read(296) #Lee 296 bytes del buffer. 
@@ -70,8 +209,7 @@ while 1:
 			byte4 = ord(reg[3]) - 48
 
 			if (j == 0 ):
-				#print('\n\t\t\t PC')
-				switch_demo(j,byte1,byte2,byte3,byte4)
+				parseo(j,byte1,byte2,byte3,byte4)
 			elif (j <= 32 ):
 				if j==1:
 					print('\n\t\t\t REGISTROS')
@@ -83,8 +221,7 @@ while 1:
 			elif (j <= 73 ):
 				if j == 53:
 					print('\n\t\t\t LATCHS')
-					#print('Stage : Instruction Fetch')
-				switch_demo(j,byte1,byte2,byte3,byte4)
+				parseo(j,byte1,byte2,byte3,byte4)
 			else:
 				print('Default: 0x{:0>2x}{:0>2x}{:0>2x}{:0>2x} : 0b{:0>8b}_{:0>8b}_{:0>8b}_{:0>8b}'.format(byte1,byte2,byte3,byte4,byte1,byte2,byte3,byte4))
 			j=j+1

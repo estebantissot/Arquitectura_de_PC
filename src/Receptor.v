@@ -17,7 +17,8 @@ module Receptor
 		data = 2'b10,
 		stop = 2'b11; 
 
-	reg [1:0] state_reg , state_next ;
+	(*dont_touch="true",mark_debug="true"*)reg [1:0] state_reg; 
+	reg [1:0] state_next ;
 	reg [3:0] s_reg , s_next;
 	reg [2:0] n_reg , n_next;
 	reg [7:0] b_reg , b_next;

@@ -24,7 +24,6 @@ module DebugUnit(
     input rst,
     
     //input BTNC,
-    input SW0,
     (*dont_touch="true",mark_debug="true"*)input RX,
     input [31:0] inLatch,
     input [31:0] inPC,
@@ -97,6 +96,7 @@ reg [31:0] address;
 reg [3:0]senal;
 reg [2:0]etapa;
 reg led;
+(*dont_touch="true",mark_debug="true"*) reg reg_rx;
 
 assign out_led0 = !state_send[0];
 assign out_led1 = !state_send[1];
@@ -181,6 +181,12 @@ end
 * send_init: Estado inicial. Solo se pasa si no se esta recibiendo datos por la interfaz RX.
 * send_Rmem: 
 */
+
+always @(*)
+begin
+    reg_rx <= RX; 
+end
+
 always @(posedge clk,posedge rst)
 begin
 	if(rst)
@@ -199,7 +205,7 @@ begin
             send_init:
                 begin
                   //led <= 1'b1;
-                  if(RX == 1'b0)//if(write)//if(state_rx!=rx_stop)
+                  if(inPC==32'd16)//(reg_rx == 1'b0)//if(write)//if(state_rx!=rx_stop)
                    begin
                         //led <= 1'b1;
                         state_send<=send_PC;

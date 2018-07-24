@@ -1,6 +1,6 @@
 `timescale 1ns / 1ps
 module BRG(clk,tick);
-	parameter FreqClock = 50000000;	//50Mhz
+	parameter FreqClock = 100000000;	//100Mhz
 	parameter BaudRate = 19200;	//Frecuencia de muestreo
 	parameter Ticks = 16;			//Muestras por BaudRate
 	integer contador = 0;
