@@ -30,8 +30,8 @@ module InstructionDecode(
     input [31:0] 	inRegF_wd,
     input           EXE_mem_read,
     input [4:0]     EXE_rd,
-    input           Debug_on,
-    input [4:0]     Debug_read_reg,
+    (*dont_touch="true",mark_debug="true"*)input           Debug_on,
+    (*dont_touch="true",mark_debug="true"*)input [4:0]     Debug_read_reg,
 	 
 // Branch
 	input 			ID_flush,
@@ -50,7 +50,7 @@ module InstructionDecode(
     output 	        outPC_write,
     output 	        outIF_ID_write,
     output          outFlush,
-    output  [31:0]  out_regDebug,
+    (*dont_touch="true",mark_debug="true"*)output  [31:0]  out_regDebug,
     output  [6:0]	outInmmediateOpcode	 	
     );
 

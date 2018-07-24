@@ -20,21 +20,21 @@
 module InstructionFetch(
 //Clock and Reset Signals
     input clk,
-    input rst,
+    (*dont_touch="true",mark_debug="true"*)input rst,
 	 
 //Input Signals
-    input           inIF_ID_write,
-    input           inPC_write,
-	input 			inPCSel,
-    input [31:0] 	inPCJump,
+    (*dont_touch="true",mark_debug="true"*)input           inIF_ID_write,
+    (*dont_touch="true",mark_debug="true"*)input           inPC_write,
+	(*dont_touch="true",mark_debug="true"*)input 			inPCSel,
+    (*dont_touch="true",mark_debug="true"*)input [31:0] 	inPCJump,
    // input           inFlush,
-    input 			stopPC_debug,
-    input [31:0]    data_instruction,
-    input           wr_instruction,
+    (*dont_touch="true",mark_debug="true"*)input 			stopPC_debug,
+    (*dont_touch="true",mark_debug="true"*)input [31:0]    data_instruction,
+    (*dont_touch="true",mark_debug="true"*)input           wr_instruction,
  	 
 //Output Signals
-    output [31:0] outInstructionAddress,
-    output [31:0] outInstruction
+    (*dont_touch="true",mark_debug="true"*)output [31:0] outInstructionAddress,
+    (*dont_touch="true",mark_debug="true"*)output [31:0] outInstruction
     );
 
 // Registros
@@ -55,7 +55,7 @@ InstructionMemory imem0 (
 	.rst(rst),
 	.wr_instruction(wr_instruction),
 	.data_instruction(data_instruction),
-	.inAddr(instruction_address),
+	.inAddr(pc),
 	.outData(outInstruction)
 );
 

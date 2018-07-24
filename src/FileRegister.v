@@ -24,13 +24,13 @@ module FileRegister(
     input write,
     input [4:0] read_reg1,
     input [4:0] read_reg2,
-    input [4:0] read_regDebug,
+    (*dont_touch="true",mark_debug="true"*)input [4:0] read_regDebug,
     input [4:0] write_addr,
     input [31:0] write_data,
-    input Debug_on,
+    (*dont_touch="true",mark_debug="true"*)input Debug_on,
     output [31:0] out_reg1,
     output [31:0] out_reg2,
-    output [31:0] out_regDebug
+    (*dont_touch="true",mark_debug="true"*)output [31:0] out_regDebug
     );
 	 
 
@@ -70,8 +70,8 @@ begin
 			registros[31'd1][31:0] <= 32'h00000011;
 			registros[31'd2][31:0] <= 32'h00000012;
 			registros[31'd3][31:0] <= 32'h00000013;
-			registros[31'd4][31:0] <= 32'h00000014;
-			registros[31'd5][31:0] <= 32'h00000015;
+			registros[31'd4][31:0] <= 32'h00000015;
+			registros[31'd5][31:0] <= 32'h00000014;
 			registros[31'd6][31:0] <= 32'h00000016;
 			registros[31'd7][31:0] <= 32'h00000017;
 			registros[31'd8][31:0] <= 32'h00000004;

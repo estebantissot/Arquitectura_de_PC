@@ -64,11 +64,11 @@ while 1:
 		#print (inline)
 		for i in range (4 , len(inline)+1 , 4):			
 			reg = inline[i-4:i]
-			byte1 = ord(reg[0]) - 48
-			byte2 = ord(reg[1]) - 48
-			byte3 = ord(reg[2]) - 48
-			byte4 = ord(reg[3]) - 48
-
+			byte1 = ord(reg[0]) - 48 & 0xff
+			byte2 = ord(reg[1]) - 48 & 0xff
+			byte3 = ord(reg[2]) - 48 & 0xff
+			byte4 = ord(reg[3]) - 48 & 0xff
+			
 			if (j == 0 ):
 				#print('\n\t\t\t PC')
 				switch_demo(j,byte1,byte2,byte3,byte4)
