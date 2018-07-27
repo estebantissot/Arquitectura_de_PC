@@ -5,7 +5,7 @@ module Interfaz_Rx(
 	input 	clk,
 	input 	reset,
 	
-	(*dont_touch="true",mark_debug="true"*)input 	start,
+	input 	start,
 	input 	[7:0] din,
 
 	output 	MIPS_enable,
@@ -15,7 +15,7 @@ module Interfaz_Rx(
 	);
 
 	reg [7:0] 	num;
-	(*dont_touch="true",mark_debug="true"*)reg [31:0]	Data;		
+	reg [31:0]	Data;		
 	reg	[2:0] 	nData;
 	reg 		state;
 	reg 		ready;

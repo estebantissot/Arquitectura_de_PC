@@ -31,7 +31,7 @@ assign outControl=Control;
 
 always @ *
 	begin
-		case(inInstruction[31:26])
+		case(inInstruction[31:26])// EXE_MEM_WB
 			6'd0 	: Control=9'b1100_000_10;// Instruction TypeR Execute_Memory_WrBack
 			6'd35	: Control=9'b0001_010_11;//Load
 			6'd43	: Control=9'bX001_001_0X;//Store

@@ -31,7 +31,9 @@ module MemoryAccess(
     input [4:0] 	inRegF_wreg,
     input           Debug_on,
     input   [31:0]  Debug_read_mem,
-
+    
+ //Debug
+    input           stop_debug,
 //Output Signals    
 	output  [1:0]	outWB,
     output  [31:0]  outRegF_wd,
@@ -70,6 +72,7 @@ DataMemory dm0 (
 	.read_write(read_write),
 	.inAddress(inALUResult),
 	.inWriteData(inRegB),
+	.stop_debug(stop_debug),
 	.outData(outRegF_wd),
 	.outMemDebug(outMemDebug)
 );
@@ -85,10 +88,13 @@ begin
 		end
 	else
 		begin
+		  if(!stop_debug)
+		  begin	
 			WB <= inWB;
 			//RegF_wd <= dm0_RegF_wd;
 			ALUResult <= inALUResult;
 			RegF_wreg <= inRegF_wreg;
+		  end
 		end
 end
 

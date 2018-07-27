@@ -27,6 +27,10 @@ module DataMemory(
     input [31:0] Debug_read_mem,
     input [31:0] inAddress,
     input [31:0] inWriteData,
+    
+    //Debug
+    input           stop_debug,
+    
     output [31:0] outData,
     output [31:0] outMemDebug
     );
@@ -96,14 +100,17 @@ begin
             end
         else
             begin
-                if(read_write == 2'b01) //Escritura
-                   begin
-                       data_memory[inAddress][31:0] <= inWriteData;
-                   end
-                 if(read_write == 2'b10) //Lectura 
-                   begin
-                        Data <= data_memory[inAddress][31:0];
-                   end
+                if(!stop_debug)
+                begin
+                    if(read_write == 2'b01) //Escritura
+                       begin
+                           data_memory[inAddress][31:0] <= inWriteData;
+                       end
+                     if(read_write == 2'b10) //Lectura 
+                       begin
+                            Data <= data_memory[inAddress][31:0];
+                       end
+                 end
              end
 	/*
 		case(inAddress)

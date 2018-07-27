@@ -27,10 +27,10 @@ module DebugUnit(
     input Rx,
     input [31:0] inLatch,
     input [31:0] inPC,
-    (*dont_touch="true",mark_debug="true"*)input [31:0] inFRData,
+    input [31:0] inFRData,
     input [31:0] inMemData,
         
-    (*dont_touch="true",mark_debug="true"*)output   out_debug_on,
+    output   out_debug_on,
     output [31:0] outDebugAddress,
     
     output [31:0] rx_address,
@@ -40,7 +40,7 @@ module DebugUnit(
     output write_instruction,
     output TX,
     output soft_rst,
-    (*dont_touch="true",mark_debug="true"*)output stopPC_debug
+    output stopPC_debug
     
     );
     
@@ -65,11 +65,11 @@ localparam [2:0] send_Latch = 3'b100;
 localparam [2:0] send_waitFinish = 3'b101;
 localparam [2:0] send_Finish = 3'b110;
 
-localparam [2:0] cant_senal_fetch = 3'd2;
-localparam [2:0] cant_senal_decode = 3'd6;
-localparam [2:0] cant_senal_execute = 3'd6;
-localparam [2:0] cant_senal_memory = 3'd5;
-localparam [2:0] cant_senal_wb = 3'd2;
+localparam [3:0] cant_senal_fetch = 4'd2;
+localparam [3:0] cant_senal_decode = 4'd6;
+localparam [3:0] cant_senal_execute = 4'd6;
+localparam [3:0] cant_senal_memory = 4'd4;
+localparam [3:0] cant_senal_wb = 4'd2;
 
 reg [2:0] state_prev;
 
@@ -90,7 +90,7 @@ wire rx_done;
 
 // Registros
 reg debug;
-(*dont_touch="true",mark_debug="true"*)reg [31:0] address;
+reg [31:0] address;
 reg [3:0]senal;
 reg [2:0]etapa;
 reg led;

@@ -30,7 +30,7 @@ module Top_UART(
 		output MIPS_enable,
 		output TX,
 		output [31:0] rx_address,
-		(*dont_touch="true",mark_debug="true"*)output write,
+		output write,
 		output [31:0] dout,
 		output tx_dataready
 );

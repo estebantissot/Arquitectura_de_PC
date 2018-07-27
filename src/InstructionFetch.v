@@ -20,21 +20,21 @@
 module InstructionFetch(
 //Clock and Reset Signals
     input clk,
-    (*dont_touch="true",mark_debug="true"*)input rst,
+    input rst,
 	 
 //Input Signals
-    (*dont_touch="true",mark_debug="true"*)input           inIF_ID_write,
-    (*dont_touch="true",mark_debug="true"*)input           inPC_write,
-	(*dont_touch="true",mark_debug="true"*)input 			inPCSel,
-    (*dont_touch="true",mark_debug="true"*)input [31:0] 	inPCJump,
+    input           inIF_ID_write,
+    input           inPC_write,
+	input 			inPCSel,
+    input [31:0] 	inPCJump,
    // input           inFlush,
-    (*dont_touch="true",mark_debug="true"*)input 			stopPC_debug,
-    (*dont_touch="true",mark_debug="true"*)input [31:0]    data_instruction,
-    (*dont_touch="true",mark_debug="true"*)input           wr_instruction,
+    input 			stop_debug,
+    input [31:0]    data_instruction,
+    input           wr_instruction,
  	 
 //Output Signals
-    (*dont_touch="true",mark_debug="true"*)output [31:0] outInstructionAddress,
-    (*dont_touch="true",mark_debug="true"*)output [31:0] outInstruction
+    output [31:0] outInstructionAddress,
+    output [31:0] outInstruction
     );
 
 // Registros
@@ -81,7 +81,7 @@ begin
 			pc <= 32'd0;
 			//instruction <= 32'bX;
 		end
-	else if (inIF_ID_write && (!stopPC_debug))
+	else if (inIF_ID_write && (!stop_debug))
 	//else if (inIF_ID_write)
 		begin
 			pc <= instruction_address;

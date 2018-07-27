@@ -7,7 +7,7 @@ module Receptor
 	(
 	input wire clk, reset,
 	input wire rx, s_tick,
-	(*dont_touch="true",mark_debug="true"*)output reg rx_done_tick,
+	output reg rx_done_tick,
 	output wire [7:0] dout
 	);
 	
@@ -64,7 +64,7 @@ module Receptor
 						s_next = s_reg + 1;
 			data :
 				if (s_tick)
-					if (s_reg==1)
+					if (s_reg==15)
 						begin
 							s_next = 0;
 							b_next = {rx, b_reg [7:1]};
