@@ -24,13 +24,16 @@ module DebugUnit(
     input rst,
     
     //input BTNC,
-    (*dont_touch="true",mark_debug="true"*)input RX,
+    input RX,
     input [31:0] inLatch,
     input [31:0] inPC,
     input [31:0] inFRData,
     input [31:0] inMemData,
-        
-    (*dont_touch="true",mark_debug="true"*)output        out_debug_on,
+    
+    output led0,
+    output led1,
+    
+    output   out_debug_on,
     output [31:0] outDebugAddress,
     
     output [31:0] rx_address,
@@ -38,7 +41,7 @@ module DebugUnit(
     output [31:0] addressInstrucction,
     output [31:0] InstructionRecive,
     output write_instruction,
-    (*dont_touch="true",mark_debug="true"*)output TX,
+    output TX,
     output soft_rst,
     output stopPC_debug
     
@@ -52,10 +55,10 @@ reg mode;
 reg state_mode;
 reg [31:0]	sendData;
 reg 		stopPC;
-(*dont_touch="true",mark_debug="true"*)reg 		tx_start;
+reg 		tx_start;
 reg         WriteRead;
 //-----------------Maquina de Estados-----------------------------
-(*dont_touch="true",mark_debug="true"*)reg [2:0] 	state_send;
+reg [2:0] 	state_send;
 
 localparam [2:0] send_init = 3'b000;
 localparam [2:0] send_PC = 3'b001;
@@ -71,7 +74,7 @@ localparam [2:0] cant_senal_execute = 3'd6;
 localparam [2:0] cant_senal_memory = 3'd5;
 localparam [2:0] cant_senal_wb = 3'd2;
 
-(*dont_touch="true",mark_debug="true"*)reg [2:0] state_prev;
+reg [2:0] state_prev;
 
 
 // Registros --- Maquina Receptora de instrucciones 
@@ -93,6 +96,9 @@ reg debug;
 reg [31:0] address;
 reg [3:0]senal;
 reg [2:0]etapa;
+reg [7:0]led;
+reg listo;
+reg [31:0] dato_rx;
 
 assign stopPC_debug =stopPC;
 assign InstructionRecive	=	rx_Instruccion;
@@ -107,6 +113,8 @@ assign outDebugAddress = address;
 assign outControlLatchMux = {etapa,senal};
 assign out_debug_on = debug;
 
+assign led0 = led[0];
+assign led1 = led[1];
 
 wire write;
 wire [31:0] dout;
@@ -120,22 +128,25 @@ Top_UART uart(
 	.TX_start(tx_start),
 	.UART_data(sendData),
 	.RX(RX),
-    	.rx_address(rx_address),
+    .rx_address(rx_address),
 	.MIPS_enable(MIPS_enable),
 	.TX(TX),
-	.write(write),
+	.write(),
 	.dout(dout),
 	.tx_dataready(tx_dataready)
 );
 
-/*
+
 // Maquina de estado de RX
 always @ (posedge clk, posedge rst)
 begin
 	if(rst)
 		begin
-		state_rx	=	rx_enviar;
-		rx_direccion 	=	32'hffffffff;
+		state_rx	<=	rx_enviar;
+		rx_direccion 	<=	32'hffffffff;
+		led[0] <= 1'b0;
+		dato_rx <= 32'b0;
+		listo <= 1'b0;
 		end
 	else
 		begin
@@ -144,28 +155,33 @@ begin
 				begin	
 					if(write)
 						begin
-							rx_direccion  = rx_direccion+1;
-							rx_Instruccion	= dout;
+						  led[0] <= 1'b1;
+						  listo <= 1'b1;
+						  dato_rx <= dout;
+						  
+						  //rx_direccion  = rx_direccion+1;
+							//rx_Instruccion	= dout;
 
-							WriteRead = 1'b1;
+							//WriteRead = 1'b1;
 									
-							if(dout == 32'h0 || rx_direccion == 32'hfffffff0)// Instruccion de Halt para terminar el cargado de memoria		
-								begin
-									state_rx = rx_stop;
-								end
+							//if(dout == 32'h0 || rx_direccion == 32'hfffffff0)// Instruccion de Halt para terminar el cargado de memoria		
+							//	begin
+							//	    led = 1'b1;
+							//		state_rx = rx_stop;
+							//	end
 						end
 					else
-						WriteRead = 1'b0;
+						WriteRead <= 1'b0;
 				end
 			rx_stop:
 				begin
-					WriteRead<=1'b0;
+					WriteRead <=1'b0;
 				end
 			endcase
 		end
 
 end
-*/
+
 
 
 /* maquina de estado del TX 
@@ -182,17 +198,29 @@ begin
 			etapa <= 3'b0;
 			senal <= 4'b0;
 			debug <= 1'b0;
+			led[1]<=1'b0;
 		end
 	else
 		begin
 		case(state_send)
             send_init:
                 begin
-                  if(!RX)//inPC == 32'd28//if(write)//if(state_rx!=rx_stop)
-                     begin
-                        state_send<=send_PC;
-                        debug <= 1'b1;
+                    if(write)
+                    begin
+                        led[1]<=1'b0;
+                        //sendData<=32'b00000000_00000000_11111111_00000000;
+                        sendData<=dout;
+                        tx_start<=1'b1;
+                        state_prev<=send_Finish;
+                        state_send<=send_waitFinish;
                     end
+                    
+                   //stopPC<=1'b1; 
+                  //if(inPC == 32'd8)//if(write)//if(state_rx!=rx_stop)
+                   //  begin
+                    //    state_send<=send_PC;
+                     //   debug <= 1'b1;
+                   // end
                 end
                 
             send_PC:
@@ -227,7 +255,7 @@ begin
              send_Mem:
                 begin
                     sendData <= inMemData;
-                    tx_start<=1'b1;                    
+                    tx_start<=1'b1;                   
                     if (address == 32'd19)  //if (address == 32'd20)
                         begin
                             address <= 32'b0;
@@ -299,7 +327,7 @@ begin
                                   begin
                                       etapa <= 3'b000;
                                       senal <= 4'b0;
-                                      stopPC<=1'b0; 
+                                      //stopPC<=1'b0; 
                                       state_prev <= send_Finish;
                                   end
                               else
@@ -323,10 +351,11 @@ begin
                 
             send_Finish:
                 begin
-                    stopPC<=1'b1;
+                    led[1]<=1'b1;
+                    stopPC<=1'b0;
                     debug <= 1'b0;
                     tx_start<=1'b0;
-                    state_send <= send_init;
+                    //state_send <= send_init;
                     // se debe esperar hasta que se quiera mandar todo de nuevo.
                 end
             

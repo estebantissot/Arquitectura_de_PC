@@ -21,8 +21,12 @@ module top_level(
     input clk,
     input reset,
 	input UART_TXD_IN,
-	output UART_RXD_OUT
+	output UART_RXD_OUT,
+	output led0,
+	output led1
     );
+
+//assign UART_RXD_OUT = UART_TXD_IN;
 
 // Cables
 
@@ -174,7 +178,7 @@ Execute execute0(
 	.MEM_regF_wr(execute0_outWB[1]),
 	.WB_rd(memaccess0_outRegF_wreg),
 	.WB_regF_wr(wb0_outRegF_wr),
-    	.inInmmediateOpcode(idecode0_outInmmediateOpcode),
+    .inInmmediateOpcode(idecode0_outInmmediateOpcode),
 	//Output Signals
 	.outWB(execute0_outWB),
 	.outMEM(execute0_outMEM),
@@ -286,13 +290,16 @@ DebugUnit debug(
     .inMemData(MemData),
     
     // OUTPUT
+    .led0(led0),
+    .led1(led1),
+    
     .out_debug_on(Debug_on),
     .outDebugAddress(DebugAddress),
     .addressInstrucction(),
     .InstructionRecive(program_instruction),
     .write_instruction(wr_program_instruction),
     .rx_address(rx_address),
-    .TX(UART_RXD_OUT),
+    .TX(UART_RXD_OUT), 
     .soft_rst(soft_rst),
     .stopPC_debug(stopPC_debug),
     .outControlLatchMux(ControlLatchMux)

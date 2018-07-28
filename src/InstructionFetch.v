@@ -55,7 +55,7 @@ InstructionMemory imem0 (
 	.rst(rst),
 	.wr_instruction(wr_instruction),
 	.data_instruction(data_instruction),
-	.inAddr(instruction_address),
+	.inAddr(pc),
 	.outData(outInstruction)
 );
 

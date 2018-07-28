@@ -45,7 +45,7 @@ module Transmisor
 				end
 		end
 
-	always @*
+	always @(*)
 		begin
 			state_next = state_reg;
 			tx_done_tick = 1'b0;

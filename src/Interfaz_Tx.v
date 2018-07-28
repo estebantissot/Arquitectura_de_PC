@@ -22,32 +22,32 @@ module Interfaz_Tx(
 	//INPUT
 	input clk,
 	input reset,
-	(*dont_touch="true",mark_debug="true"*)input wire [31:0] in_data,
+	input wire [31:0] in_data,
 	input wire new_result,
 	input tx_done,
 	// OUTPUT
-	(*dont_touch="true",mark_debug="true"*)output wire [7:0] out_data,
+	output wire [7:0] out_data,
 	output wire tx_start,
 	output data_done
-    );
+);
 
 	reg [7:0] data_out;
-	
 	reg [2:0]state;
 	reg start;
 	//debug
 	reg dataDone;
 	reg [31:0] inData;
+	
 	localparam idle = 2'b00;
 	localparam send_value = 2'b01;
 	localparam send_valor = 2'b10;
 	
-	
 	assign out_data = data_out;
-	assign tx_start =start;
+	assign tx_start = start;
 	assign data_done = dataDone;
 
-	integer bit_msb,bit_lsb;
+	//integer bit_msb;
+	integer bit_lsb;
 	
 	always @ (posedge clk, posedge reset)
 	if(reset)
@@ -55,7 +55,7 @@ module Interfaz_Tx(
 		state <=  idle;
 		start <= 1'b0;
 		bit_lsb <= 24;
-		bit_msb <= 31;
+		//bit_msb <= 31;
 		inData <= 32'b0;
 		dataDone  <=  1'b0;
 		data_out  <=  8'b0;
@@ -92,7 +92,7 @@ module Interfaz_Tx(
 				begin
 					if(tx_done)
 						begin
-						data_out <= inData[31:24]+48;
+						data_out <= inData[31:24]+8'd48;
                         inData <= inData << 8;
 							if(bit_lsb < 0)
 								begin

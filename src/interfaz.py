@@ -116,13 +116,30 @@ for i in range (1,31):
     print ('| {}\t|   {}\t|   {}\t|'.format(instruction_set(i)[0], instruction_set(i)[1], instruction_set(i)[2] ))
 print ('  -----------------------------------------------------------------------------')
 
+
+print ('  ---------------------------------- PROGRAM ----------------------------------\n')
+try:
+
+	f = open ('program.txt','r')	
+	while True:
+		line = f.readline()
+		if not line:
+			break
+		line = line[:-1]
+		print('{:^30}'.format(line))
+except:
+	pass
+f.close
+print ('\n  -----------------------------------------------------------------------------')
+
+
 print ('\t\t\t\tMIPS - UNIDAD DE DEBUGGING')
 try:
-	ser = serial.Serial('/dev/ttyUSB1',19200,timeout=1) #38400 #19200
+	ser = serial.Serial('/dev/ttyUSB2',19200,timeout=1) #38400 #19200
 	print ('\t\tSerialPort: {} , BaudRate: {} , ByteSize: {}\n'.format(ser.name,ser.baudrate, ser.bytesize))
 except:
 	print('ERROR - Asegurese de conectar el dispositivo ')
-	
+
 
 while (1):
 
@@ -132,6 +149,20 @@ while (1):
     if (in_comando == "exit"):
         print("\nGOODBYE  BITCH!!\n")
         break
+
+    if (in_comando == 'halt'):
+    	print("\nGOODBYE  MOTHERFUCKER!!\n")
+    	#print('{:b}'.format(0b01101111))
+    	#ser.write('bbbb')
+    	ser.write("1234")
+    	time.sleep(1)
+    	ser.write("2222")
+    	time.sleep(1)
+    	ser.write("3333")
+    	time.sleep(1)
+    	ser.write("4444")
+    	time.sleep(1)
+    	ser.write("5555")
 
     print(in_comando)
 
@@ -195,19 +226,19 @@ j=0
 
 while 1:
 	j=0
-	var = raw_input("Write or Read? [w/r]: ")
-	ser.write("fasdf4444")	
-	#inline = ser.readline() # Lee hasta que se vacie el buffer.
-	inline = ser.read(296) #Lee 296 bytes del buffer. 
+	#var = raw_input("Write or Read? [w/r]: ")
+	#ser.write("fasdf4444")	
+	inline = ser.readline() # Lee hasta que se vacie el buffer.
+	#inline = ser.read(296) #Lee 296 bytes del buffer. 
 	if (inline != ""):
-		#print (inline)
+		print (inline)
 		for i in range (4 , len(inline)+1 , 4):			
 			reg = inline[i-4:i]
-			byte1 = ord(reg[0]) - 48
-			byte2 = ord(reg[1]) - 48
-			byte3 = ord(reg[2]) - 48
-			byte4 = ord(reg[3]) - 48
-
+			byte1 = ord(reg[0]) - 48 & 0xff
+			byte2 = ord(reg[1]) - 48 & 0xff
+			byte3 = ord(reg[2]) - 48 & 0xff
+			byte4 = ord(reg[3]) - 48 & 0xff
+			
 			if (j == 0 ):
 				parseo(j,byte1,byte2,byte3,byte4)
 			elif (j <= 32 ):

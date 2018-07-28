@@ -7,7 +7,7 @@ module Receptor
 	(
 	input wire clk, reset,
 	input wire rx, s_tick,
-	(*dont_touch="true",mark_debug="true"*)output reg rx_done_tick,
+	output reg rx_done_tick,
 	output wire [7:0] dout
 	);
 	
@@ -17,19 +17,22 @@ module Receptor
 		data = 2'b10,
 		stop = 2'b11; 
 
-	(*dont_touch="true",mark_debug="true"*)reg [1:0] state_reg; 
+	reg [1:0] state_reg; 
 	reg [1:0] state_next ;
 	reg [3:0] s_reg , s_next;
 	reg [2:0] n_reg , n_next;
 	reg [7:0] b_reg , b_next;
+	
+	assign dout = b_reg;
 
 	always @(posedge clk,posedge reset)
+	begin
 		if (reset)
 			begin
 				state_reg <= idle;
-				s_reg <= 0;
-				n_reg <= 0;
-				b_reg <= 0;
+				s_reg <= 4'b0;
+				n_reg <= 3'b0;
+				b_reg <= 8'b0;
 			end
 		else
 			begin
@@ -38,6 +41,7 @@ module Receptor
 				n_reg <= n_next;
 				b_reg <= b_next;
 			end
+    end
 
 	always @(*)
 		begin
@@ -46,9 +50,10 @@ module Receptor
 			s_next = s_reg; 
 			n_next = n_reg;	
 			b_next = b_reg;
+			
 			case (state_reg)
 			idle :
-				if (rx==0)
+				if (rx==1'b0)
 					begin
 						state_next = start;
 						s_next = 0;
@@ -65,7 +70,7 @@ module Receptor
 						s_next = s_reg + 1;
 			data :
 				if (s_tick)
-					if (s_reg==1)
+					if (s_reg==15)//(s_reg==1)
 						begin
 							s_next = 0;
 							b_next = {rx, b_reg [7:1]};
@@ -87,5 +92,5 @@ module Receptor
 					s_next = s_reg + 1;
 			endcase
 		end
-	assign dout = b_reg;
+	
 endmodule
