@@ -39,7 +39,10 @@ module Execute(
     input           MEM_regF_wr,
     input [4:0]     WB_rd,     
     input           WB_regF_wr,
-	input [6:0]		inInmmediateOpcode,				 
+	input [6:0]		inInmmediateOpcode,
+	
+	//debug
+	input           stop_debug,				 
 //Output Signals
     output [1:0] 	outWB,
     output [2:0] 	outMEM,
@@ -138,14 +141,17 @@ begin
 		end
 	else
 		begin
-			WB <= inWB;
-			MEM <= inMEM;
-			//PCJump <= Jump; 
-			RegF_wreg <= wreg;
-			ALUResult <= alu_result;
-			ALUZero <= alu_zero;
-			RegB <= inRegB;
-		end
+		  if(!stop_debug)
+		  begin
+                WB <= inWB;
+                MEM <= inMEM;
+                //PCJump <= Jump; 
+                RegF_wreg <= wreg;
+                ALUResult <= alu_result;
+                ALUZero <= alu_zero;
+                RegB <= inRegB;
+		  end
+	end
 end
 
 always @(*)

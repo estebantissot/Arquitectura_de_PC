@@ -21,10 +21,10 @@ module top_level(
     input clk,
     input reset,
 	input UART_TXD_IN,
-	output UART_RXD_OUT,
-	output led0,
-	output led1
-    );
+	output UART_RXD_OUT
+	//output led0,
+	//output led1
+);
 
 //assign UART_RXD_OUT = UART_TXD_IN;
 
@@ -71,7 +71,7 @@ wire 		wb0_outRegF_wr; // wb0:outRegF_wr -> idecode0:inRegF_wr & WB_regF_wr (exe
 wire [31:0]	wb0_outRegF_wd; // wb0:outRegF_wd -> idecode0:inRegF_wd & WB_regF_wd(execute stage)
 
 //debug
-wire stopPC_debug;
+wire stop_debug;
 wire [31:0] muxLatch_outData;
 wire [6:0]  ControlLatchMux;
 
@@ -103,7 +103,7 @@ InstructionFetch ifetch0(
 	//debug
     .data_instruction(program_instruction),
     .wr_instruction(wr_program_instruction),
-	.stopPC_debug(stopPC_debug),
+	.stop_debug(stop_debug),
 
 	//Input Signals
 	.inPC_write(idecode0_outPC_write),
@@ -137,6 +137,8 @@ InstructionDecode idecode0(
 	//Branch
 	.ID_flush(memaccess0_outPCSel),
 	
+	//Stop Debug
+	.stop_debug(stop_debug),
 	//Output Signals
 	.outWB(idecode0_outWB),
 	.outMEM(idecode0_outMEM),
@@ -179,6 +181,10 @@ Execute execute0(
 	.WB_rd(memaccess0_outRegF_wreg),
 	.WB_regF_wr(wb0_outRegF_wr),
     .inInmmediateOpcode(idecode0_outInmmediateOpcode),
+    
+    //Stop Debug
+     .stop_debug(stop_debug),
+    
 	//Output Signals
 	.outWB(execute0_outWB),
 	.outMEM(execute0_outMEM),
@@ -208,7 +214,9 @@ MemoryAccess memaccess0(
 	.inRegF_wreg(execute0_outRegF_wreg),
 	.Debug_on(Debug_on),
 	.Debug_read_mem(DebugAddress),
-
+    
+    //Stop Debug
+    .stop_debug(stop_debug),
 	//Output Signals    
 	.outWB(memaccess0_outWB),
 	.outRegF_wd(memaccess0_outRegF_wd),
@@ -224,7 +232,7 @@ WriteBack wb0(
 	.inWB(memaccess0_outWB),
 	.inRegF_wd(memaccess0_outRegF_wd),
 	.inALUResult(memaccess0_outALUResult),
-
+	
 	//Output Signals
 	.outRegF_wr(wb0_outRegF_wr),
 	.outRegF_wd(wb0_outRegF_wd)
@@ -264,7 +272,8 @@ MuxLatch ml0(
     .execute0_outRegF_wreg(execute0_outRegF_wreg), 
     
     //-- Modulo MemoryAccess --
-    .memaccess0_outWB(memaccess0_outWB), 			 	
+    .memaccess0_outWB(memaccess0_outWB),
+    .memaccess0_outPCSel(memaccess0_outPCSel), 			 	
     .memaccess0_outRegF_wd(memaccess0_outRegF_wd), 	
     .memaccess0_outALUResult(memaccess0_outALUResult), 
     .memaccess0_outRegF_wreg(memaccess0_outRegF_wreg), 
@@ -290,8 +299,8 @@ DebugUnit debug(
     .inMemData(MemData),
     
     // OUTPUT
-    .led0(led0),
-    .led1(led1),
+    //.led0(led0),
+    //.led1(led1),
     
     .out_debug_on(Debug_on),
     .outDebugAddress(DebugAddress),
@@ -301,7 +310,7 @@ DebugUnit debug(
     .rx_address(rx_address),
     .TX(UART_RXD_OUT), 
     .soft_rst(soft_rst),
-    .stopPC_debug(stopPC_debug),
+    .stopPC_debug(stop_debug),
     .outControlLatchMux(ControlLatchMux)
 
 );

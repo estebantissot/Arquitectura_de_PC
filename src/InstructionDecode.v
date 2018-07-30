@@ -35,7 +35,8 @@ module InstructionDecode(
 	 
 // Branch
 	input 			ID_flush,
-
+//Debug
+    input           stop_debug,
 //Output Signals
     output  [1:0]   outWB,
     output  [2:0] 	outMEM,
@@ -117,6 +118,7 @@ FileRegister regF0 (
 	.read_reg1(inInstruction[25:21]),
 	.read_reg2(inInstruction[20:16]),
 	.read_regDebug(Debug_read_reg),
+	.stop_debug(stop_debug),
 	.write_addr(inRegF_wreg),
 	.write_data(inRegF_wd),
 	.out_reg1(outRegA),
@@ -133,7 +135,7 @@ begin
 if (rst)
 	begin
 		WB = 2'b00;
-		MEM = 3'b010;
+		MEM = 3'b000;
 		EXE = 4'b0;
 		InstructionAddress = 32'b0;
 		//RegA = 32'b0;
@@ -145,30 +147,33 @@ if (rst)
 	end
 else // Escritura de todos los registros de salida
 	begin
-	   case (ControlMux & (!ID_flush))
-            1'b0:
-            begin
-                WB = 2'b0;
-                MEM = 3'b0;
-                EXE = 4'b0;
-            end
-            1'b1:
-            begin
-                WB = outControl[1:0];
-                MEM = outControl[4:2];
-                EXE = outControl[8:5];
-            end
-        endcase
-
-		InstructionAddress = inInstructionAddress;
-		InmmediateOpcode = inInstruction[31:26];
-		//RegA = RegF_outRegA;
-		//RegB = RegF_outRegB;
-		//ID_flush = outPCSel;
-		Instruction_ls = {inInstruction[15:0],16'b0};
-		rs = inInstruction[25:21];
-		rt = inInstruction[20:16];
-		RT_rd = inInstruction[15:11];
+	   if(!stop_debug)
+	   begin
+           case (ControlMux & (!ID_flush))
+                1'b0:
+                begin
+                    WB = 2'b0;
+                    MEM = 3'b0;
+                    EXE = 4'b0;
+                end
+                1'b1:
+                begin
+                    WB = outControl[1:0];
+                    MEM = outControl[4:2];
+                    EXE = outControl[8:5];
+                end
+            endcase
+    
+            InstructionAddress = inInstructionAddress;
+            InmmediateOpcode = inInstruction[31:26];
+            //RegA = RegF_outRegA;
+            //RegB = RegF_outRegB;
+            //ID_flush = outPCSel;
+            Instruction_ls = {inInstruction[15:0],16'b0};
+            rs = inInstruction[25:21];
+            rt = inInstruction[20:16];
+            RT_rd = inInstruction[15:11];
+        end
 	end
 end
 

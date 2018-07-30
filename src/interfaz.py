@@ -91,7 +91,7 @@ def parseo(argument,byte1,byte2,byte3,byte4):
         57: 'RegA \t\t : 0x{:0>2x}{:0>2x}{:0>2x}{:0>2x} : 0b{:0>8b}_{:0>8b}_{:0>8b}_{:0>8b}'.format(byte1,byte2,byte3,byte4,byte1,byte2,byte3,byte4),
         58: 'RegB \t\t : 0x{:0>2x}{:0>2x}{:0>2x}{:0>2x} : 0b{:0>8b}_{:0>8b}_{:0>8b}_{:0>8b}'.format(byte1,byte2,byte3,byte4,byte1,byte2,byte3,byte4),
         59: 'Instruction_ls : 0x{:0>2x}{:0>2x}{:0>2x}{:0>2x} : 0b{:0>8b}_{:0>8b}_{:0>8b}_{:0>8b}'.format(byte1,byte2,byte3,byte4,byte1,byte2,byte3,byte4),
-        60: 'dir_Rs : 0x{:0>2x} dir_Rt : {:0>2x} dir_Rd : {:0>2x} PC_write[1] IF_ID_write[0] : 0b{:0>8b} : 0b{:0>8b}_{:0>8b}_{:0>8b}_{:0>8b}'.format(byte1,byte2,byte3,byte4,byte1,byte2,byte3,byte4),
+        60: 'dir_Rs : 0x{:0>2x} dir_Rt : 0x{:0>2x} dir_Rd : 0x{:0>2x} PC_write[1] IF_ID_write[0] : 0x{:0>2x} : 0b{:0>8b}_{:0>8b}_{:0>8b}_{:0>8b}'.format(byte1,byte2,byte3,byte4,byte1,byte2,byte3,byte4),
         61: '\nStage : Execute\nMEM : 0x{:0>2x} WB : 0x{:0>2x} : 0b{:0>8b}_{:0>8b}_{:0>8b}_{:0>8b}'.format(byte3,byte4,byte1,byte2,byte3,byte4),
         62: 'PC_write[1] IF_ID_write[0] : 0b{:b} rs : 0x{:0>2x} rt : 0x{:0>2x} : 0b{:0>8b}_{:0>8b}_{:0>8b}_{:0>8b}'.format(byte1,byte2,byte3,byte4,byte1,byte2,byte3,byte4),
         63: 'PCJump : 0x{:0>2x}{:0>2x}{:0>2x}{:0>2x} : 0b{:0>8b}_{:0>8b}_{:0>8b}_{:0>8b}'.format(byte1,byte2,byte3,byte4,byte1,byte2,byte3,byte4),
@@ -99,12 +99,12 @@ def parseo(argument,byte1,byte2,byte3,byte4):
         65: 'RegB : 0x{:0>2x}{:0>2x}{:0>2x}{:0>2x} : 0b{:0>8b}_{:0>8b}_{:0>8b}_{:0>8b}'.format(byte1,byte2,byte3,byte4,byte1,byte2,byte3,byte4),
         66: 'ALUZero : 0x{:0>2x} RegF_wreg : {:0>2x} : 0b{:0>8b}_{:0>8b}_{:0>8b}_{:0>8b}'.format(byte3,byte4,byte1,byte2,byte3,byte4),
         67: '\nStage : Memory\nWB : 0x{:0>2x} : 0b{:0>8b}_{:0>8b}_{:0>8b}_{:0>8b}'.format(byte4,byte1,byte2,byte3,byte4),
-        68: 'PCJump : 0x{:0>2x}{:0>2x}{:0>2x}{:0>2x} : 0b{:0>8b}_{:0>8b}_{:0>8b}_{:0>8b}'.format(byte1,byte2,byte3,byte4,byte1,byte2,byte3,byte4),
-        69: 'RegF_wd : 0x{:0>2x}{:0>2x}{:0>2x}{:0>2x} : 0b{:0>8b}_{:0>8b}_{:0>8b}_{:0>8b}'.format(byte1,byte2,byte3,byte4,byte1,byte2,byte3,byte4),
-        70: 'ALUResult : 0x{:0>2x}{:0>2x}{:0>2x}{:0>2x} : 0b{:0>8b}_{:0>8b}_{:0>8b}_{:0>8b}'.format(byte1,byte2,byte3,byte4,byte1,byte2,byte3,byte4),
-        71: 'PCSel : 0x{:0>2x} RegF_wreg : {:0>2x} : 0b{:0>8b}_{:0>8b}_{:0>8b}_{:0>8b}'.format(byte3,byte4,byte1,byte2,byte3,byte4),
-        72: '\nStage : Write Back\nRegF_wd : 0x{:0>2x}{:0>2x}{:0>2x}{:0>2x} : 0b{:0>8b}_{:0>8b}_{:0>8b}_{:0>8b}'.format(byte1,byte2,byte3,byte4,byte1,byte2,byte3,byte4),
-        73: 'RegF_wr : {:0>2x} : 0b{:0>8b}_{:0>8b}_{:0>8b}_{:0>8b}'.format(byte4,byte1,byte2,byte3,byte4)
+        #68: 'PCJump : 0x{:0>2x}{:0>2x}{:0>2x}{:0>2x} : 0b{:0>8b}_{:0>8b}_{:0>8b}_{:0>8b}'.format(byte1,byte2,byte3,byte4,byte1,byte2,byte3,byte4),
+        68: 'RegF_wd : 0x{:0>2x}{:0>2x}{:0>2x}{:0>2x} : 0b{:0>8b}_{:0>8b}_{:0>8b}_{:0>8b}'.format(byte1,byte2,byte3,byte4,byte1,byte2,byte3,byte4),
+        69: 'ALUResult : 0x{:0>2x}{:0>2x}{:0>2x}{:0>2x} : 0b{:0>8b}_{:0>8b}_{:0>8b}_{:0>8b}'.format(byte1,byte2,byte3,byte4,byte1,byte2,byte3,byte4),
+        70: 'PCSel : 0x{:0>2x} RegF_wreg : {:0>2x} : 0b{:0>8b}_{:0>8b}_{:0>8b}_{:0>8b}'.format(byte3,byte4,byte1,byte2,byte3,byte4),
+        71: '\nStage : Write Back\nRegF_wd : 0x{:0>2x}{:0>2x}{:0>2x}{:0>2x} : 0b{:0>8b}_{:0>8b}_{:0>8b}_{:0>8b}'.format(byte1,byte2,byte3,byte4,byte1,byte2,byte3,byte4),
+        72: 'RegF_wr : {:0>2x} : 0b{:0>8b}_{:0>8b}_{:0>8b}_{:0>8b}'.format(byte4,byte1,byte2,byte3,byte4)
     }
     print switcher.get(argument, "Error!!")
 
@@ -135,7 +135,7 @@ print ('\n  --------------------------------------------------------------------
 
 print ('\t\t\t\tMIPS - UNIDAD DE DEBUGGING')
 try:
-	ser = serial.Serial('/dev/ttyUSB2',19200,timeout=1) #38400 #19200
+	ser = serial.Serial('/dev/ttyUSB1',19200,timeout=1) #38400 #19200
 	print ('\t\tSerialPort: {} , BaudRate: {} , ByteSize: {}\n'.format(ser.name,ser.baudrate, ser.bytesize))
 except:
 	print('ERROR - Asegurese de conectar el dispositivo ')
@@ -152,8 +152,10 @@ while (1):
 
     if (in_comando == 'halt'):
     	print("\nGOODBYE  MOTHERFUCKER!!\n")
-    	#print('{:b}'.format(0b01101111))
-    	#ser.write('bbbb')
+    	ser.write('{:b}'.format(0b00000001000000100000001100000100))
+
+    	#ser.write('1234')
+    	'''
     	ser.write("1234")
     	time.sleep(1)
     	ser.write("2222")
@@ -163,6 +165,8 @@ while (1):
     	ser.write("4444")
     	time.sleep(1)
     	ser.write("5555")
+    	'''
+    	break
 
     print(in_comando)
 

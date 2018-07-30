@@ -1,15 +1,14 @@
 `timescale 1ns / 1ps
 //////////////////////////////////////////////////////////////////////////////////
-// Company: 
-// Engineer: 
+// Materia:         Arquitectura de Computadoras
+// Alumnos:         Tissot Esteban
+//			        Manero Matias
 // 
-// Create Date:    14:31:18 10/18/2017 
+// Create Date:     15:50:01 03/01/2018 
 // Design Name: 
-// Module Name:    Top_UART 
-// Project Name: 
-// Target Devices: 
-// Tool versions: 
-// Description: 
+// Module Name:     Top_UART 
+// Project Name:    TP4-PIPELINE 
+// Description:   
 //
 // Dependencies: 
 //
@@ -18,14 +17,16 @@
 // Additional Comments: 
 //
 //////////////////////////////////////////////////////////////////////////////////
+
 module Top_UART(
 		input  clk,
 		input  reset,
 		
+		// INPUT
 		input  TX_start,
 		input  [31:0] UART_data,
 		input  RX,
-        
+        // OUTPUT
         //output rx_done,
 		output MIPS_enable,
 		output TX,
@@ -39,6 +40,13 @@ wire s_tick;//,transmitir;
 wire [7:0] rx_data;
 wire [7:0] tx_data;
 wire tx_start;
+
+reg [31:0] data;
+reg send;
+reg reg_tx_start;
+
+wire [31:0] send_data;
+wire init_tx;
 
 wire tx_done, rx_done, new_result;
 
@@ -68,12 +76,33 @@ Interfaz_Rx rx(
     .dout(dout)
 );
 
-reg [31:0] data;
-reg send;
-reg reg_tx_start;
 
-wire [31:0] send_data;
-wire init_tx;
+Interfaz_Tx tx(
+    .clk(clk),
+    .reset(reset),
+    // INTPUT
+    .in_data(UART_data), //(dout),
+    .new_result(TX_start),// (write),
+    .tx_done(tx_done),
+    // OUTPUT
+    .out_data(tx_data),
+    .tx_start(tx_start),
+    .data_done(tx_dataready)
+);
+
+Transmisor trans(
+    .clk(clk),
+    .reset(reset),
+    // INPUT
+    .tx_start(tx_start),
+    .s_tick(s_tick),
+    .din(tx_data),
+    // OUTPUT
+    .tx_done_tick(tx_done),
+    .tx(TX)
+);
+
+
 
 /*assign send_data = data;
 assign init_tx = reg_tx_start;
@@ -105,30 +134,6 @@ begin
 end
 */
 
-Interfaz_Tx tx(
-    .clk(clk),
-    .reset(reset),
-    // INTPUT
-    .in_data(dout),
-    .new_result(write),
-    .tx_done(tx_done),
-    // OUTPUT
-    .out_data(tx_data),
-    .tx_start(tx_start),
-    .data_done(tx_dataready)
-);
-
-Transmisor trans(
-    .clk(clk),
-    .reset(reset),
-    // INPUT
-    .tx_start(tx_start),
-    .s_tick(s_tick),
-    .din(tx_data),
-    // OUTPUT
-    .tx_done_tick(tx_done),
-    .tx(TX)
-);
 
 
 /*

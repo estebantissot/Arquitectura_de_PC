@@ -70,7 +70,7 @@ module Receptor
 						s_next = s_reg + 1;
 			data :
 				if (s_tick)
-					if (s_reg==15)//(s_reg==1)
+					if (s_reg==15)
 						begin
 							s_next = 0;
 							b_next = {rx, b_reg [7:1]};
