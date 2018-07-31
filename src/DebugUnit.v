@@ -175,7 +175,7 @@ always @(posedge clk,posedge rst)
 begin
 	if(rst)
 		begin
-			stopPC<=1'b1;
+			stopPC<=1'b0;
 			tx_start<=1'b0;
 			state_send <= send_init;
 			etapa <= 3'b0;
@@ -188,7 +188,7 @@ begin
             send_init:
                 begin
                   //led <= 1'b1;
-                   stopPC<=1'b1; 
+                   stopPC<=1'b0; 
                   if(write)//inPC == 32'd28//if(write)//if(state_rx!=rx_stop)
                      begin
                         //led <= 1'b1;

@@ -47,7 +47,8 @@ initial
         RegisterMemory[32'd7]=32'b000000_01000_00111_01010_00000_100000;//R-type add
         RegisterMemory[32'd8]=32'b000000_01000_00111_01011_00000_100000;//R-type add 
         RegisterMemory[32'd9]=32'b000000_01000_00111_01100_00000_100000;//R-type add
-        RegisterMemory[32'd10]=32'b000100_10111_10110_0000000000000100; // branch
+        //RegisterMemory[32'd10]=32'b000100_10111_10110_0000000000000100; // branch
+        RegisterMemory[32'd10]=32'b000010_00000000000000000000000100; // jump
         RegisterMemory[32'd11]=32'b000000_01000_00000_00100_00000_100000;//R-type add
         RegisterMemory[32'd12]=32'b100011_01000_00010_0000000000000011; // Load
         
