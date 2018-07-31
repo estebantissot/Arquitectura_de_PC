@@ -55,22 +55,22 @@ always@(posedge clk, posedge reset)
                             case(state_byte)
                                 first_byte:
                                     begin
-                                        Data[31:24] <=  din - 8'd48;
+                                        Data[31:24] <=  din;// - 8'd48;
                                         state_byte <= second_byte;
                                     end
                                 second_byte:
                                     begin
-                                        Data[23:16] <=  din- 8'd48;
+                                        Data[23:16] <=  din;//- 8'd48;
                                         state_byte <= third_byte;                                    
                                     end
                                 third_byte:
                                     begin
-                                        Data[15:8] <=  din - 8'd48;
+                                        Data[15:8] <=  din; //- 8'd48;
                                         state_byte <= fourth_byte;                                    
                                     end
                                 fourth_byte:
                                     begin
-                                        Data[7:0] <=  din - 8'd48;
+                                        Data[7:0] <=  din;// - 8'd48;
                                         state_byte <= first_byte;
                                         ready	<=	1'b1;                                    
                                     end                               

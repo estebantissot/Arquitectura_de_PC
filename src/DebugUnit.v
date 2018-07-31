@@ -29,13 +29,14 @@ module DebugUnit(
     input [31:0] inFRData,
     input [31:0] inMemData,
         
+    output led0,
     output   out_debug_on,
     output [31:0] outDebugAddress,
     
     output [31:0] rx_address,
     output [6:0] outControlLatchMux,
-    output [31:0] addressInstrucction,
-    output [31:0] InstructionRecive,
+    output [31:0] addressInstrucctionProgram,
+    output [31:0] InstructionProgram,
     output write_instruction,
     output TX,
     output soft_rst,
@@ -77,9 +78,13 @@ reg [2:0] state_prev;
 reg [31:0]	rx_direccion;
 reg [31:0]  rx_Instruccion;
 //--------------------- Maquina de estado-------------------------
-reg state_rx;
-localparam rx_enviar = 1'b0;
-localparam rx_stop = 1'b1;
+reg [1:0] state_rx;
+
+localparam rx_init = 2'b00;
+localparam rx_program = 2'b01;
+localparam rx_stop = 2'b10;
+//localparam rx_idle = 2'b10;
+//localparam rx_send = 2'b11;
 //---------------------------------------------------------------
 
 // Cables
@@ -89,13 +94,15 @@ wire rx_done;
 
 // Registros
 reg debug;
+reg debug_mode;
 reg [31:0] address;
 reg [3:0]senal;
 reg [2:0]etapa;
+reg send;
 
 assign stopPC_debug =stopPC;
-assign InstructionRecive	=	rx_Instruccion;
-assign addressInstrucction	=	rx_direccion;
+assign InstructionProgram	=	rx_Instruccion;
+assign addressInstrucctionProgram	=	rx_direccion;
 
 assign soft_rst = rst;//(rst || (!MIPS_enable));
 assign write_instruction   =   WriteRead;
@@ -106,6 +113,7 @@ assign outDebugAddress = address;
 assign outControlLatchMux = {etapa,senal};
 assign out_debug_on = debug;
 
+assign led0 = debug_mode;
 
 wire write;
 wire [31:0] dout;
@@ -127,44 +135,84 @@ Top_UART uart(
 	.tx_dataready(tx_dataready)
 );
 
-/*
+
 // Maquina de estado de RX
 always @ (posedge clk, posedge rst)
 begin
 	if(rst)
 		begin
-		state_rx	=	rx_enviar;
-		rx_direccion 	=	32'hffffffff;
+		state_rx <= rx_init;
+		send <= 1'b0;
+		debug_mode <= 1'b0;
+		rx_direccion <= 32'h00000000;
 		end
 	else
 		begin
 			case(state_rx)
-			rx_enviar:
+            
+            rx_init:
+                begin
+                    if(write)
+                        begin    
+                            debug_mode <= dout[0]; 
+                            state_rx <= rx_program;
+                        end
+                end
+			
+			rx_program:
 				begin	
 					if(write)
-						begin
-							rx_direccion  = rx_direccion+1;
-							rx_Instruccion	= dout;
-
-							WriteRead = 1'b1;
-									
-							if(dout == 32'h0 || rx_direccion == 32'hfffffff0)// Instruccion de Halt para terminar el cargado de memoria		
+						begin	
+							if(dout == 32'b01111111111111111111111111111110)// Instruccion de Halt para terminar el cargado de memoria		
 								begin
-									state_rx = rx_stop;
+								    WriteRead <= 1'b0;
+									state_rx <= rx_stop;
 								end
+                            else
+                                begin
+                                    WriteRead <= 1'b1;
+                                    state_rx <= rx_program;
+                                    rx_direccion <= rx_direccion+1;
+                                    rx_Instruccion <= dout;
+                                end
 						end
 					else
-						WriteRead = 1'b0;
+					   begin
+					       WriteRead <= 1'b0;
+					       state_rx <= rx_program;
+                       end
 				end
-			rx_stop:
+				
+            rx_stop:
+                begin
+                    WriteRead <= 1'b0;
+                    state_rx <= rx_stop;
+                end	
+			/*
+			rx_idle:
 				begin
-					WriteRead<=1'b0;
+					WriteRead <= 1'b0;
+					if (debug_mode && RX != 1'b1)
+                        begin
+                           send <= 1'b1;
+                           state_rx <= rx_send;
+                        end
+					else
+					   begin
+					       state_rx <= rx_idle;
+				        end
 				end
+				
+            rx_send:
+                begin
+                    send <= 1'b0;
+                    state_rx <= rx_idle;
+                end
+                */
 			endcase
 		end
 
 end
-*/
 
 
 /* maquina de estado del TX 
@@ -187,20 +235,40 @@ begin
 		case(state_send)
             send_init:
                 begin
-                  //led <= 1'b1;
-                   stopPC<=1'b1; 
-                  if(write)//inPC == 32'd28//if(write)//if(state_rx!=rx_stop)
-                     begin
-                        //led <= 1'b1;
-                        state_send<=send_PC;
-                        debug <= 1'b1;
-                        
-                    end
+                    if(state_rx == rx_stop)
+                        begin
+                            if (!debug_mode) // Envio todo al final del programa
+                                begin
+                                    if (inPC == rx_direccion + 32'd4) // Finalizo el programa
+                                        begin
+                                            stopPC <= 1'b1;
+                                            state_send<=send_PC;
+                                            debug <= 1'b1;
+                                        end
+                                    else
+                                        begin
+                                            stopPC <= 1'b0;
+                                            state_send<=send_init;
+                                        end
+                                end
+                           else // Envio todo despues de cada instruccion
+                               begin
+                                    stopPC<=1'b1; 
+                                    if (!RX)
+                                        begin 
+                                            state_send <= send_PC;
+                                            debug <= 1'b1;
+                                        end
+                                    else
+                                        state_send <= send_init;
+                               end     
+                        end
+                    else
+                        state_send <= send_init; 
                 end
                 
             send_PC:
                 begin
-                     //stopPC<=1'b0; 
                      sendData<=inPC;
                      tx_start<=1'b1;
                      state_prev<=send_Rmem;
@@ -247,7 +315,6 @@ begin
              
              send_Latch:
                  begin
-                    //sendData<=32'b01111111_00000110_00000111_00001000;
                     tx_start<=1'b1;
                     sendData <= inLatch;
                     state_send <= send_waitFinish;
@@ -302,7 +369,6 @@ begin
                                   begin
                                       etapa <= 3'b000;
                                       senal <= 4'b0;
-                                      //stopPC<=1'b0; 
                                       state_prev <= send_Finish;
                                   end
                               else
@@ -320,21 +386,24 @@ begin
                     if(tx_dataready == 1'b1)
                         begin
                             state_send <= state_prev;
-                            //tx_start<=1'b0;
                         end
                 end
                 
             send_Finish:
                 begin
-                    stopPC<=1'b0;
                     debug <= 1'b0;
                     tx_start<=1'b0;
-                    state_send <= send_init;
-                    // se debe esperar hasta que se quiera mandar todo de nuevo.
+                    if (debug_mode)
+                        begin
+                            state_send <= send_init;
+                            stopPC<=1'b0;
+                        end
+                    else
+                        state_send <= send_Finish;
                 end
             
             endcase
-            end
+        end
 	
 end
 

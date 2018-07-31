@@ -1,7 +1,10 @@
-instruccion 1
-instruccion 2
-instruccion 3
-instruccion 4
-instruccion 5
-instruccion 6
-instruccion 7
+addu r3 r2 r1
+subu r4 r2 r1
+and r5 r2 r1
+or r6 r2 r1
+sw r3 11
+lw r8 2
+addu r8 r7 r9
+addu r8 r7 r10
+addu r8 r7 r11
+addu r8 r7 r12

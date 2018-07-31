@@ -37,6 +37,7 @@ assign outData=Data;
 
 initial
     begin
+        /*
         RegisterMemory[32'd0]=32'b000000_00001_00010_00011_00000_100000;//R-type add;
         RegisterMemory[32'd1]=32'b000000_00001_00010_00100_00000_100010;//R-type sub;
         RegisterMemory[32'd2]=32'b000000_00001_00010_00101_00000_100100;//R-type and
@@ -59,6 +60,7 @@ initial
         //RegisterMemory[32'd16]=32'b001100_11000_11101_0000000000001111;//Y-type andi
         RegisterMemory[32'd18]=32'b000000_00010_00111_01011_00000_100000;//R-type add
         RegisterMemory[32'd19]=32'b000000_01000_00111_01100_00000_100000;//R-type add
+        */
         /*RegisterMemory[32'd15]=32'b001110_11000_00001_0000000000001111;//Y-type xori
         RegisterMemory[32'd16]=32'b001100_11000_11101_0000000000001111;//Y-type andi
         RegisterMemory[32'd17]=32'b000000_01000_00111_01011_00000_100000;//R-type add
@@ -82,9 +84,9 @@ begin
     end
     else
     begin
-        //if(wr_instruction)
-         //   RegisterMemory[inAddr]=data_instruction;
-        //else
+        if(wr_instruction)
+            RegisterMemory[inAddr]=data_instruction;
+        else
             Data=RegisterMemory[inAddr];
     end
 end

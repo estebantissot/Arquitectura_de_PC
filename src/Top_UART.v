@@ -81,8 +81,8 @@ Interfaz_Tx tx(
     .clk(clk),
     .reset(reset),
     // INTPUT
-    .in_data(UART_data), //(dout),
-    .new_result(TX_start),// (write),
+    .in_data(UART_data),// UART_data - dout
+    .new_result(TX_start),// TX_start - write
     .tx_done(tx_done),
     // OUTPUT
     .out_data(tx_data),

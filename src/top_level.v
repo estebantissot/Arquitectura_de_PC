@@ -21,8 +21,8 @@ module top_level(
     input clk,
     input reset,
 	input UART_TXD_IN,
-	output UART_RXD_OUT
-	//output led0,
+	output UART_RXD_OUT,
+	output led0
 	//output led1
 );
 
@@ -84,6 +84,7 @@ wire [31:0] MemData;
 wire [31:0] DebugAddress;
 wire wr_program_instruction;
 wire [31:0] program_instruction;
+wire [31:0] addressInstrucctionProgram;
 wire [31:0] rx_address;
 wire rst;
 //assign tx_start = (ifetch0_outInstructionAddress==32'd19)? 1'b1:1'b0;
@@ -101,6 +102,7 @@ InstructionFetch ifetch0(
 	.rst(soft_rst),
 		
 	//debug
+	.addressInstrucctionProgram(addressInstrucctionProgram),
     .data_instruction(program_instruction),
     .wr_instruction(wr_program_instruction),
 	.stop_debug(stop_debug),
@@ -299,13 +301,13 @@ DebugUnit debug(
     .inMemData(MemData),
     
     // OUTPUT
-    //.led0(led0),
+    .led0(led0),
     //.led1(led1),
     
     .out_debug_on(Debug_on),
     .outDebugAddress(DebugAddress),
-    .addressInstrucction(),
-    .InstructionRecive(program_instruction),
+    .addressInstrucctionProgram(addressInstrucctionProgram),
+    .InstructionProgram(program_instruction),
     .write_instruction(wr_program_instruction),
     .rx_address(rx_address),
     .TX(UART_RXD_OUT), 
