@@ -202,8 +202,8 @@ except:
 
 
 print('Debugging Mode: \n\t 1) Debug at the end of the program (default)\n\t 2) Debug for each clock')
-mode = raw_input("Select the number of the mode: ")
-if (mode == '2'):
+debug_mode = raw_input("Select the number of the mode: ")
+if (debug_mode == '2'):
 	send("00000000000000000000000000000001")
 else:
 	send("00000000000000000000000000000010")
@@ -219,11 +219,11 @@ print ('  ----------------------------------------------------------------------
 
 
 print('Load Program Mode: \n\t 1) Load from file (default) \n\t 2) Manual Loading')
-mode = raw_input("Select the number of the mode: ")
-if (mode != '2'):
+load_mode = raw_input("Select the number of the mode: ")
+if (load_mode != '2'):
 	print ('  ---------------------------------- PROGRAM ----------------------------------\n')
 	try:
-		f = open ('program.txt','r')	
+		f = open ('prueba.txt','r')	
 		while True:
 			line = f.readline()
 			if not line:
@@ -242,7 +242,7 @@ if (mode != '2'):
 	send(opcode('halt')) #instruccion HALT
 	print ('\n  -----------------------------------------------------------------------------')
 	
-if (mode == '2'):
+if (load_mode == '2'):
 	while (1):
 		print("\n\t\tManual Loading")
 		in_comando = raw_input("Write one instruction: ")
@@ -261,17 +261,20 @@ if (mode == '2'):
 		send(b_instruction)
 
 
-inline = ""
-j=0
+print ("\n\nWait for debug data ...")
 
 while 1:
-	j=0
-	var = raw_input("Press a keyboard for debug ")
-	ser.write("1")	
+	
+	if (debug_mode == '2'):
+		var = raw_input("Press a keyboard for debug ")
+		ser.write("1")
+
+	inline = ""
 	inline = ser.readline() # Lee hasta que se vacie el buffer.
 	#inline = ser.read(296) #Lee 296 bytes del buffer. 
 	if (inline != ""):
 		#print (inline)
+		j=0
 		for i in range (4 , len(inline)+1 , 4):			
 			reg = inline[i-4:i]
 			byte1 = ord(reg[0]) - 48 & 0xff

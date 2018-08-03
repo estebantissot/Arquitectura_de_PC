@@ -2,9 +2,19 @@ addu r3 r2 r1
 subu r4 r2 r1
 and r5 r2 r1
 or r6 r2 r1
-sw r3 11
+sw r3 3
 lw r8 2
 addu r8 r7 r9
 addu r8 r7 r10
 addu r8 r7 r11
 addu r8 r7 r12
+j 4
+addu r8 r0 r4
+lw r8 3
+ori r17 r14 15
+addi r25 r14 3
+andi r29 r14 15  
+addu r11 r7 r17
+lw r2 3
+addu r11 r7 r2
+addu r12 r7 r8

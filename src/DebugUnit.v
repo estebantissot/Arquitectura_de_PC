@@ -35,6 +35,7 @@ module DebugUnit(
     
     output [31:0] rx_address,
     output [6:0] outControlLatchMux,
+    output loadProgram,
     output [31:0] addressInstrucctionProgram,
     output [31:0] InstructionProgram,
     output write_instruction,
@@ -99,6 +100,7 @@ reg [31:0] address;
 reg [3:0]senal;
 reg [2:0]etapa;
 reg send;
+reg load_program;
 
 assign stopPC_debug =stopPC;
 assign InstructionProgram	=	rx_Instruccion;
@@ -106,6 +108,7 @@ assign addressInstrucctionProgram	=	rx_direccion;
 
 assign soft_rst = rst;//(rst || (!MIPS_enable));
 assign write_instruction   =   WriteRead;
+assign loadProgram = load_program;
 
 //assign tx_start = (Instruction==32'd19)? 1'b1:1'b0;
 
@@ -144,7 +147,8 @@ begin
 		state_rx <= rx_init;
 		send <= 1'b0;
 		debug_mode <= 1'b0;
-		rx_direccion <= 32'h00000000;
+		rx_direccion <= 32'hffffffff;
+		load_program = 1'b1;
 		end
 	else
 		begin
@@ -156,6 +160,7 @@ begin
                         begin    
                             debug_mode <= dout[0]; 
                             state_rx <= rx_program;
+                            load_program = 1'b1;
                         end
                 end
 			
@@ -166,6 +171,7 @@ begin
 							if(dout == 32'b01111111111111111111111111111110)// Instruccion de Halt para terminar el cargado de memoria		
 								begin
 								    WriteRead <= 1'b0;
+								    load_program = 1'b0;
 									state_rx <= rx_stop;
 								end
                             else
@@ -185,30 +191,10 @@ begin
 				
             rx_stop:
                 begin
+                    load_program = 1'b0;
                     WriteRead <= 1'b0;
                     state_rx <= rx_stop;
                 end	
-			/*
-			rx_idle:
-				begin
-					WriteRead <= 1'b0;
-					if (debug_mode && RX != 1'b1)
-                        begin
-                           send <= 1'b1;
-                           state_rx <= rx_send;
-                        end
-					else
-					   begin
-					       state_rx <= rx_idle;
-				        end
-				end
-				
-            rx_send:
-                begin
-                    send <= 1'b0;
-                    state_rx <= rx_idle;
-                end
-                */
 			endcase
 		end
 

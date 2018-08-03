@@ -48,11 +48,12 @@ wire [4:0]	idecode0_outRT_rd; //idecode0:outRT_rd -> execute0:inRT_rd
 wire        idecode0_outPC_write;
 wire        idecode0_outIF_ID_write;
 wire [6:0]  idecode0_outInmmediateOpcode;
-
+wire [31:0] idecode0_outPCJump;
+wire        idecode0_jump;
 //-- Modulo Execute --
 wire [1:0]	execute0_outWB; 		//execute0:outWB -> memaccess0:inWB
 wire [2:0]	execute0_outMEM; 		//execute0:outMEM -> memacces0:inMEM
-wire [31:0]	execute0_outPCJump; 	//execute0:outPCJump -> memaccess0:inPCJump
+wire [31:0]	execute0_outPCBranch; 	//execute0:outPCJump -> memaccess0:inPCJump
 wire [31:0]	execute0_outALUResult;//execute0:outALUResult -> memaccess0:inALUResult
 wire 			execute0_outALUZero; 	//execute0:outALUZero -> memaccess0:inALUZero
 wire [31:0] execute0_outRegB; 		//execute0:outRegB -> memaccess0:inRegB
@@ -72,6 +73,7 @@ wire [31:0]	wb0_outRegF_wd; // wb0:outRegF_wd -> idecode0:inRegF_wd & WB_regF_wd
 
 //debug
 wire stop_debug;
+wire loadProgram;
 wire [31:0] muxLatch_outData;
 wire [6:0]  ControlLatchMux;
 
@@ -87,13 +89,10 @@ wire [31:0] program_instruction;
 wire [31:0] addressInstrucctionProgram;
 wire [31:0] rx_address;
 wire rst;
-//assign tx_start = (ifetch0_outInstructionAddress==32'd19)? 1'b1:1'b0;
-
-//Top_UART uart(.clk(clk),.reset(rst),.TX_start(tx_start),.UART_data(execute0_outALUResult),.RX(RX),.MIPS_enable(MIPS_enable),.TX(TX));
-
+wire [31:0]jump_branch;
 
 assign rst = (!reset);
-
+assign jump_branch= (memaccess0_outPCSel)? execute0_outPCBranch:idecode0_outPCJump;
 // Instancias
 // Instancia del modulo Instruction Fetch
 InstructionFetch ifetch0(
@@ -102,6 +101,7 @@ InstructionFetch ifetch0(
 	.rst(soft_rst),
 		
 	//debug
+	.loadProgram(loadProgram),
 	.addressInstrucctionProgram(addressInstrucctionProgram),
     .data_instruction(program_instruction),
     .wr_instruction(wr_program_instruction),
@@ -110,8 +110,8 @@ InstructionFetch ifetch0(
 	//Input Signals
 	.inPC_write(idecode0_outPC_write),
 	.inIF_ID_write(idecode0_outIF_ID_write),
-	.inPCSel(memaccess0_outPCSel),
-	.inPCJump(execute0_outPCJump),
+	.inPCSel(memaccess0_outPCSel|idecode0_jump),
+	.inPCJump(jump_branch),
 	
 	//Output Signals
 	.outInstructionAddress(ifetch0_outInstructionAddress),
@@ -155,10 +155,13 @@ InstructionDecode idecode0(
 	.outPC_write(idecode0_outPC_write),
     .outIF_ID_write(idecode0_outIF_ID_write),
     .out_regDebug(FRData),
-    .outInmmediateOpcode(idecode0_outInmmediateOpcode)
+    .outInmmediateOpcode(idecode0_outInmmediateOpcode),
+    
+    .outAddress_jump(idecode0_outPCJump),
+    .jump_take(idecode0_jump)
 	
 );
-
+	
 // Instancia del modulo Execute
 Execute execute0(
 	//Clock and Reset Signals
@@ -190,9 +193,10 @@ Execute execute0(
 	//Output Signals
 	.outWB(execute0_outWB),
 	.outMEM(execute0_outMEM),
+
 	//Branch
    	.outPCSel(memaccess0_outPCSel),
-	.outPCJump(execute0_outPCJump),
+	.outPCJump(execute0_outPCBranch),
 	
 	.outALUResult(execute0_outALUResult),
 	.outALUZero(execute0_outALUZero),
@@ -267,7 +271,7 @@ MuxLatch ml0(
     //-- Modulo Execute --
     .execute0_outWB(execute0_outWB), 		
     .execute0_outMEM(execute0_outMEM), 	
-    .execute0_outPCJump(execute0_outPCJump), 	
+    .execute0_outPCJump(execute0_outPCBranch), 	
     .execute0_outALUResult(execute0_outALUResult),
     .execute0_outALUZero(execute0_outALUZero), 	
     .execute0_outRegB(execute0_outRegB), 		
@@ -306,6 +310,7 @@ DebugUnit debug(
     
     .out_debug_on(Debug_on),
     .outDebugAddress(DebugAddress),
+    .loadProgram(loadProgram),
     .addressInstrucctionProgram(addressInstrucctionProgram),
     .InstructionProgram(program_instruction),
     .write_instruction(wr_program_instruction),

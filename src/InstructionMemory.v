@@ -32,11 +32,34 @@ module InstructionMemory(
 
 reg [31:0] RegisterMemory [31:0];
 reg [31:0] Data;
+integer i;
 
 assign outData=Data; 
 
 initial
     begin
+    
+        for (i=32'd0; i <= 32'd31; i=i+32'b1)
+                begin
+                   RegisterMemory[i][31:0]<= 32'b0;
+                end
+        
+        //RegisterMemory[32'd0]=32'b0;//R-type add;
+        //RegisterMemory[32'd1]=32'b0;//R-type sub;
+        //RegisterMemory[32'd2]=32'b0;//R-type and
+        //RegisterMemory[32'd3]=32'b0;//R-type or
+        /*
+        RegisterMemory[32'd1]=32'b000000_00000_00000_00000_00000_000000;//R-type add;
+        RegisterMemory[32'd1]=32'b000000_00001_00010_00011_00000_100000;//R-type add;
+        RegisterMemory[32'd2]=32'b000000_00001_00011_00100_00000_100010;//R-type sub;
+        RegisterMemory[32'd3]=32'b000000_00001_00010_00111_00000_100100;//R-type and
+        RegisterMemory[32'd4]=32'b000000_00001_00010_00110_00000_100101;//R-type or
+        
+        RegisterMemory[32'd5]=32'b000000_00001_00010_00011_00000_100000;//R-type add;
+        RegisterMemory[32'd6]=32'b000000_00001_00010_00100_00000_100010;//R-type sub;
+        RegisterMemory[32'd7]=32'b000000_00001_00010_00101_00000_100100;//R-type and
+        RegisterMemory[32'd8]=32'b000000_00001_00010_00110_00000_100101;//R-type or
+        */
         /*
         RegisterMemory[32'd0]=32'b000000_00001_00010_00011_00000_100000;//R-type add;
         RegisterMemory[32'd1]=32'b000000_00001_00010_00100_00000_100010;//R-type sub;
@@ -48,7 +71,8 @@ initial
         RegisterMemory[32'd7]=32'b000000_01000_00111_01010_00000_100000;//R-type add
         RegisterMemory[32'd8]=32'b000000_01000_00111_01011_00000_100000;//R-type add 
         RegisterMemory[32'd9]=32'b000000_01000_00111_01100_00000_100000;//R-type add
-        RegisterMemory[32'd10]=32'b000100_10111_10110_0000000000000100; // branch
+        //RegisterMemory[32'd10]=32'b000100_10111_10110_0000000000000100; // branch
+        RegisterMemory[32'd10]=32'b000010_00000000000000000000000100; // jump
         RegisterMemory[32'd11]=32'b000000_01000_00000_00100_00000_100000;//R-type add
         RegisterMemory[32'd12]=32'b100011_01000_00010_0000000000000011; // Load
         
@@ -78,16 +102,16 @@ initial
 
 always @ (negedge clk, posedge rst)
 begin    
-    if (rst)
+    if(rst)
     begin
         Data <= RegisterMemory[1'b0];
     end
     else
     begin
         if(wr_instruction)
-            RegisterMemory[inAddr]=data_instruction;
+            RegisterMemory[inAddr] <= data_instruction;
         else
-            Data=RegisterMemory[inAddr];
+            Data <= RegisterMemory[inAddr];
     end
 end
 

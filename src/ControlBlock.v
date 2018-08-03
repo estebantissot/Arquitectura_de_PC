@@ -41,6 +41,7 @@ always @ *
 			6'd8	: Control=9'b0111_000_10;//Inmediato
 			6'd8	: Control=9'b0111_000_10;//Inmediato
 			6'd20	: Control=9'b0001_010_11;//Load byte????
+			6'd2    : Control=9'b0000_000_00;
 			default:
 				Control=9'b0000_000_00;
 		endcase

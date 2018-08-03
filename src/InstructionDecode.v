@@ -37,6 +37,7 @@ module InstructionDecode(
 	input 			ID_flush,
 //Debug
     input           stop_debug,
+        
 //Output Signals
     output  [1:0]   outWB,
     output  [2:0] 	outMEM,
@@ -50,9 +51,15 @@ module InstructionDecode(
     output  [4:0] 	outRT_rd,
     output 	        outPC_write,
     output 	        outIF_ID_write,
-    output          outFlush,
+    //output          outFlush,
     output  [31:0]  out_regDebug,
-    output  [6:0]	outInmmediateOpcode	 	
+    output  [6:0]	outInmmediateOpcode,
+    
+    //Jump
+    output [31:0]   outAddress_jump,
+    output 			jump_take
+    
+    	
     );
 
 //Registros
@@ -68,6 +75,7 @@ reg [4:0] 	rt;
 reg [4:0] 	RT_rd;
 reg [6:0]	InmmediateOpcode;
 reg [31:0]  PCJump;
+reg         PCSel;
 //Cables
 //wire [31:0] RegF_outRegA;
 //wire [31:0] RegF_outRegB;
@@ -86,12 +94,15 @@ assign outInstruction_ls = ((EXE[2:1]==2'b11) && (inInstruction[31:26]!=6'd8))? 
 assign out_rs = rs;
 assign out_rt = rt;
 assign outRT_rd = RT_rd;
-assign outInmmediateOpcode	=	InmmediateOpcode;
- 
+assign outInmmediateOpcode	=	InmmediateOpcode; 
 assign write = (Debug_on) ? 1'b0:inRegF_wr;
 
+assign jump_take=(inInstruction[31:26] == 6'd2)? 1'b1:1'b0;
+assign outAddress_jump=(inInstruction[31:26] == 6'd2)? {inInstructionAddress[31:28],inInstruction[25:0],2'b00}:inInstructionAddress;
+
+
 // Instancia de "Hazard Detection Unit"
-HazardDetectionUnit hdu0 (
+HazardDetectionUnit hdu0(
 	.rst(rst),
 	.EXE_mem_read(EXE_mem_read),
 	.EXE_rd(EXE_rd),
@@ -173,6 +184,8 @@ else // Escritura de todos los registros de salida
             rs = inInstruction[25:21];
             rt = inInstruction[20:16];
             RT_rd = inInstruction[15:11];
+            
+            
         end
 	end
 end

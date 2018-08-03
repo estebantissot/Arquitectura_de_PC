@@ -28,7 +28,8 @@ module InstructionFetch(
 	input 			inPCSel,
     input [31:0] 	inPCJump,
    // input           inFlush,
-    input 			stop_debug,
+    input 			stop_debug, 
+    input           loadProgram,
     input [31:0]    addressInstrucctionProgram,
     input [31:0]    data_instruction,
     input           wr_instruction,
@@ -49,7 +50,7 @@ wire [31:0] address;
 
 // Asignaciones
 assign outInstructionAddress = pc;
-assign address = (stop_debug) ? addressInstrucctionProgram : pc;
+assign address = (loadProgram) ? addressInstrucctionProgram : pc;
 //assign outInstruction = instruction;
 
 // Instancia de "Instruction Memory"
