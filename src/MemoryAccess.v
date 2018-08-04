@@ -23,7 +23,7 @@ module MemoryAccess(
     input rst,
 	 
 //Input Signals
-    input [1:0] 	inWB,
+    input [4:0] 	inWB,
     input [2:0] 	inMEM,
     input [31:0] 	inALUResult,
     input 			inALUZero,
@@ -35,7 +35,7 @@ module MemoryAccess(
  //Debug
     input           stop_debug,
 //Output Signals    
-	output  [1:0]	outWB,
+	output  [4:0]	outWB,
     output  [31:0]  outRegF_wd,
     output  [31:0]  outALUResult,
     output  [4:0] 	outRegF_wreg,
@@ -43,7 +43,7 @@ module MemoryAccess(
     );
 
 // Registros
-reg [1:0]	WB;
+reg [4:0]	WB;
 //reg [31:0] 	RegF_wd;
 reg [31:0] 	ALUResult;
 reg [4:0] 	RegF_wreg;
@@ -81,7 +81,7 @@ always @(negedge clk, posedge rst)
 begin
 	if(rst)
 		begin
-			WB <= 2'b00;
+			WB <= 4'b0000;
 			//RegF_wd <= 32'bZ;
 			ALUResult <= 32'b0;
 			RegF_wreg <= 5'b0;

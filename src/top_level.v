@@ -35,7 +35,7 @@ wire [31:0]	ifetch0_outInstructionAddress; //ifetch0:outInstructionAddress -> id
 wire [31:0]	ifetch0_outInstruction; 			//ifetch0:outInstruction -> idecode0:inInstruction
 
 //-- Modulo Instruction Decode --
-wire [1:0]	idecode0_outWB; 	//idecode0:outWB -> execute0:inWB
+wire [4:0]	idecode0_outWB; 	//idecode0:outWB -> execute0:inWB
 wire [2:0]	idecode0_outMEM; 	//idecode0:outMEM -> execute0:inMEM
 wire [3:0]	idecode0_outEXE; 	//idecode0:outEXE -> execute0:inEXE
 wire [31:0]	idecode0_outInstructionAddress; //idecode0:outInstructionAddress -> execute0:inInstructionAddress
@@ -51,7 +51,7 @@ wire [6:0]  idecode0_outInmmediateOpcode;
 wire [31:0] idecode0_outPCJump;
 wire        idecode0_jump;
 //-- Modulo Execute --
-wire [1:0]	execute0_outWB; 		//execute0:outWB -> memaccess0:inWB
+wire [4:0]	execute0_outWB; 		//execute0:outWB -> memaccess0:inWB
 wire [2:0]	execute0_outMEM; 		//execute0:outMEM -> memacces0:inMEM
 wire [31:0]	execute0_outPCBranch; 	//execute0:outPCJump -> memaccess0:inPCJump
 wire [31:0]	execute0_outALUResult;//execute0:outALUResult -> memaccess0:inALUResult
@@ -60,7 +60,7 @@ wire [31:0] execute0_outRegB; 		//execute0:outRegB -> memaccess0:inRegB
 wire [4:0]	execute0_outRegF_wreg; //execute0:outRegF_wreg -> memaccess0:inRegF_wreg
 
 //-- Modulo MemoryAccess --
-wire [1:0]	memaccess0_outWB; 			//memaccess0:outWB -> wb0:inWB
+wire [4:0]	memaccess0_outWB; 			//memaccess0:outWB -> wb0:inWB
 wire 		memaccess0_outPCSel; 		//memaccess0:outPCSel -> ifetch0:inPCSel
 wire [31:0]	memaccess0_outPCJump; 	//memaccess0:outPCJump -> ifetch0:inPCJump
 wire [31:0] memaccess0_outRegF_wd; 	//memaccess0:outRegF_wd -> wb0:inRegF_wd

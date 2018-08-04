@@ -39,7 +39,7 @@ module InstructionDecode(
     input           stop_debug,
         
 //Output Signals
-    output  [1:0]   outWB,
+    output  [4:0]   outWB,
     output  [2:0] 	outMEM,
     output  [3:0] 	outEXE,
     output  [31:0]  outInstructionAddress,
@@ -63,7 +63,7 @@ module InstructionDecode(
     );
 
 //Registros
-reg [1:0] 	WB;
+reg [4:0] 	WB;
 reg [2:0] 	MEM;
 reg [3:0] 	EXE;
 reg [31:0] 	InstructionAddress;
@@ -79,7 +79,7 @@ reg         PCSel;
 //Cables
 //wire [31:0] RegF_outRegA;
 //wire [31:0] RegF_outRegB;
-wire [8:0] outControl;
+wire [11:0] outControl;
 wire ControlMux;
 wire write;
 
@@ -145,7 +145,7 @@ always @(negedge clk, posedge rst)
 begin
 if (rst)
 	begin
-		WB = 2'b00;
+		WB = 5'b0000;
 		MEM = 3'b000;
 		EXE = 4'b0;
 		InstructionAddress = 32'b0;
@@ -163,15 +163,15 @@ else // Escritura de todos los registros de salida
            case (ControlMux & (!ID_flush))
                 1'b0:
                 begin
-                    WB = 2'b0;
+                    WB = 5'b0;
                     MEM = 3'b0;
                     EXE = 4'b0;
                 end
                 1'b1:
                 begin
-                    WB = outControl[1:0];
-                    MEM = outControl[4:2];
-                    EXE = outControl[8:5];
+                    WB = outControl[4:0];
+                    MEM = outControl[7:5];
+                    EXE = outControl[11:8];
                 end
             endcase
     

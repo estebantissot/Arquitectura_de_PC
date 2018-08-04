@@ -36,13 +36,13 @@ module ALU #(parameter bits = 8)(rst,A,B,select,Zero,C);
 				4'b0000:e=A&B;
 				4'b0001:e=A|B;
 				4'b0010:e=A+B;
-				4'b0011:e=A>>>B;
-				4'b0100:e=A>>B;
+				4'b0011:e=B>>>A;
+				4'b0100:e=B>>A;
 				4'b0101:e=~(A|B);
 				4'b0110:e=A-B;
 				4'b0111:e=-1;
 				4'b1001:e=A^B;
-				4'b1011:e=A<<B;
+				4'b1011:e=B<<A;
 
 				
 				/*6'b000000:e=A;

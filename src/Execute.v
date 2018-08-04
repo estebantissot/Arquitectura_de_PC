@@ -23,7 +23,7 @@ module Execute(
     input rst,
 	 
 //Input Signals
-    input [1:0] 	inWB,
+    input [4:0] 	inWB,
     input [2:0] 	inMEM,
     input [3:0] 	inEXE,
     input [31:0] 	inInstructionAddress,
@@ -44,7 +44,7 @@ module Execute(
 	//debug
 	input           stop_debug,				 
 //Output Signals
-    output [1:0] 	outWB,
+    output [4:0] 	outWB,
     output [2:0] 	outMEM,
     output 			outPCSel,
     output [31:0]   outPCJump,
@@ -55,7 +55,7 @@ module Execute(
     );
 
 // Registros
-    reg [1:0] 	WB;
+    reg [4:0] 	WB;
     reg [2:0] 	MEM;
     //reg [31:0] PCJump;
 	//reg [31:0] Jump;
@@ -104,7 +104,7 @@ assign outPCSel = (inMEM[2] && (inRegA==inRegB))? 1'b1:1'b0;
 
 assign Opcode = (inEXE[2:1] == 2'b11)? inInmmediateOpcode:inInstruction_ls[5:0];
 
-assign shif_variable= ((Opcode == 5'b0) && (inInstruction_ls[10:6] != 5'b0))? 1'b1:1'b0;
+assign shif_variable= ((inEXE[2:1] == 2'b10) && (inInstruction_ls[10:6] != 5'b0))? 1'b1:1'b0;
 //Instancia de "ALUControl"
 ALUControl alu_contol0 (
 	.rst(rst),
@@ -131,7 +131,7 @@ always @(negedge clk, posedge rst)
 begin
 	if(rst)
 		begin
-			WB <= 2'b00;
+			WB <= 5'b00000;
 			MEM <= 3'b010;
 			//PCJump <= 32'b0;
 			RegF_wreg <= 5'bZZZZZ;
@@ -176,19 +176,19 @@ always @(*)
 						end
 				endcase
 				// MUX A
-				case(control_muxA)
-				    2'b00: regA_ALU <= inRegA;
-				    2'b01: regA_ALU <= WB_regF_wd;
-				    2'b10: regA_ALU <= MEM_AluResult;
+				casez({shif_variable,control_muxA})
+				    3'b000: regA_ALU <= inRegA;
+				    3'b001: regA_ALU <= WB_regF_wd;
+				    3'b010: regA_ALU <= MEM_AluResult;
+				    3'b1??: regA_ALU <= inInstruction_ls[10:6];
 				    default:regA_ALU <= inRegA;
 				endcase
 				// MUX B
-				casez({shif_variable,{inEXE[0],control_muxB}}) //control_muxB
-					4'b0000: regB_ALU <= inRegB;
-					4'b0001: regB_ALU <= WB_regF_wd;
-					4'b0010: regB_ALU <= MEM_AluResult;
-					4'b0100: regB_ALU <= inInstruction_ls;  
-					4'b1???: regB_ALU <= inInstruction_ls[10:6];
+				case({inEXE[0],control_muxB}) //control_muxB
+					3'b000: regB_ALU <= inRegB;
+					3'b001: regB_ALU <= WB_regF_wd;
+					3'b010: regB_ALU <= MEM_AluResult;
+					3'b100: regB_ALU <= inInstruction_ls;  
 					default:
 						begin
 								regB_ALU <= inRegB;
