@@ -21,8 +21,8 @@ module top_level(
     input clk,
     input reset,
 	input UART_TXD_IN,
-	output UART_RXD_OUT
-	//output led0,
+	output UART_RXD_OUT,
+	output led0
 	//output led1
 );
 
@@ -47,7 +47,7 @@ wire [4:0]	idecode0_out_rt; //idecode0:out_rt -> execute0:in_rt
 wire [4:0]	idecode0_outRT_rd; //idecode0:outRT_rd -> execute0:inRT_rd
 wire        idecode0_outPC_write;
 wire        idecode0_outIF_ID_write;
-wire [6:0]  idecode0_outInmmediateOpcode;
+wire [5:0]  idecode0_outInmmediateOpcode;
 wire [31:0] idecode0_outPCJump;
 wire        idecode0_jump;
 //-- Modulo Execute --
@@ -73,10 +73,10 @@ wire [31:0]	wb0_outRegF_wd; // wb0:outRegF_wd -> idecode0:inRegF_wd & WB_regF_wd
 
 //debug
 wire stop_debug;
+wire loadProgram;
 wire [31:0] muxLatch_outData;
 wire [6:0]  ControlLatchMux;
 
-wire soft_rst; 
 wire tx_start;
 wire MIPS_enable;
 wire Debug_on;
@@ -85,13 +85,10 @@ wire [31:0] MemData;
 wire [31:0] DebugAddress;
 wire wr_program_instruction;
 wire [31:0] program_instruction;
+wire [31:0] addressInstrucctionProgram;
 wire [31:0] rx_address;
 wire rst;
 wire [31:0]jump_branch;
-//assign tx_start = (ifetch0_outInstructionAddress==32'd19)? 1'b1:1'b0;
-
-//Top_UART uart(.clk(clk),.reset(rst),.TX_start(tx_start),.UART_data(execute0_outALUResult),.RX(RX),.MIPS_enable(MIPS_enable),.TX(TX));
-
 
 assign rst = (!reset);
 assign jump_branch= (memaccess0_outPCSel)? execute0_outPCBranch:idecode0_outPCJump;
@@ -100,9 +97,11 @@ assign jump_branch= (memaccess0_outPCSel)? execute0_outPCBranch:idecode0_outPCJu
 InstructionFetch ifetch0(
 	//Clock and Reset Signals
 	.clk(clk),
-	.rst(soft_rst),
+	.rst(rst),
 		
 	//debug
+	.loadProgram(loadProgram),
+	.addressInstrucctionProgram(addressInstrucctionProgram),
     .data_instruction(program_instruction),
     .wr_instruction(wr_program_instruction),
 	.stop_debug(stop_debug),
@@ -305,17 +304,17 @@ DebugUnit debug(
     .inMemData(MemData),
     
     // OUTPUT
-    //.led0(led0),
+    .led0(led0),
     //.led1(led1),
     
     .out_debug_on(Debug_on),
     .outDebugAddress(DebugAddress),
-    .addressInstrucction(),
-    .InstructionRecive(program_instruction),
+    .loadProgram(loadProgram),
+    .addressInstrucctionProgram(addressInstrucctionProgram),
+    .InstructionProgram(program_instruction),
     .write_instruction(wr_program_instruction),
     .rx_address(rx_address),
     .TX(UART_RXD_OUT), 
-    .soft_rst(soft_rst),
     .stopPC_debug(stop_debug),
     .outControlLatchMux(ControlLatchMux)
 

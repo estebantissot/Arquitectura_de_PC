@@ -72,12 +72,12 @@ begin
 		data_memory[3][31:0]<= 32'd8;
 		*/
 		
-		for (i=32'd0; i <= 32'd32; i=i+32'b1)
+		for (i=32'd0; i <= 32'd31; i=i+32'b1)
             begin
                data_memory[i][31:0]<= 32'b0;
             end
             
-            data_memory[20][31:0]<= 32'hAAA;
+            //data_memory[20][31:0]<= 32'hAAA;
             
 		/*
 		New_Data1<=32'h00000000;
@@ -112,55 +112,6 @@ begin
                        end
                  end
              end
-	/*
-		case(inAddress)
-			32'h00000000:begin
-							if(read_write == 2'b01)New_Data1<=inWriteData;
-							if(read_write == 2'b10)Data <= New_Data1;
-						  end
-			32'h00000001:begin
-							if(read_write == 2'b01)New_Data2<=inWriteData;
-							if(read_write == 2'b10)Data <= New_Data2;
-							end	
-			32'h00000002:begin
-							if(read_write == 2'b01)New_Data3<=inWriteData;
-							if(read_write == 2'b10)Data <= New_Data3;
-						  end
-			32'h00000003:begin
-							if(read_write == 2'b01)New_Data4<=inWriteData;
-							if(read_write == 2'b10)Data <= New_Data4;
-						  end
-			32'h00000004:begin
-							if(read_write == 2'b01)New_Data5<=inWriteData;
-							if(read_write == 2'b10)Data <= New_Data5;
-						  end
-			32'h00000005:begin
-							if(read_write == 2'b01)New_Data6<=inWriteData;
-							if(read_write == 2'b10)Data <= New_Data6;
-						  end
-			32'h00000006:begin
-							if(read_write == 2'b01)New_Data7<=inWriteData;
-							if(read_write == 2'b10)Data <= New_Data7;
-						  end
-			32'h00000007:begin
-							if(read_write == 2'b01)New_Data8<=inWriteData;
-							if(read_write == 2'b10)Data <= New_Data8;
-						  end
-			32'h00000008:begin
-							if(read_write == 2'b01)New_Data9<=inWriteData;
-							if(read_write == 2'b10)Data <= New_Data9;
-						  end
-			32'h00000009:begin
-							if(read_write == 2'b01)New_Data10<=inWriteData;
-							if(read_write == 2'b10)Data <= New_Data10;
-						  end					  
-				default: begin
-					//if(read_write == 2'b01)defaultvalue<=inWriteData;
-					if(read_write == 2'b10)Data <= 32'hZZZZZZZZ;
-					if(read_write == 2'b01)Data <= 32'hXXXXXXZZ;
-					end
-		endcase
-		*/
 	end
 end
 					  

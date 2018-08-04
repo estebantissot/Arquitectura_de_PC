@@ -19,8 +19,7 @@
 //
 //////////////////////////////////////////////////////////////////////////////////
 module ControlBlock(
-    input rst,
-    input [31:0] inInstruction,
+    input [5:0] inInstruction,
     output [11:0] outControl
     );
 
@@ -29,9 +28,9 @@ reg [11:0]Control;
 
 assign outControl=Control;
 
-always @ *
+always @(*)
 	begin
-		case(inInstruction[31:26])// EXE_MEM_WB
+		case(inInstruction)// EXE_MEM_WB
 			6'd0 	: Control=12'b1100_000_000_10;// Instruction TypeR Execute_Memory_WrBack
 			6'd35   : Control=12'b0001_010_000_11;//Load word
 			6'h20   : Control=12'b0001_010_101_11;//Load signed byte  
@@ -42,9 +41,6 @@ always @ *
 			6'd4 	: Control=12'bX010_100_000_0X;//Branch
 			6'd8,6'hc,6'hd,6'he	: 
 			          Control=12'b0111_000_000_10;//Inmediato
-			6'd8	: Control=12'b0111_000_000_10;//Inmediato
-			6'd8	: Control=12'b0111_000_000_10;//Inmediato
-			6'd8	: Control=12'b0111_000_000_10;//Inmediato
 			6'd20	: Control=12'b0001_010_000_11;//Load byte????
 			6'd2    : Control=12'b0000_000_000_00;
 			default:

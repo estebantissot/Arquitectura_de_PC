@@ -19,7 +19,6 @@
 //
 //////////////////////////////////////////////////////////////////////////////////
 module ALUControl(
-    input  rst,
     input  [1:0] inALUop,
     input  [5:0] inInstructionOpcode,
     output [3:0] outALUControl

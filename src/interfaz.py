@@ -37,7 +37,8 @@ def instruction_set(argument):
         30 : ('Jump                     '    ,'j    target      '    , 'j    26          '),
         31 : ('Jump and link            '    ,'jal  target      '    , 'jal  26          '),
         32 : ('Jump register            '    ,'jr   rt          '    , 'jr   $t50        '),
-        33 : ('Jump and link register   '    ,'jalr rd  rs      '    , 'jalr $t51 $t16   ')
+        33 : ('Jump and link register   '    ,'jalr rd  rs      '    , 'jalr $t51 $t16   '),
+        34 : ('Finish the program 	'    ,'halt 	'    , 'halt 	'),
     }
     return instr.get(argument) 
 
@@ -76,7 +77,8 @@ def opcode(argument):
         'j'		:	('000010_TARGET',2,'TARGET'), #jump -> j target
         'jal'	:	('000011_TARGET',2,'TARGET'), #jump and link -> jal target
         'jr'	:	('000000_RS_000000000000000_001000',2,'REG_S'), #jump register -> jr rs
-        'jalr'	:	('000000_RS_00000_RD_00000_001001',3,'REG_S','REG_D') #jump and link register -> jalr rs,rd  !!!!!
+        'jalr'	:	('000000_RS_00000_RD_00000_001001',3,'REG_S','REG_D'), #jump and link register -> jalr rs,rd  !!!!!
+        'halt'	:	('01111111111111111111111111111110') # HALT
     }
     return op.get(argument) 
 
@@ -109,28 +111,85 @@ def parseo(argument,byte1,byte2,byte3,byte4):
     print switcher.get(argument, "Error!!")
 
 
+def send(argument):
+	print(argument)
+	send = ''
+	for j in range (0,32,8): # parseo el string en 4 grupos de 8 caracteres
+		a = argument[j:j+8]
+		#print ('\n\nj: {}, inst: {}'.format(j, a))
+		cont = 0
+		for i in range (0,8,1): # tomo cada uno de los caracteres del grupo
+			#print('i: {}, a[i]{}, potencia: {}'.format(i, int(a[i]), 7-i ))
+			cont = cont + int(a[i])*(2**(7-i)) # calculo el peso y lo sumo
+		#print('valor: {} , en ascii: {:c}'.format(cont, cont))
+		send = send + '{:c}'.format(cont)
 
-print ('  ------------------------------ INSTRUCTION SET ------------------------------\n')
-print ('| \t\tNAME   \t\t|\tINSTRUCTION \t|\tEXAMPLE \t|')
-for i in range (1,31):
-    print ('| {}\t|   {}\t|   {}\t|'.format(instruction_set(i)[0], instruction_set(i)[1], instruction_set(i)[2] ))
-print ('  -----------------------------------------------------------------------------')
+	print('send: {} len: {}'.format(send, len(send)))
+	ser.write(send)
 
 
-print ('  ---------------------------------- PROGRAM ----------------------------------\n')
-try:
+def decode(cmd):
+	print(cmd)
 
-	f = open ('program.txt','r')	
-	while True:
-		line = f.readline()
-		if not line:
-			break
-		line = line[:-1]
-		print('{:^30}'.format(line))
-except:
-	pass
-f.close
-print ('\n  -----------------------------------------------------------------------------')
+	try:
+		instruction = cmd.split(' ')
+		print(instruction)
+
+		binary_instruction = ''
+		struct = opcode(instruction[0])[0]
+
+		binary_instruction = binary_instruction + '{}'.format(struct)
+		print("")
+
+		print(binary_instruction + ' <- estructura')
+
+		cant_param = opcode(instruction[0])[1]
+		print(cant_param)
+
+		for i in range(2,cant_param+1,1):
+			
+			instruction[i-1]=instruction[i-1].replace("$t","")
+			instruction[i-1]=instruction[i-1].replace("r","")
+			
+			if((opcode(instruction[0])[i]) == 'REG_D'):
+				#instruction[i-1]=instruction[i-1].replace("$t","")
+				binary_instruction = binary_instruction.replace('RD','{:0>5b}'.format(int(instruction[i-1])))
+				print(binary_instruction + ' <- param{} RD'.format(i-1))
+
+			elif((opcode(instruction[0])[i]) == 'REG_T'):
+				#instruction[i-1]=instruction[i-1].replace("$t","")
+				binary_instruction = binary_instruction.replace('RT','{:0>5b}'.format(int(instruction[i-1])))
+				print(binary_instruction + ' <- param{} RT'.format(i-1))
+
+			elif((opcode(instruction[0])[i]) == 'REG_S'):
+				#instruction[i-1]=instruction[i-1].replace("$t","")
+				binary_instruction = binary_instruction.replace('RS','{:0>5b}'.format(int(instruction[i-1])))
+				print(binary_instruction + ' <- param{} RS'.format(i-1))
+
+			elif((opcode(instruction[0])[i]) == 'SHAMT'):
+				binary_instruction = binary_instruction.replace('SHAMT','{:0>5b}'.format(int(instruction[i-1])))
+				print(binary_instruction + ' <- param{} SHAMT'.format(i-1))
+
+			elif((opcode(instruction[0])[i]) == 'OFFSET'):
+				binary_instruction = binary_instruction.replace('OFFSET','{:0>16b}'.format(int(instruction[i-1])))
+				print(binary_instruction + ' <- param{} OFFSET'.format(i-1))
+
+			elif((opcode(instruction[0])[i]) == 'IMMEDIATE'):
+				binary_instruction = binary_instruction.replace('IMMEDIATE','{:0>16b}'.format(int(instruction[i-1])))
+				print(binary_instruction + ' <- param{} IMMEDIATE'.format(i-1))
+
+			elif((opcode(instruction[0])[i]) == 'TARGET'):
+				binary_instruction = binary_instruction.replace('TARGET','{:0>26b}'.format(int(instruction[i-1])))
+				print(binary_instruction + ' <- param{} TARGET'.format(i-1))
+
+		print(binary_instruction)
+		binary_instruction = binary_instruction.replace("_","")
+		print('Instruccion: {}\nLongitud: {}'.format(binary_instruction, len(binary_instruction)))
+		return binary_instruction
+
+	except:
+		print("\nERROR - INSTRUCCION INVALIDA\n\n")
+		return -1 
 
 
 print ('\t\t\t\tMIPS - UNIDAD DE DEBUGGING')
@@ -139,103 +198,83 @@ try:
 	print ('\t\tSerialPort: {} , BaudRate: {} , ByteSize: {}\n'.format(ser.name,ser.baudrate, ser.bytesize))
 except:
 	print('ERROR - Asegurese de conectar el dispositivo ')
+	exit()
 
 
-while (1):
-
-    in_comando = raw_input("Write one instruction: ")
-    in_comando = in_comando.lower()
-
-    if (in_comando == "exit"):
-        print("\nGOODBYE  BITCH!!\n")
-        break
-
-    if (in_comando == 'halt'):
-    	print("\nGOODBYE  MOTHERFUCKER!!\n")
-    	ser.write('{:b}'.format(0b00000001000000100000001100000100))
-
-    	#ser.write('1234')
-    	'''
-    	ser.write("1234")
-    	time.sleep(1)
-    	ser.write("2222")
-    	time.sleep(1)
-    	ser.write("3333")
-    	time.sleep(1)
-    	ser.write("4444")
-    	time.sleep(1)
-    	ser.write("5555")
-    	'''
-    	break
-
-    print(in_comando)
-
-    try:
-        instruction = in_comando.split(' ')
-        print(instruction)
-
-        binary_instruction = ''
-        struct = opcode(instruction[0])[0]
-
-        binary_instruction = binary_instruction + '{}'.format(struct)
-        print("")
-
-        print(binary_instruction + ' <- estructura')
-        
-        cant_param = opcode(instruction[0])[1]
-        print(cant_param)
-        for i in range(2,cant_param+1,1):
-
-            if((opcode(instruction[0])[i]) == 'REG_D'):
-                instruction[i-1]=instruction[i-1].replace("$t","")
-                binary_instruction = binary_instruction.replace('RD','{:0>5b}'.format(int(instruction[i-1])))
-                print(binary_instruction + ' <- param{} RD'.format(i-1))
-
-            elif((opcode(instruction[0])[i]) == 'REG_T'):
-                instruction[i-1]=instruction[i-1].replace("$t","")
-                binary_instruction = binary_instruction.replace('RT','{:0>5b}'.format(int(instruction[i-1])))
-                print(binary_instruction + ' <- param{} RT'.format(i-1))
-
-            elif((opcode(instruction[0])[i]) == 'REG_S'):
-                instruction[i-1]=instruction[i-1].replace("$t","")
-                binary_instruction = binary_instruction.replace('RS','{:0>5b}'.format(int(instruction[i-1])))
-                print(binary_instruction + ' <- param{} RS'.format(i-1))
-
-            elif((opcode(instruction[0])[i]) == 'SHAMT'):
-                binary_instruction = binary_instruction.replace('SHAMT','{:0>5b}'.format(int(instruction[i-1])))
-                print(binary_instruction + ' <- param{} SHAMT'.format(i-1))
-
-            elif((opcode(instruction[0])[i]) == 'OFFSET'):
-                binary_instruction = binary_instruction.replace('OFFSET','{:0>16b}'.format(int(instruction[i-1])))
-                print(binary_instruction + ' <- param{} OFFSET'.format(i-1))
-
-            elif((opcode(instruction[0])[i]) == 'IMMEDIATE'):
-                binary_instruction = binary_instruction.replace('IMMEDIATE','{:0>16b}'.format(int(instruction[i-1])))
-                print(binary_instruction + ' <- param{} IMMEDIATE'.format(i-1))
-            
-            elif((opcode(instruction[0])[i]) == 'TARGET'):
-                binary_instruction = binary_instruction.replace('TARGET','{:0>26b}'.format(int(instruction[i-1])))
-                print(binary_instruction + ' <- param{} TARGET'.format(i-1))
-
-        binary_instruction = binary_instruction.replace("_","")
-        print('\nInstruccion: {}\nLongitud: {}'.format(binary_instruction, len(binary_instruction)))
-        #ser.write("fasdf4444")
-
-    except:
-        print("\nERROR - INSTRUCCION INVALIDA\n\n") 
+print('Debugging Mode: \n\t 1) Debug at the end of the program (default)\n\t 2) Debug for each clock')
+debug_mode = raw_input("Select the number of the mode: ")
+if (debug_mode == '2'):
+	send("00000000000000000000000000000001")
+else:
+	send("00000000000000000000000000000010")
 
 
-inline = ""
-j=0
+
+print ('  ------------------------------ INSTRUCTION SET ------------------------------\n')
+print ('| \t\tNAME   \t\t|\tINSTRUCTION \t|\tEXAMPLE \t|')
+for i in range (1,35):
+    print ('| {}\t|   {}\t|   {}\t|'.format(instruction_set(i)[0], instruction_set(i)[1], instruction_set(i)[2] ))
+print ('  -----------------------------------------------------------------------------')
+
+
+
+print('Load Program Mode: \n\t 1) Load from file (default) \n\t 2) Manual Loading')
+load_mode = raw_input("Select the number of the mode: ")
+if (load_mode != '2'):
+	print ('  ---------------------------------- PROGRAM ----------------------------------\n')
+	try:
+		f = open ('program_addi.txt','r')	
+		while True:
+			line = f.readline()
+			if not line:
+				print("LOAD SUCCESSFULLY")
+				break
+			line = line[:-1]
+			print('{:^30}'.format(line))
+			b_instruction=decode(line)
+			send(b_instruction)
+			time.sleep(1)
+	except:
+		print ("ERROR")
+		mode = 1
+		pass
+	f.close
+	send(opcode('halt')) #instruccion HALT
+	print ('\n  -----------------------------------------------------------------------------')
+	
+if (load_mode == '2'):
+	while (1):
+		print("\n\t\tManual Loading")
+		in_comando = raw_input("Write one instruction: ")
+		in_comando = in_comando.lower()
+
+		if (in_comando == "exit"):
+		    print("\n\tGOODBYE !!\n")
+		    exit()
+
+		if (in_comando == 'halt'):
+			send(opcode(in_comando)) #instruccion HALT
+			break
+
+		b_instruction=decode(in_comando)
+		print(b_instruction)
+		send(b_instruction)
+
+
+print ("\n\nWait for debug data ...")
 
 while 1:
-	j=0
-	#var = raw_input("Write or Read? [w/r]: ")
-	#ser.write("fasdf4444")	
+	
+	if (debug_mode == '2'):
+		var = raw_input("Press a keyboard for debug ")
+		ser.write("1")
+
+	inline = ""
 	inline = ser.readline() # Lee hasta que se vacie el buffer.
 	#inline = ser.read(296) #Lee 296 bytes del buffer. 
 	if (inline != ""):
-		print (inline)
+		#print (inline)
+		j=0
 		for i in range (4 , len(inline)+1 , 4):			
 			reg = inline[i-4:i]
 			byte1 = ord(reg[0]) - 48 & 0xff

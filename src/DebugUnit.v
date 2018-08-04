@@ -29,30 +29,27 @@ module DebugUnit(
     input [31:0] inFRData,
     input [31:0] inMemData,
         
+    output led0,
     output   out_debug_on,
     output [31:0] outDebugAddress,
     
     output [31:0] rx_address,
     output [6:0] outControlLatchMux,
-    output [31:0] addressInstrucction,
-    output [31:0] InstructionRecive,
+    output loadProgram,
+    output [31:0] addressInstrucctionProgram,
+    output [31:0] InstructionProgram,
     output write_instruction,
     output TX,
-    output soft_rst,
     output stopPC_debug
     
     );
     
-wire MIPS_enable;    
-
 // Registros --- Maquina Transmisora 
 
-reg mode;
 reg state_mode;
 reg [31:0]	sendData;
 reg 		stopPC;
 reg 		tx_start;
-reg         WriteRead;
 //-----------------Maquina de Estados-----------------------------
 reg [2:0] 	state_send;
 
@@ -76,40 +73,45 @@ reg [2:0] state_prev;
 // Registros --- Maquina Receptora de instrucciones 
 reg [31:0]	rx_direccion;
 reg [31:0]  rx_Instruccion;
+reg         mode;
+reg         WriteRead;
+
 //--------------------- Maquina de estado-------------------------
-reg state_rx;
-localparam rx_enviar = 1'b0;
-localparam rx_stop = 1'b1;
+reg [1:0] state_rx;
+
+localparam rx_init = 2'b00;
+localparam rx_program = 2'b01;
+localparam rx_stop = 2'b10;
+
 //---------------------------------------------------------------
 
 // Cables
 wire [31:0] outRegData;
 wire [31:0] outMemData;
 wire rx_done;
-
-// Registros
-reg debug;
-reg [31:0] address;
-reg [3:0]senal;
-reg [2:0]etapa;
-
-assign stopPC_debug =stopPC;
-assign InstructionRecive	=	rx_Instruccion;
-assign addressInstrucction	=	rx_direccion;
-
-assign soft_rst = rst;//(rst || (!MIPS_enable));
-assign write_instruction   =   WriteRead;
-
-//assign tx_start = (Instruction==32'd19)? 1'b1:1'b0;
-
-assign outDebugAddress = address;
-assign outControlLatchMux = {etapa,senal};
-assign out_debug_on = debug;
-
-
 wire write;
 wire [31:0] dout;
 wire tx_dataready;
+
+// Registros
+reg debug;
+reg debug_mode;
+reg [31:0] address;
+reg [3:0]senal;
+reg [2:0]etapa;
+//reg send;
+reg load_program;
+
+assign stopPC_debug =stopPC;
+assign InstructionProgram	=	rx_Instruccion;
+assign addressInstrucctionProgram	=	rx_direccion;
+assign write_instruction   =   WriteRead;
+assign loadProgram = load_program;
+assign outDebugAddress = address;
+assign outControlLatchMux = {etapa,senal};
+assign out_debug_on = debug;
+assign led0 = debug_mode;
+
 
 // Instancia de UART
 Top_UART uart(
@@ -120,51 +122,73 @@ Top_UART uart(
 	.UART_data(sendData),
 	.RX(RX),
     .rx_address(rx_address),
-	.MIPS_enable(MIPS_enable),
 	.TX(TX),
 	.write(write),
 	.dout(dout),
 	.tx_dataready(tx_dataready)
 );
 
-/*
+
 // Maquina de estado de RX
 always @ (posedge clk, posedge rst)
 begin
 	if(rst)
 		begin
-		state_rx	=	rx_enviar;
-		rx_direccion 	=	32'hffffffff;
+		state_rx <= rx_init;
+		//send <= 1'b0;
+		debug_mode <= 1'b0;
+		rx_direccion <= 32'hffffffff;
+		load_program = 1'b1;
 		end
 	else
 		begin
 			case(state_rx)
-			rx_enviar:
+            
+            rx_init:
+                begin
+                    if(write)
+                        begin    
+                            debug_mode <= dout[0]; 
+                            state_rx <= rx_program;
+                            load_program = 1'b1;
+                        end
+                end
+			
+			rx_program:
 				begin	
 					if(write)
-						begin
-							rx_direccion  = rx_direccion+1;
-							rx_Instruccion	= dout;
-
-							WriteRead = 1'b1;
-									
-							if(dout == 32'h0 || rx_direccion == 32'hfffffff0)// Instruccion de Halt para terminar el cargado de memoria		
+						begin	
+							if(dout == 32'b01111111111111111111111111111110)// Instruccion de Halt para terminar el cargado de memoria		
 								begin
-									state_rx = rx_stop;
+								    WriteRead <= 1'b0;
+								    load_program = 1'b0;
+									state_rx <= rx_stop;
 								end
+                            else
+                                begin
+                                    WriteRead <= 1'b1;
+                                    state_rx <= rx_program;
+                                    rx_direccion <= rx_direccion+1;
+                                    rx_Instruccion <= dout;
+                                end
 						end
 					else
-						WriteRead = 1'b0;
+					   begin
+					       WriteRead <= 1'b0;
+					       state_rx <= rx_program;
+                       end
 				end
-			rx_stop:
-				begin
-					WriteRead<=1'b0;
-				end
+				
+            rx_stop:
+                begin
+                    load_program = 1'b0;
+                    WriteRead <= 1'b0;
+                    state_rx <= rx_stop;
+                end	
 			endcase
 		end
 
 end
-*/
 
 
 /* maquina de estado del TX 
@@ -175,7 +199,7 @@ always @(posedge clk,posedge rst)
 begin
 	if(rst)
 		begin
-			stopPC<=1'b0;
+			stopPC<=1'b1;
 			tx_start<=1'b0;
 			state_send <= send_init;
 			etapa <= 3'b0;
@@ -187,20 +211,40 @@ begin
 		case(state_send)
             send_init:
                 begin
-                  //led <= 1'b1;
-                   stopPC<=1'b0; 
-                  if(write)//inPC == 32'd28//if(write)//if(state_rx!=rx_stop)
-                     begin
-                        //led <= 1'b1;
-                        state_send<=send_PC;
-                        debug <= 1'b1;
-                        
-                    end
+                    if(state_rx == rx_stop)
+                        begin
+                            if (!debug_mode) // Envio todo al final del programa
+                                begin
+                                    if (inPC == rx_direccion + 32'd4) // Finalizo el programa
+                                        begin
+                                            stopPC <= 1'b1;
+                                            state_send<=send_PC;
+                                            debug <= 1'b1;
+                                        end
+                                    else
+                                        begin
+                                            stopPC <= 1'b0;
+                                            state_send<=send_init;
+                                        end
+                                end
+                           else // Envio todo despues de cada instruccion
+                               begin
+                                    stopPC<=1'b1; 
+                                    if (!RX)
+                                        begin 
+                                            state_send <= send_PC;
+                                            debug <= 1'b1;
+                                        end
+                                    else
+                                        state_send <= send_init;
+                               end     
+                        end
+                    else
+                        state_send <= send_init; 
                 end
                 
             send_PC:
                 begin
-                     //stopPC<=1'b0; 
                      sendData<=inPC;
                      tx_start<=1'b1;
                      state_prev<=send_Rmem;
@@ -247,7 +291,6 @@ begin
              
              send_Latch:
                  begin
-                    //sendData<=32'b01111111_00000110_00000111_00001000;
                     tx_start<=1'b1;
                     sendData <= inLatch;
                     state_send <= send_waitFinish;
@@ -302,7 +345,6 @@ begin
                                   begin
                                       etapa <= 3'b000;
                                       senal <= 4'b0;
-                                      //stopPC<=1'b0; 
                                       state_prev <= send_Finish;
                                   end
                               else
@@ -320,21 +362,24 @@ begin
                     if(tx_dataready == 1'b1)
                         begin
                             state_send <= state_prev;
-                            //tx_start<=1'b0;
                         end
                 end
                 
             send_Finish:
                 begin
-                    stopPC<=1'b0;
                     debug <= 1'b0;
                     tx_start<=1'b0;
-                    state_send <= send_init;
-                    // se debe esperar hasta que se quiera mandar todo de nuevo.
+                    if (debug_mode)
+                        begin
+                            state_send <= send_init;
+                            stopPC<=1'b0;
+                        end
+                    else
+                        state_send <= send_Finish;
                 end
             
             endcase
-            end
+        end
 	
 end
 

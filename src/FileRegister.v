@@ -6,9 +6,7 @@
 // Create Date:    17:07:06 03/02/2018 
 // Design Name: 
 // Module Name:    FileRegister 
-// Project Name: 
-// Target Devices: 
-// Tool versions: 
+// Project Name:    TP4-PIPELINE 
 // Description: 
 //
 // Dependencies: 
@@ -37,20 +35,20 @@ module FileRegister(
     output [31:0] out_regDebug
     );
 	 
-
+// Registros
 reg [31:0] registros[31:0];// Matriz de 32X32
 reg [31:0] reg1;
 reg [31:0] reg2;
 reg [31:0] reg_Debug;
 
-// Lectura combinacional, manipulado por el clock desendente que se encuentra en el modulo superior
+integer i;
+
+// Asignaciones
 assign out_reg1 = reg1;
 assign out_reg2 = reg2;
-
 assign out_regDebug = reg_Debug;
 
 //Lectura por flanco descendente
-
 always @(negedge clk)
 begin
     if (Debug_on)
@@ -73,6 +71,11 @@ always@ (posedge clk, posedge rst)
 begin
 	if (rst)
 		begin
+            for (i=32'd0; i <= 32'd31; i=i+32'b1)
+                begin
+                   registros[i][31:0]<= 32'b0;
+                end
+		/*
 			registros[31'd0][31:0] <= 32'h00000001;
 			registros[31'd1][31:0] <= 32'h00000011;
 			registros[31'd2][31:0] <= 32'h00000012;
@@ -104,6 +107,7 @@ begin
             registros[31'd29][31:0] <= 32'h00000000;
             registros[31'd30][31:0] <= 32'h00000000;
             registros[31'd31][31:0] <= 32'd42;  //Z en ascii
+            */
 		end
 	else
 		begin

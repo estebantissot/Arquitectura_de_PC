@@ -6,9 +6,7 @@
 // Create Date:    16:01:24 03/02/2018 
 // Design Name: 
 // Module Name:    InstructionMemory 
-// Project Name: 
-// Target Devices: 
-// Tool versions: 
+// Project Name:    TP4-PIPELINE
 // Description: 
 //
 // Dependencies: 
@@ -22,21 +20,32 @@ module InstructionMemory(
 	input clk,
 	input rst,
 	input [31:0] inAddr,
-	output [31:0] outData,
 	
 	//Debug unit
     input wr_instruction,
-    input [31:0] data_instruction
-    
+    input [31:0] data_instruction,
+
+    // OUTPUT
+    output [31:0] outData
 );
 
+// Registros
 reg [31:0] RegisterMemory [31:0];
 reg [31:0] Data;
 
+integer i;
+
+// Asignaciones
 assign outData=Data; 
 
 initial
     begin
+	
+	 for (i=32'd0; i <= 32'd31; i=i+32'b1)
+            begin
+               RegisterMemory[i][31:0]<= 32'b0;
+            end
+        /*
         RegisterMemory[32'd0]=32'b000000_00001_00010_00011_00000_100000;//R-type add;
         RegisterMemory[32'd1]=32'b000000_00001_00010_00100_00000_100010;//R-type sub;
         RegisterMemory[32'd2]=32'b000000_00001_00010_00101_00000_100100;//R-type and
@@ -86,17 +95,17 @@ initial
 
 always @ (negedge clk, posedge rst)
 begin    
-    if (rst)
-    begin
-        Data <= RegisterMemory[1'b0];
-    end
+    if(rst)
+        begin
+            Data <= RegisterMemory[1'b0];
+        end
     else
-    begin
-        //if(wr_instruction)
-         //   RegisterMemory[inAddr]=data_instruction;
-        //else
-            Data=RegisterMemory[inAddr];
-    end
+        begin
+            if(wr_instruction)
+                RegisterMemory[inAddr] <= data_instruction;
+            else
+                Data <= RegisterMemory[inAddr];
+        end
 end
 
 

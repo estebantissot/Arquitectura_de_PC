@@ -28,7 +28,6 @@ module Top_UART(
 		input  RX,
         // OUTPUT
         //output rx_done,
-		output MIPS_enable,
 		output TX,
 		output [31:0] rx_address,
 		output write,
@@ -70,7 +69,6 @@ Interfaz_Rx rx(
     .start(rx_done),
     .din(rx_data),
     // OUTPUT
-    .MIPS_enable(MIPS_enable),
     .go(write),
     .rx_address(rx_address),
     .dout(dout)
@@ -81,8 +79,8 @@ Interfaz_Tx tx(
     .clk(clk),
     .reset(reset),
     // INTPUT
-    .in_data(UART_data), //(dout),
-    .new_result(TX_start),// (write),
+    .in_data(UART_data),// UART_data - dout
+    .new_result(TX_start),// TX_start - write
     .tx_done(tx_done),
     // OUTPUT
     .out_data(tx_data),
@@ -104,7 +102,10 @@ Transmisor trans(
 
 
 
-/*assign send_data = data;
+/*
+// ECO pasando por los mopdulos tx, interfaz tx, interfaz rx y rx
+
+assign send_data = data;
 assign init_tx = reg_tx_start;
 
 always @(posedge clk, posedge reset)
@@ -137,6 +138,8 @@ end
 
 
 /*
+
+//ECO pasando por los mopdulos tx y rx
 
 reg [1:0] state_rx;
 reg [1:0] state_tx;
