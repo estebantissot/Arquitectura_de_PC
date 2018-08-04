@@ -47,7 +47,7 @@ wire [4:0]	idecode0_out_rt; //idecode0:out_rt -> execute0:in_rt
 wire [4:0]	idecode0_outRT_rd; //idecode0:outRT_rd -> execute0:inRT_rd
 wire        idecode0_outPC_write;
 wire        idecode0_outIF_ID_write;
-wire [6:0]  idecode0_outInmmediateOpcode;
+wire [5:0]  idecode0_outInmmediateOpcode;
 wire [31:0] idecode0_outPCJump;
 wire        idecode0_jump;
 //-- Modulo Execute --
@@ -77,7 +77,6 @@ wire loadProgram;
 wire [31:0] muxLatch_outData;
 wire [6:0]  ControlLatchMux;
 
-wire soft_rst; 
 wire tx_start;
 wire MIPS_enable;
 wire Debug_on;
@@ -98,7 +97,7 @@ assign jump_branch= (memaccess0_outPCSel)? execute0_outPCBranch:idecode0_outPCJu
 InstructionFetch ifetch0(
 	//Clock and Reset Signals
 	.clk(clk),
-	.rst(soft_rst),
+	.rst(rst),
 		
 	//debug
 	.loadProgram(loadProgram),
@@ -316,7 +315,6 @@ DebugUnit debug(
     .write_instruction(wr_program_instruction),
     .rx_address(rx_address),
     .TX(UART_RXD_OUT), 
-    .soft_rst(soft_rst),
     .stopPC_debug(stop_debug),
     .outControlLatchMux(ControlLatchMux)
 

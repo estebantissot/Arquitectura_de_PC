@@ -39,7 +39,7 @@ module Execute(
     input           MEM_regF_wr,
     input [4:0]     WB_rd,     
     input           WB_regF_wr,
-	input [6:0]		inInmmediateOpcode,
+	input [5:0]		inInmmediateOpcode,
 	
 	//debug
 	input           stop_debug,				 
@@ -77,6 +77,7 @@ module Execute(
     wire [1:0] control_muxB; //control mux de inAluB.
     wire [5:0] Opcode;
     wire    shif_variable;
+    
     // Asignaciones
     assign outWB = WB;
     assign outMEM = MEM;
@@ -90,7 +91,6 @@ module Execute(
 
 //Instancia de "ALU"
 ALU #(.bits(32)) alu0 (	
-    .rst(rst),
 	.A(ALU_A),
 	.B(ALU_B),
 	.select(ALUControl),
@@ -107,7 +107,6 @@ assign Opcode = (inEXE[2:1] == 2'b11)? inInmmediateOpcode:inInstruction_ls[5:0];
 assign shif_variable= ((Opcode == 5'b0) && (inInstruction_ls[10:6] != 5'b0))? 1'b1:1'b0;
 //Instancia de "ALUControl"
 ALUControl alu_contol0 (
-	.rst(rst),
 	.inALUop(inEXE[2:1]),
 	.inInstructionOpcode(Opcode),
 	.outALUControl(ALUControl)

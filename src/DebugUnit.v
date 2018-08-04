@@ -40,21 +40,16 @@ module DebugUnit(
     output [31:0] InstructionProgram,
     output write_instruction,
     output TX,
-    output soft_rst,
     output stopPC_debug
     
     );
     
-wire MIPS_enable;    
-
 // Registros --- Maquina Transmisora 
 
-reg mode;
 reg state_mode;
 reg [31:0]	sendData;
 reg 		stopPC;
 reg 		tx_start;
-reg         WriteRead;
 //-----------------Maquina de Estados-----------------------------
 reg [2:0] 	state_send;
 
@@ -78,20 +73,25 @@ reg [2:0] state_prev;
 // Registros --- Maquina Receptora de instrucciones 
 reg [31:0]	rx_direccion;
 reg [31:0]  rx_Instruccion;
+reg         mode;
+reg         WriteRead;
+
 //--------------------- Maquina de estado-------------------------
 reg [1:0] state_rx;
 
 localparam rx_init = 2'b00;
 localparam rx_program = 2'b01;
 localparam rx_stop = 2'b10;
-//localparam rx_idle = 2'b10;
-//localparam rx_send = 2'b11;
+
 //---------------------------------------------------------------
 
 // Cables
 wire [31:0] outRegData;
 wire [31:0] outMemData;
 wire rx_done;
+wire write;
+wire [31:0] dout;
+wire tx_dataready;
 
 // Registros
 reg debug;
@@ -99,28 +99,19 @@ reg debug_mode;
 reg [31:0] address;
 reg [3:0]senal;
 reg [2:0]etapa;
-reg send;
+//reg send;
 reg load_program;
 
 assign stopPC_debug =stopPC;
 assign InstructionProgram	=	rx_Instruccion;
 assign addressInstrucctionProgram	=	rx_direccion;
-
-assign soft_rst = rst;//(rst || (!MIPS_enable));
 assign write_instruction   =   WriteRead;
 assign loadProgram = load_program;
-
-//assign tx_start = (Instruction==32'd19)? 1'b1:1'b0;
-
 assign outDebugAddress = address;
 assign outControlLatchMux = {etapa,senal};
 assign out_debug_on = debug;
-
 assign led0 = debug_mode;
 
-wire write;
-wire [31:0] dout;
-wire tx_dataready;
 
 // Instancia de UART
 Top_UART uart(
@@ -131,7 +122,6 @@ Top_UART uart(
 	.UART_data(sendData),
 	.RX(RX),
     .rx_address(rx_address),
-	.MIPS_enable(MIPS_enable),
 	.TX(TX),
 	.write(write),
 	.dout(dout),
@@ -145,7 +135,7 @@ begin
 	if(rst)
 		begin
 		state_rx <= rx_init;
-		send <= 1'b0;
+		//send <= 1'b0;
 		debug_mode <= 1'b0;
 		rx_direccion <= 32'hffffffff;
 		load_program = 1'b1;

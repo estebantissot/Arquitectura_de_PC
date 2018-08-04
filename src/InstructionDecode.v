@@ -53,7 +53,7 @@ module InstructionDecode(
     output 	        outIF_ID_write,
     //output          outFlush,
     output  [31:0]  out_regDebug,
-    output  [6:0]	outInmmediateOpcode,
+    output  [5:0]	outInmmediateOpcode,
     
     //Jump
     output [31:0]   outAddress_jump,
@@ -73,12 +73,10 @@ reg signed [31:0]	Instruction_ls;
 reg [4:0]   rs;
 reg [4:0] 	rt;
 reg [4:0] 	RT_rd;
-reg [6:0]	InmmediateOpcode;
+reg [5:0]	InmmediateOpcode;
 reg [31:0]  PCJump;
 reg         PCSel;
 //Cables
-//wire [31:0] RegF_outRegA;
-//wire [31:0] RegF_outRegB;
 wire [8:0] outControl;
 wire ControlMux;
 wire write;
@@ -88,8 +86,6 @@ assign outWB = WB;
 assign outMEM = MEM;
 assign outEXE = EXE;
 assign outInstructionAddress = InstructionAddress;
-//assign outRegA = RegF_outRegA;
-//assign outRegB = RegF_outRegB;
 assign outInstruction_ls = ((EXE[2:1]==2'b11) && (inInstruction[31:26]!=6'd8))? Instruction_ls>>16:Instruction_ls >>> 16;
 assign out_rs = rs;
 assign out_rt = rt;
@@ -115,8 +111,7 @@ HazardDetectionUnit hdu0(
 
 // Instancia de "Control Block"
 ControlBlock ctrl0 (
-	.rst(rst),
-	.inInstruction(inInstruction),
+	.inInstruction(inInstruction[31:26]),
 	.outControl(outControl)
 );
 
