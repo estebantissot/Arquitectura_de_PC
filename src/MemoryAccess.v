@@ -72,6 +72,7 @@ DataMemory dm0 (
 	.read_write(read_write),
 	.inAddress(inALUResult),
 	.inWriteData(inRegB),
+	.length(inWB[3:2]),
 	.stop_debug(stop_debug),
 	.outData(outRegF_wd),
 	.outMemDebug(outMemDebug)

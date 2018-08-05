@@ -286,7 +286,6 @@ MuxLatch ml0(
     //-- Modulo Write Back --
     .wb0_outRegF_wr(wb0_outRegF_wr), 
     .wb0_outRegF_wd(wb0_outRegF_wd), 
-    
     .out_data(muxLatch_outData)
     );
 

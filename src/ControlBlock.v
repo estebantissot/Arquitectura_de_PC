@@ -37,6 +37,8 @@ always @(*)
 			6'h24   : Control=12'b0001_010_001_11;//Load unsigned byte
 			6'h21	: Control=12'b0001_010_110_11;//Load signed halfword 
 			6'h25	: Control=12'b0001_010_010_11;//Load unsigned halfword         
+			6'h28	: Control=12'bX001_001_001_0X;//Store
+			6'h29	: Control=12'bX001_001_010_0X;//Store
 			6'd43	: Control=12'bX001_001_000_0X;//Store
 			6'd4 	: Control=12'bX010_100_000_0X;//Branch
 			6'd8,6'hc,6'hd,6'he	: 

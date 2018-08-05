@@ -56,25 +56,25 @@ module Execute(
 
 // Registros
     reg [4:0] 	WB;
-    reg [2:0] 	MEM;
-    reg [31:0] ALUResult;
-    reg 		ALUZero;
+    reg [2:0]   MEM;
+    reg [31:0]  ALUResult;
+    reg 	   ALUZero;
     reg [31:0] RegB;
-    reg [4:0] 	RegF_wreg;
-	reg [4:0] 	wreg;
+    reg [4:0]  RegF_wreg;
+	reg [4:0]  wreg;
 	reg [31:0] regB_ALU;
 	reg [31:0] regA_ALU;
-
+    reg        PCSel;
     // Cables
     wire [3:0] 	ALUControl;
     wire [31:0] ALU_A;
     wire [31:0] ALU_B;
     wire [31:0] alu_result;
-    wire 			alu_zero;
-    wire [1:0] control_muxA; //control mux de inAluA 
-    wire [1:0] control_muxB; //control mux de inAluB.
-    wire [5:0] Opcode;
-    wire    shif_variable;
+    wire 		alu_zero;
+    wire [1:0]  control_muxA; //control mux de inAluA 
+    wire [1:0]  control_muxB; //control mux de inAluB.
+    wire [5:0]  Opcode;
+    wire        shif_variable;
     
 // Asignaciones
 assign outWB = WB;
@@ -97,7 +97,7 @@ ALU #(.bits(32)) alu0 (
 
 // Asignaciones
 assign outPCJump = inInstruction_ls + inInstructionAddress;
-assign outPCSel = (inMEM[2] && (inRegA==inRegB))? 1'b1:1'b0;
+assign outPCSel = PCSel;// (inMEM[2] && (inRegA==inRegB))? 1'b1:1'b0;
 assign Opcode = (inEXE[2:1] == 2'b11)? inInmmediateOpcode:inInstruction_ls[5:0];
 assign shif_variable= ((inEXE[2:1] == 2'b10) && (inInstruction_ls[10:6] != 5'b0))? 1'b1:1'b0;
 //Instancia de "ALUControl"
@@ -131,6 +131,7 @@ begin
 			ALUResult <= 32'b0;
 			ALUZero <= 1'b0;
 			RegB <= 32'b0;
+			
 		end
 	else
 		begin
@@ -151,11 +152,17 @@ always @(*)
 		if(rst)
 			begin
 			    regA_ALU <= 32'b0;
-				wreg<=0;
-				regB_ALU<=0;
+				wreg <= 0;
+				regB_ALU<= 0;
+				PCSel <= 0;
 			end
 		else
 			begin
+			    if(inMEM[2] && (inRegA==inRegB))
+			         PCSel=1'b1;
+			    else
+			         PCSel=1'b0;
+			
 				//Jump <= ((inInstruction_ls << 2) + inInstructionAddress);
 				casez(inEXE)
 					

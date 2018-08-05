@@ -75,6 +75,7 @@ reg [4:0] 	RT_rd;
 reg [5:0]	InmmediateOpcode;
 reg [31:0]  PCJump;
 reg         PCSel;
+reg         jumpTake;
 //Cables
 wire [11:0] outControl;
 wire ControlMux;
@@ -92,7 +93,7 @@ assign outRT_rd = RT_rd;
 assign outInmmediateOpcode	=	InmmediateOpcode; 
 assign write = (Debug_on) ? 1'b0:inRegF_wr;
 
-assign jump_take=(inInstruction[31:26] == 6'd2)? 1'b1:1'b0;
+assign jump_take=jumpTake;//(inInstruction[31:26] == 6'd2)? 1'b1:1'b0;
 assign outAddress_jump=(inInstruction[31:26] == 6'd2)? {inInstructionAddress[31:28],inInstruction[25:0],2'b00}:inInstructionAddress;
 
 
@@ -149,6 +150,7 @@ if (rst)
 		rs = 5'b0;
 		rt = 5'b0;
 		RT_rd = 5'b0;
+		jumpTake=1'b0;
 	end
 else // Escritura de todos los registros de salida
 	begin
@@ -168,7 +170,11 @@ else // Escritura de todos los registros de salida
                     EXE = outControl[11:8];
                 end
             endcase
-    
+            
+            if(inInstruction[31:26] == 6'd2)
+                jumpTake=1'b1;
+            else
+                jumpTake=1'b0;
             InstructionAddress = inInstructionAddress;
             InmmediateOpcode = inInstruction[31:26];
             //RegA = RegF_outRegA;

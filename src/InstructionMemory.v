@@ -41,11 +41,12 @@ assign outData=Data;
 initial
     begin
 	
-	 for (i=32'd0; i <= 32'd31; i=i+32'b1)
+	 /*for (i=32'd0; i <= 32'd31; i=i+32'b1)
             begin
                RegisterMemory[i][31:0]<= 32'b0;
             end
-        /*
+       */ 
+       /*
         RegisterMemory[32'd0]=32'b000000_00001_00010_00011_00000_100000;//R-type add;
         RegisterMemory[32'd1]=32'b000000_00001_00010_00100_00000_100010;//R-type sub;
         RegisterMemory[32'd2]=32'b000000_00001_00010_00101_00000_100100;//R-type and
@@ -76,7 +77,50 @@ initial
         RegisterMemory[32'd23]=32'b000000_10011_10010_00010_00000_000111;//R-type srav
         RegisterMemory[32'd24]=32'b000000_10011_10010_00010_00111_000010;//R-type srl
         RegisterMemory[32'd25]=32'b000000_10011_10010_00010_00000_000110;//R-type srlv
-        
+        */
+      
+
+      	//-------------------------LOAD-----------------------------------------------------
+		/*	RegisterMemory[32'd1]=32'b100011_00001_00010_0000000000000010; // Load word  
+			RegisterMemory[32'd2]=32'b100101_00001_00011_0000000000000011; // Load unsigned halfword 
+			RegisterMemory[32'd3]=32'b100001_00001_00100_0000000000000010; // Load signed halfword
+			RegisterMemory[32'd4]=32'b100100_00001_00101_0000000000000101; // Load  unsigned byte
+			RegisterMemory[32'd5]=32'b100000_00001_00110_0000000000000111; // Load  signed byte
+        	RegisterMemory[32'd6]=32'b000000_00001_00010_10000_00000_100000;//R-type add;
+			RegisterMemory[32'd7]=32'b000000_00001_00011_10000_00000_100000;//R-type add;
+			RegisterMemory[32'd8]=32'b000000_00001_00100_10000_00000_100000;//R-type add;
+			RegisterMemory[32'd9]=32'b000000_00001_00101_10000_00000_100000;//R-type add;
+			RegisterMemory[32'd10]=32'b000000_00001_00110_10000_00000_100000;//R-type add;
+       	*/
+       	//----------------------------------------------------------------------------------
+
+
+       	//-------------------------Store-----------------------------------------------------
+			
+
+			RegisterMemory[32'd1]=32'b101011_00001_01000_0000000000001000;//Store word;
+			RegisterMemory[32'd2]=32'b101001_00001_01001_0000000000000100;//Store halfword;
+			RegisterMemory[32'd3]=32'b101000_00001_01010_0000000000010001;//Store byte;
+			
+
+			RegisterMemory[32'd4]=32'b000000_00001_00010_10000_00000_100000;//R-type add;
+			RegisterMemory[32'd5]=32'b000000_00001_00011_10000_00000_100000;//R-type add;
+			RegisterMemory[32'd6]=32'b000000_00001_00100_10000_00000_100000;//R-type add;
+			RegisterMemory[32'd7]=32'b000000_00001_00101_10000_00000_100000;//R-type add;
+			RegisterMemory[32'd8]=32'b000000_00001_00110_10000_00000_100000;//R-type add;
+			
+			RegisterMemory[32'd9]=32'b100011_00001_00010_0000000000001000; // Load word  
+        	RegisterMemory[32'd10]=32'b100011_00001_00011_0000000000000000; // Load word
+        	RegisterMemory[32'd11]=32'b100011_00001_00100_0000000000000001; // Load word
+
+        	RegisterMemory[32'd12]=32'b000000_10101_01110_10000_00000_100000;//R-type add;
+			RegisterMemory[32'd13]=32'b000000_10001_10011_11000_00000_100000;//R-type add;
+			RegisterMemory[32'd14]=32'b000000_00010_00100_10000_00000_100000;//R-type add;
+			RegisterMemory[32'd15]=32'b000000_00011_00101_10000_00000_100000;//R-type add;
+			RegisterMemory[32'd16]=32'b000000_00100_00110_10000_00000_100000;//R-type add;
+       	
+       	//----------------------------------------------------------------------------------
+
 
         /*RegisterMemory[32'd15]=32'b001110_11000_00001_0000000000001111;//Y-type xori
         RegisterMemory[32'd16]=32'b001100_11000_11101_0000000000001111;//Y-type andi
