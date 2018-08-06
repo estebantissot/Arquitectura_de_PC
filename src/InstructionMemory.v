@@ -76,7 +76,7 @@ initial
         RegisterMemory[32'd23]=32'b000000_10011_10010_00010_00000_000111;//R-type srav
         RegisterMemory[32'd24]=32'b000000_10011_10010_00010_00111_000010;//R-type srl
         RegisterMemory[32'd25]=32'b000000_10011_10010_00010_00000_000110;//R-type srlv
-        
+*/        
 
         /*RegisterMemory[32'd15]=32'b001110_11000_00001_0000000000001111;//Y-type xori
         RegisterMemory[32'd16]=32'b001100_11000_11101_0000000000001111;//Y-type andi

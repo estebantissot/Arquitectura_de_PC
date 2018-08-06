@@ -1,7 +1,8 @@
 import serial
 import time
 
-
+# Esta tabla contiene el set de instrucciones implementado. 
+# Se utiliza para mostrar informacion al usuario.
 def instruction_set(argument):
     instr = {
         #KEY    :   (instruction, example, description)
@@ -18,11 +19,11 @@ def instruction_set(argument):
         11 : ('Exclusive OR             '    ,'xor  rd  rt  rs  '    , 'xor  $t27 $t6 $t1'),
         12 : ('NOR                      '    ,'nor  rd  rt  rs  '    , 'nor  $t28 $t6 $t1'),
         13 : ('Set less than            '    ,'slt  rd  rt  rs  '    , 'slt  $t29 $t6 $t1'),
-        14 : ('load byte                '    ,'lb   rt  offset  '    , 'lb   $t30 16     '),
+        14 : ('Load byte                '    ,'lb   rt  offset  '    , 'lb   $t30 16     '),
         15 : ('Load halfword            '    ,'lh   rt  offset  '    , 'lh   $t31 16     '),
         16 : ('Load word                '    ,'lw   rt  offset  '    , 'lw   $t32 16     '),
         17 : ('Load unsigned byte       '    ,'lbu  rt  offset  '    , 'lbu  $t33 16     '),
-        18 : ('load unsigned halfword   '    ,'lhu  rt  offset  '    , 'lhu  $t34 16     '),
+        18 : ('Load unsigned halfword   '    ,'lhu  rt  offset  '    , 'lhu  $t34 16     '),
         19 : ('Store byte               '    ,'sb   rt  offset  '    , 'sb   $t35 16     '),
         20 : ('Store halfword           '    ,'sh   rt  offset  '    , 'sh   $t36 16     '),
         21 : ('Store word               '    ,'sw   rt  offset  '    , 'sw   $t37 16     '),
@@ -42,6 +43,8 @@ def instruction_set(argument):
     }
     return instr.get(argument) 
 
+# Esta tabla contiene la estructura de las instrucciones implementadas en el MIPS.
+# Se utiliza para codificar el assembler escrito por el usuario.
 def opcode(argument):
     op = {
     	#KEY	:	(estructura,cant_param, param1,param2,..)
@@ -82,7 +85,8 @@ def opcode(argument):
     }
     return op.get(argument) 
 
-
+# Esta tabla contiene el orden y etiqueta de los datos que se reciben por UART 
+# Se utiliza para presentar al usuario los datos recibidos.
 def parseo(argument,byte1,byte2,byte3,byte4):
     switcher = {
         0:  '\n\t\t\t Program Counter\nPC : 0x{:0>2x}{:0>2x}{:0>2x}{:0>2x} : 0b{:0>8b}_{:0>8b}_{:0>8b}_{:0>8b}'.format(byte1,byte2,byte3,byte4,byte1,byte2,byte3,byte4),
@@ -110,24 +114,24 @@ def parseo(argument,byte1,byte2,byte3,byte4):
     }
     print switcher.get(argument, "Error!!")
 
-
+# Esta funcion se encarga de enviar los datos por UART
+# Parsea el argumento de 32bits en 4 grupos de 8bits, con 8 bits se representa un caracter ascii.
+# Suma el peso de cada bit y concatena el ascii correspondiente a ese valor. Luego envia los 4 caracteres ascii 
 def send(argument):
 	print(argument)
 	send = ''
 	for j in range (0,32,8): # parseo el string en 4 grupos de 8 caracteres
 		a = argument[j:j+8]
-		#print ('\n\nj: {}, inst: {}'.format(j, a))
 		cont = 0
 		for i in range (0,8,1): # tomo cada uno de los caracteres del grupo
-			#print('i: {}, a[i]{}, potencia: {}'.format(i, int(a[i]), 7-i ))
 			cont = cont + int(a[i])*(2**(7-i)) # calculo el peso y lo sumo
-		#print('valor: {} , en ascii: {:c}'.format(cont, cont))
 		send = send + '{:c}'.format(cont)
 
 	print('send: {} len: {}'.format(send, len(send)))
 	ser.write(send)
 
-
+# Esta funcion se encarga de desarmar la instruccion de assembler y transformarla en 32 caracteres (1 o 0) 
+# Es necesario reordenar y adicionar datos segun la instruccion. 
 def decode(cmd):
 	print(cmd)
 
@@ -192,15 +196,19 @@ def decode(cmd):
 		return -1 
 
 
+########################################  INTERACCION CON EL USUARIO  ######################################## 
+
 print ('\t\t\t\tMIPS - UNIDAD DE DEBUGGING')
+
+# Configuracion de la comunicacion serial
 try:
-	ser = serial.Serial('/dev/ttyUSB1',19200,timeout=1) #38400 #19200
+	ser = serial.Serial('/dev/ttyUSB1',19200,timeout=1) 
 	print ('\t\tSerialPort: {} , BaudRate: {} , ByteSize: {}\n'.format(ser.name,ser.baudrate, ser.bytesize))
 except:
 	print('ERROR - Asegurese de conectar el dispositivo ')
 	exit()
 
-
+# Seleccion del modo de debugging
 print('Debugging Mode: \n\t 1) Debug at the end of the program (default)\n\t 2) Debug for each clock')
 debug_mode = raw_input("Select the number of the mode: ")
 if (debug_mode == '2'):
@@ -208,8 +216,7 @@ if (debug_mode == '2'):
 else:
 	send("00000000000000000000000000000010")
 
-
-
+# Se imprime el set de instrucciones soportado por el MIPS
 print ('  ------------------------------ INSTRUCTION SET ------------------------------\n')
 print ('| \t\tNAME   \t\t|\tINSTRUCTION \t|\tEXAMPLE \t|')
 for i in range (1,35):
@@ -217,7 +224,7 @@ for i in range (1,35):
 print ('  -----------------------------------------------------------------------------')
 
 
-
+# Seleccion del modo de carga del programa de usuario
 print('Load Program Mode: \n\t 1) Load from file (default) \n\t 2) Manual Loading')
 load_mode = raw_input("Select the number of the mode: ")
 if (load_mode != '2'):
@@ -243,12 +250,12 @@ if (load_mode != '2'):
 	print ('\n  -----------------------------------------------------------------------------')
 	
 if (load_mode == '2'):
+	print("\n\t\tManual Loading")
 	while (1):
-		print("\n\t\tManual Loading")
 		in_comando = raw_input("Write one instruction: ")
 		in_comando = in_comando.lower()
 
-		if (in_comando == "exit"):
+		if (in_comando == "exit"): # comando de salida
 		    print("\n\tGOODBYE !!\n")
 		    exit()
 
@@ -257,14 +264,15 @@ if (load_mode == '2'):
 			break
 
 		b_instruction=decode(in_comando)
-		print(b_instruction)
+		#print(b_instruction)
 		send(b_instruction)
 
 
 print ("\n\nWait for debug data ...")
 
+
 while 1:
-	
+	# Si el modo de debug es en cada ciclo necesito enviar un dato para recibir insformacion.	
 	if (debug_mode == '2'):
 		var = raw_input("Press a keyboard for debug ")
 		ser.write("1")
@@ -275,6 +283,8 @@ while 1:
 	if (inline != ""):
 		#print (inline)
 		j=0
+		# Se separa el string recibido cada 4 caracteres (32bits), luego se obtiene el numero entero restandole 48 al valor
+		# del caracter ascii y se pone la etiqueta correspondiente al dato. 
 		for i in range (4 , len(inline)+1 , 4):			
 			reg = inline[i-4:i]
 			byte1 = ord(reg[0]) - 48 & 0xff

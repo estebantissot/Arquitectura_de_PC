@@ -27,7 +27,7 @@ module Interfaz_Rx(
 	input 	[7:0] din,
 
 	output 	go,
-	output  [31:0] rx_address,
+	//output  [31:0] rx_address,
 	output	[31:0] dout
 );
 
@@ -36,7 +36,7 @@ reg [7:0] 	num;
 reg [31:0]	Data;		
 reg [1:0]	state_byte;
 reg 		ready;
-reg [31:0]  new_address;
+//reg [31:0]  new_address;
     
 // Parametros Locales
 localparam [1:0] first_byte     = 2'b00;
@@ -47,7 +47,7 @@ localparam [1:0] fourth_byte    = 2'b11;
 // Asignaciones
 assign dout	=	Data;
 assign go	=	ready;
-assign rx_address = new_address;
+//assign rx_address = new_address;
 
 // Logica del modulo
 always@(posedge clk, posedge reset)
@@ -56,7 +56,7 @@ always@(posedge clk, posedge reset)
 			begin
 				Data	<=	32'b0;
 				ready	<=	1'b0;	
-				new_address <= 32'b0;
+				//new_address <= 32'b0;
 				state_byte <= first_byte;
 			end
 		else

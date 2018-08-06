@@ -33,7 +33,7 @@ module DebugUnit(
     output   out_debug_on,
     output [31:0] outDebugAddress,
     
-    output [31:0] rx_address,
+   // output [31:0] rx_address,
     output [6:0] outControlLatchMux,
     output loadProgram,
     output [31:0] addressInstrucctionProgram,
@@ -121,7 +121,7 @@ Top_UART uart(
 	.TX_start(tx_start),
 	.UART_data(sendData),
 	.RX(RX),
-    .rx_address(rx_address),
+   // .rx_address(rx_address),
 	.TX(TX),
 	.write(write),
 	.dout(dout),

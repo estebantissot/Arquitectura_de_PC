@@ -29,7 +29,7 @@ module Top_UART(
         // OUTPUT
         //output rx_done,
 		output TX,
-		output [31:0] rx_address,
+		//output [31:0] rx_address,
 		output write,
 		output [31:0] dout,
 		output tx_dataready
@@ -70,7 +70,7 @@ Interfaz_Rx rx(
     .din(rx_data),
     // OUTPUT
     .go(write),
-    .rx_address(rx_address),
+    //.rx_address(rx_address),
     .dout(dout)
 );
 

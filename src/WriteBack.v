@@ -31,8 +31,10 @@ module WriteBack(
 //Registros
 reg [31:0] RegF_wd;
 
+// Parametros Locales
 localparam [31:0] byte = 32'h000f;
 localparam [31:0] halfword = 32'h00ff;
+
 //Asignaciones
 assign outRegF_wd = RegF_wd;//(inWB[0]) ? inRegF_wd:inALUResult;
 assign outRegF_wr = inWB[1];
@@ -42,7 +44,7 @@ always @ (*)
 begin
 	RegF_wd = 32'b0;
 	casez({inWB[4:2],inWB[0]})
-	   4'bxxx0:RegF_wd = inALUResult;
+	   4'b???0:RegF_wd = inALUResult;
 	   4'b0001:RegF_wd = inRegF_wd;
 	   4'b0011:RegF_wd = inRegF_wd & byte;
 	   4'b0101:RegF_wd = inRegF_wd & halfword;

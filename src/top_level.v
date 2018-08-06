@@ -52,7 +52,7 @@ wire [31:0] idecode0_outPCJump;
 wire        idecode0_jump;
 //-- Modulo Execute --
 wire [4:0]	execute0_outWB; 		//execute0:outWB -> memaccess0:inWB
-wire [2:0]	execute0_outMEM; 		//execute0:outMEM -> memacces0:inMEM
+wire [1:0]	execute0_outMEM; 		//execute0:outMEM -> memacces0:inMEM
 wire [31:0]	execute0_outPCBranch; 	//execute0:outPCJump -> memaccess0:inPCJump
 wire [31:0]	execute0_outALUResult;//execute0:outALUResult -> memaccess0:inALUResult
 wire 			execute0_outALUZero; 	//execute0:outALUZero -> memaccess0:inALUZero
@@ -86,7 +86,7 @@ wire [31:0] DebugAddress;
 wire wr_program_instruction;
 wire [31:0] program_instruction;
 wire [31:0] addressInstrucctionProgram;
-wire [31:0] rx_address;
+//wire [31:0] rx_address;
 wire rst;
 wire [31:0]jump_branch;
 
@@ -313,7 +313,7 @@ DebugUnit debug(
     .addressInstrucctionProgram(addressInstrucctionProgram),
     .InstructionProgram(program_instruction),
     .write_instruction(wr_program_instruction),
-    .rx_address(rx_address),
+    //.rx_address(rx_address),
     .TX(UART_RXD_OUT), 
     .stopPC_debug(stop_debug),
     .outControlLatchMux(ControlLatchMux)
