@@ -20,7 +20,7 @@
 module WriteBack(
 //Input Signals
     input [4:0]  inWB,
-    input [31:0] inRegF_wd,
+    input signed [31:0] inRegF_wd,
     input [31:0] inALUResult,
 
 //Output Signals
@@ -46,18 +46,11 @@ begin
 	casez({inWB[4:2],inWB[0]})
 	   4'b???0:RegF_wd = inALUResult;
 	   4'b0001:RegF_wd = inRegF_wd;
-	   4'b0011:RegF_wd = inRegF_wd & byte;
-	   4'b0101:RegF_wd = inRegF_wd & halfword;
-	   4'b1011:
-	         begin
-	            RegF_wd[31:24] = inRegF_wd & byte;
-	            RegF_wd = RegF_wd >> 24;
-	         end
-        4'b1101:
-             begin
-                RegF_wd[31:16]= inRegF_wd & halfword;
-                RegF_wd = RegF_wd  >> 16;
-             end
+	   4'b0011:RegF_wd = inRegF_wd >> 24;
+	   4'b0101:RegF_wd = inRegF_wd >> 16;
+	   4'b1011:RegF_wd = inRegF_wd >>>  24;
+       4'b1101:RegF_wd = inRegF_wd >>>  16;
+
         default:
             RegF_wd = inALUResult;
 	endcase

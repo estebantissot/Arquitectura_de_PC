@@ -40,8 +40,9 @@ module InstructionDecode(
         
 //Output Signals
     output  [4:0]   outWB,
-    output  [2:0] 	outMEM,
-    output  [3:0] 	outEXE,
+    output  [1:0] 	outMEM,
+    output  [5:0] 	outEXE,
+    output          outJL,
     output  [31:0]  outInstructionAddress,
     output  [31:0]  outRegA,
     output  [31:0]  outRegB,
@@ -56,18 +57,17 @@ module InstructionDecode(
     
     //Jump
     output [31:0]   outAddress_jump,
-    output 			jump_take
+    output 			outJumpTake
     
     	
     );
 
 //Registros
 reg [4:0] 	WB;
-reg [2:0] 	MEM;
-reg [3:0] 	EXE;
+reg [1:0] 	MEM;
+reg [5:0] 	EXE;
+reg [1:0]   JUMP;
 reg [31:0] 	InstructionAddress;
-//reg [31:0] 	RegA;
-//reg [31:0] 	RegB;
 reg signed [31:0]	Instruction_ls;
 reg [4:0]   rs;
 reg [4:0] 	rt;
@@ -75,8 +75,9 @@ reg [4:0] 	RT_rd;
 reg [5:0]	InmmediateOpcode;
 reg [31:0]  PCJump;
 reg         PCSel;
+reg [31:0]  address_jump;
 //Cables
-wire [11:0] outControl;
+wire [14:0] outControl;
 wire ControlMux;
 wire write;
 
@@ -85,16 +86,16 @@ assign outWB = WB;
 assign outMEM = MEM;
 assign outEXE = EXE;
 assign outInstructionAddress = InstructionAddress;
-assign outInstruction_ls = ((EXE[2:1]==2'b11) && (inInstruction[31:26]!=6'd8))? Instruction_ls>>16:Instruction_ls >>> 16;
+assign outInstruction_ls = (inInstruction[31:26]!=6'd8)? Instruction_ls>>16:Instruction_ls >>> 16;
 assign out_rs = rs;
 assign out_rt = rt;
 assign outRT_rd = RT_rd;
 assign outInmmediateOpcode	=	InmmediateOpcode; 
 assign write = (Debug_on) ? 1'b0:inRegF_wr;
 
-assign jump_take=(inInstruction[31:26] == 6'd2)? 1'b1:1'b0;
-assign outAddress_jump=(inInstruction[31:26] == 6'd2)? {inInstructionAddress[31:28],inInstruction[25:0],2'b00}:inInstructionAddress;
-
+assign outJumpTake = JUMP[1];//(inInstruction[31:26] == 6'd2)? 1'b1:1'b0;
+assign outAddress_jump= address_jump;
+assign outJL = JUMP[0];
 
 // Instancia de "Hazard Detection Unit"
 HazardDetectionUnit hdu0(
@@ -139,16 +140,16 @@ always @(negedge clk, posedge rst)
 begin
 if (rst)
 	begin
-		WB = 5'b0000;
-		MEM = 3'b000;
-		EXE = 4'b0;
-		InstructionAddress = 32'b0;
+		WB = 5'd0;
+		MEM = 3'd0;
+		EXE = 6'd0;
+		InstructionAddress = 32'd0;
 		//RegA = 32'b0;
 		//RegB = 32'b0;
-		Instruction_ls = 32'b0;
-		rs = 5'b0;
-		rt = 5'b0;
-		RT_rd = 5'b0;
+		Instruction_ls = 32'd0;
+		rs = 5'd0;
+		rt = 5'd0;
+		RT_rd = 5'd0;
 	end
 else // Escritura de todos los registros de salida
 	begin
@@ -157,18 +158,28 @@ else // Escritura de todos los registros de salida
            case (ControlMux & (!ID_flush))
                 1'b0:
                 begin
-                    WB = 5'b0;
-                    MEM = 3'b0;
-                    EXE = 4'b0;
+                    WB = 5'd0;
+                    MEM = 2'd0;
+                    EXE = 6'd0;
                 end
                 1'b1:
                 begin
                     WB = outControl[4:0];
-                    MEM = outControl[7:5];
-                    EXE = outControl[11:8];
+                    MEM = outControl[6:5];
+                    EXE = outControl[12:7];
+                    JUMP = outControl[14:13];
                 end
             endcase
-    
+            
+            if(JUMP[1])
+            begin
+                address_jump = {inInstructionAddress[31:28],inInstruction[25:0],2'b00};
+            end
+                
+            else
+                begin
+                    address_jump = inInstructionAddress;
+                end
             InstructionAddress = inInstructionAddress;
             InmmediateOpcode = inInstruction[31:26];
             //RegA = RegF_outRegA;

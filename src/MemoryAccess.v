@@ -25,6 +25,8 @@ module MemoryAccess(
 //Input Signals
     input [4:0] 	inWB,
     input [1:0] 	inMEM,
+    input           inJL,
+    input [31:0]    inInstructionAddress,
     input [31:0] 	inALUResult,
     input 			inALUZero,
     input [31:0] 	inRegB,
@@ -51,12 +53,15 @@ reg [4:0] 	RegF_wreg;
 // Cables
 wire [31:0] dm0_RegF_wd;
 wire [1:0]  read_write;
+wire [31:0] RegF_wd;
 
 //Asignaciones
 assign outWB = WB;
 assign outALUResult = ALUResult;
 assign outRegF_wreg = RegF_wreg;
 assign read_write = (Debug_on) ? 2'b10:inMEM;
+assign outRegF_wd = (inJL) ? inInstructionAddress : RegF_wd;
+
 
 // Instancia de "Data Memory"
 DataMemory dm0 (
@@ -67,8 +72,9 @@ DataMemory dm0 (
 	.read_write(read_write),
 	.inAddress(inALUResult),
 	.inWriteData(inRegB),
+	.length(inWB[3:2]),
 	.stop_debug(stop_debug),
-	.outData(outRegF_wd),
+	.outData(RegF_wd),
 	.outMemDebug(outMemDebug)
 );
 
@@ -87,7 +93,10 @@ begin
 		  begin	
 			WB <= inWB;
 			ALUResult <= inALUResult;
-			RegF_wreg <= inRegF_wreg;
+			if (inJL)
+			     RegF_wreg <= 5'd31;
+			else
+			     RegF_wreg <= inRegF_wreg;
 		  end
 		end
 end

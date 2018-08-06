@@ -36,8 +36,9 @@ wire [31:0]	ifetch0_outInstruction; 			//ifetch0:outInstruction -> idecode0:inIn
 
 //-- Modulo Instruction Decode --
 wire [4:0]	idecode0_outWB; 	//idecode0:outWB -> execute0:inWB
-wire [2:0]	idecode0_outMEM; 	//idecode0:outMEM -> execute0:inMEM
-wire [3:0]	idecode0_outEXE; 	//idecode0:outEXE -> execute0:inEXE
+wire [1:0]	idecode0_outMEM; 	//idecode0:outMEM -> execute0:inMEM
+wire [5:0]	idecode0_outEXE; 	//idecode0:outEXE -> execute0:inEXE
+wire        idecode0_JL;
 wire [31:0]	idecode0_outInstructionAddress; //idecode0:outInstructionAddress -> execute0:inInstructionAddress
 wire [31:0]	idecode0_outRegA; 	//idecode0:outRegA -> execute0:inRegA
 wire [31:0]	idecode0_outRegB; 	//idecode0:outRegB -> execute0:inRegB
@@ -50,12 +51,15 @@ wire        idecode0_outIF_ID_write;
 wire [5:0]  idecode0_outInmmediateOpcode;
 wire [31:0] idecode0_outPCJump;
 wire        idecode0_jump;
+
 //-- Modulo Execute --
 wire [4:0]	execute0_outWB; 		//execute0:outWB -> memaccess0:inWB
 wire [1:0]	execute0_outMEM; 		//execute0:outMEM -> memacces0:inMEM
+wire        execute0_JL;
 wire [31:0]	execute0_outPCBranch; 	//execute0:outPCJump -> memaccess0:inPCJump
+wire [31:0] execute0_outInstructionAddress; //execute0:outInstructionAddress -> memaccess0:inInstructionAddress
 wire [31:0]	execute0_outALUResult;//execute0:outALUResult -> memaccess0:inALUResult
-wire 			execute0_outALUZero; 	//execute0:outALUZero -> memaccess0:inALUZero
+wire 		execute0_outALUZero; 	//execute0:outALUZero -> memaccess0:inALUZero
 wire [31:0] execute0_outRegB; 		//execute0:outRegB -> memaccess0:inRegB
 wire [4:0]	execute0_outRegF_wreg; //execute0:outRegF_wreg -> memaccess0:inRegF_wreg
 
@@ -144,6 +148,7 @@ InstructionDecode idecode0(
 	.outWB(idecode0_outWB),
 	.outMEM(idecode0_outMEM),
 	.outEXE(idecode0_outEXE),
+	.outJL(idecode0_JL),
 	.outInstructionAddress(idecode0_outInstructionAddress),
 	.outRegA(idecode0_outRegA),
 	.outRegB(idecode0_outRegB),
@@ -157,7 +162,7 @@ InstructionDecode idecode0(
     .outInmmediateOpcode(idecode0_outInmmediateOpcode),
     
     .outAddress_jump(idecode0_outPCJump),
-    .jump_take(idecode0_jump)
+    .outJumpTake(idecode0_jump)
 	
 );
 	
@@ -171,6 +176,7 @@ Execute execute0(
 	.inWB(idecode0_outWB),
 	.inMEM(idecode0_outMEM),
 	.inEXE(idecode0_outEXE),
+	.inJL(idecode0_JL),
 	.inInstructionAddress(idecode0_outInstructionAddress),
 	.MEM_AluResult(execute0_outALUResult),
 	.WB_regF_wd(wb0_outRegF_wd),
@@ -192,10 +198,12 @@ Execute execute0(
 	//Output Signals
 	.outWB(execute0_outWB),
 	.outMEM(execute0_outMEM),
+	.outJL(execute0_JL),
 
 	//Branch
    	.outPCSel(memaccess0_outPCSel),
 	.outPCJump(execute0_outPCBranch),
+	.outInstructionAddress(execute0_outInstructionAddress),
 	
 	.outALUResult(execute0_outALUResult),
 	.outALUZero(execute0_outALUZero),
@@ -212,7 +220,9 @@ MemoryAccess memaccess0(
 	//Input Signals
 	.inWB(execute0_outWB),
 	.inMEM(execute0_outMEM),
+	.inJL(execute0_JL),
 	//.inPCJump(execute0_outPCJump),
+	.inInstructionAddress(execute0_outInstructionAddress),
 	.inALUResult(execute0_outALUResult),
 	.inALUZero(execute0_outALUZero),
 	.inRegB(execute0_outRegB),
@@ -286,7 +296,6 @@ MuxLatch ml0(
     //-- Modulo Write Back --
     .wb0_outRegF_wr(wb0_outRegF_wr), 
     .wb0_outRegF_wd(wb0_outRegF_wd), 
-    
     .out_data(muxLatch_outData)
     );
 

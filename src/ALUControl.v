@@ -50,7 +50,6 @@ begin
 		8'b10_000110 :	ALUControl = 4'b0011; // srlv -- Shift right logical varibale
 		8'b10_000000 :	ALUControl = 4'b1011; // sll -- Shift left logical
 		8'b10_000100 :	ALUControl = 4'b1011; // sllv -- Shift left logical varibale
-
 		//------------------------------Inmediatos-----------------------------------
 		
 		8'b11_001000 :	ALUControl = 4'b0010; // add

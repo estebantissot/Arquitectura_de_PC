@@ -134,7 +134,7 @@ always @ (posedge clk, posedge rst)
 begin
 	if(rst)
 		begin
-		state_rx <= rx_init;
+		state_rx <= rx_stop;
 		//send <= 1'b0;
 		debug_mode <= 1'b0;
 		rx_direccion <= 32'hffffffff;
@@ -199,7 +199,7 @@ always @(posedge clk,posedge rst)
 begin
 	if(rst)
 		begin
-			stopPC<=1'b1;
+			stopPC<=1'b0;
 			tx_start<=1'b0;
 			state_send <= send_init;
 			etapa <= 3'b0;
@@ -217,9 +217,9 @@ begin
                                 begin
                                     if (inPC == rx_direccion + 32'd4) // Finalizo el programa
                                         begin
-                                            stopPC <= 1'b1;
+                                            stopPC <= 1'b0;
                                             state_send<=send_PC;
-                                            debug <= 1'b1;
+                                            debug <= 1'b0;
                                         end
                                     else
                                         begin

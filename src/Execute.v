@@ -24,8 +24,9 @@ module Execute(
 	 
 //Input Signals
     input [4:0] 	inWB,
-    input [2:0] 	inMEM,
-    input [3:0] 	inEXE,
+    input [1:0] 	inMEM,
+    input [5:0] 	inEXE,
+    input           inJL,
     input [31:0] 	inInstructionAddress,
     input [31:0] 	MEM_AluResult,
     input [31:0]    WB_regF_wd,
@@ -42,13 +43,14 @@ module Execute(
 	input [5:0]		inInmmediateOpcode,
 	
 	//debug
-	input           stop_debug,
-					 
+	input           stop_debug,				 
 //Output Signals
     output [4:0] 	outWB,
     output [1:0] 	outMEM,
+    output          outJL,
     output 			outPCSel,
     output [31:0]   outPCJump,
+    output [31:0]   outInstructionAddress,
     output [31:0]   outALUResult,
     output 			outALUZero,
     output [31:0]   outRegB,
@@ -57,35 +59,40 @@ module Execute(
 
 // Registros
 reg [4:0] 	WB;
-reg [1:0] 	MEM;
-reg [31:0] ALUResult;
-reg 		ALUZero;
+reg [2:0]   MEM;
+reg         JL;
+reg [31:0]  ALUResult;
+reg 	   ALUZero;
 reg [31:0] RegB;
-reg [4:0] 	RegF_wreg;
-reg [4:0] 	wreg;
+reg [4:0]  RegF_wreg;
+reg [4:0]  wreg;
 reg [31:0] regB_ALU;
 reg [31:0] regA_ALU;
+reg        PCSel;
 
 // Cables
 wire [3:0] 	ALUControl;
 wire [31:0] ALU_A;
 wire [31:0] ALU_B;
 wire [31:0] alu_result;
-wire 			alu_zero;
-wire [1:0] control_muxA; //control mux de inAluA 
-wire [1:0] control_muxB; //control mux de inAluB.
-wire [5:0] Opcode;
-wire    shif_variable;
+wire 		alu_zero;
+wire [1:0]  control_muxA; //control mux de inAluA 
+wire [1:0]  control_muxB; //control mux de inAluB.
+wire [5:0]  Opcode;
+wire        shif_variable;
+wire [1:0] JLR;
     
 // Asignaciones
 assign outWB = WB;
 assign outMEM = MEM;
+assign outJL = JL;
 assign outRegF_wreg = RegF_wreg;
 assign outALUResult = ALUResult;
 assign outALUZero = ALUZero;
 assign outRegB = RegB;
 assign ALU_B = regB_ALU;
 assign ALU_A = regA_ALU;
+assign outInstructionAddress = inInstructionAddress;
 
 //Instancia de "ALU"
 ALU #(.bits(32)) alu0 (
@@ -97,8 +104,10 @@ ALU #(.bits(32)) alu0 (
 );
 
 // Asignaciones
-assign outPCJump = inInstruction_ls + inInstructionAddress;
-assign outPCSel = (inMEM[2] && (inRegA==inRegB))? 1'b1:1'b0;
+//assign JLR = (Opcode == 6'd8 || Opcode == 6'd9) ? 1'b1: 1'b0; 
+assign JLR = {Opcode == 6'd8,Opcode == 6'd9};
+assign outPCJump = (JLR ==2'b11) ? inRegA : (inInstruction_ls + inInstructionAddress);
+assign outPCSel = PCSel;// (inMEM[2] && (inRegA==inRegB))? 1'b1:1'b0;
 assign Opcode = (inEXE[2:1] == 2'b11)? inInmmediateOpcode:inInstruction_ls[5:0];
 assign shif_variable= ((inEXE[2:1] == 2'b10) && (inInstruction_ls[10:6] != 5'b0))? 1'b1:1'b0;
 
@@ -125,21 +134,23 @@ ForwardingUnit forwarding_unit0 (
 
 always @(negedge clk, posedge rst)
 begin
-	if(rst)
+	if(rst || JLR[1])
 		begin
 			WB <= 5'b00000;
-			MEM <= 2'b10;
+			MEM <= 3'b010;
+			JL <= 1'b0;
 			RegF_wreg <= 5'bZZZZZ;
 			ALUResult <= 32'b0;
 			ALUZero <= 1'b0;
-			RegB <= 32'b0;
+			RegB <= 32'b0;	
 		end
 	else
 		begin
 		  if(!stop_debug)
 		  begin
                 WB <= inWB;
-                MEM <= inMEM[1:0];
+                MEM <= inMEM;
+                JL <= inJL;
                 RegF_wreg <= wreg;
                 ALUResult <= alu_result;
                 ALUZero <= alu_zero;
@@ -153,11 +164,18 @@ always @(*)
 		if(rst)
 			begin
 			    regA_ALU <= 32'b0;
-				wreg<=0;
-				regB_ALU<=0;
+				wreg <= 0;
+				regB_ALU<= 0;
+				PCSel <= 0;
 			end
 		else
 			begin
+			    if(((inEXE[5:4]==2'b01) && (inRegA==inRegB)) || (JLR == 2'b11) || ((inEXE[5:4]==2'b01)&&(inRegA!=inRegB)))
+			         PCSel=1'b1;
+			    else
+			         PCSel=1'b0;
+			
+				//Jump <= ((inInstruction_ls << 2) + inInstructionAddress);
 				casez(inEXE)
 					4'b0???: wreg <= in_rt;    //registro rt de la instruccion Load
 					4'b1???: wreg <= inRT_rd;
@@ -167,11 +185,12 @@ always @(*)
 						end
 				endcase
 				// MUX A
-				casez({shif_variable,control_muxA})
-				    3'b000: regA_ALU <= inRegA;
-				    3'b001: regA_ALU <= WB_regF_wd;
-				    3'b010: regA_ALU <= MEM_AluResult;
-				    3'b1??: regA_ALU <= inInstruction_ls[10:6];
+				casez({JLR[0],shif_variable,control_muxA})
+				    4'b0000: regA_ALU <= inRegA;
+				    4'b0001: regA_ALU <= WB_regF_wd;
+				    4'b0010: regA_ALU <= MEM_AluResult;
+				    4'b1???: regA_ALU <= inInstructionAddress;
+				    4'b01??: regA_ALU <= inInstruction_ls[10:6];
 				    default:regA_ALU <= inRegA;
 				endcase
 				// MUX B

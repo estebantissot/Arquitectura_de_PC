@@ -71,22 +71,22 @@ always@ (posedge clk, posedge rst)
 begin
 	if (rst)
 		begin
-            for (i=32'd0; i <= 32'd31; i=i+32'b1)
+           /* for (i=32'd0; i <= 32'd31; i=i+32'b1)
                 begin
                    registros[i][31:0]<= 32'b0;
-                end
-		/*
+                end*/
+		
 			registros[31'd0][31:0] <= 32'h00000001;
-			registros[31'd1][31:0] <= 32'h00000011;
+			registros[31'd1][31:0] <= 32'h00000004;
 			registros[31'd2][31:0] <= 32'h00000012;
 			registros[31'd3][31:0] <= 32'h00000013;
 			registros[31'd4][31:0] <= 32'h00000015;
 			registros[31'd5][31:0] <= 32'h00000014;
 			registros[31'd6][31:0] <= 32'h00000016;
 			registros[31'd7][31:0] <= 32'h00000017;
-			registros[31'd8][31:0] <= 32'h00000004;
-			registros[31'd9][31:0] <= 32'h00000019;
-			registros[31'd10][31:0] <= 32'h00000021;
+			registros[31'd8][31:0] <= 32'h00088888;
+			registros[31'd9][31:0] <= 32'h87654321;
+			registros[31'd10][31:0] <= 32'h12345678;
 			registros[31'd12][31:0] <= 32'h00000013;
 			registros[31'd13][31:0] <= 32'h00000024;
 			registros[31'd14][31:0] <= 32'h00000025;
@@ -107,7 +107,7 @@ begin
             registros[31'd29][31:0] <= 32'h00000000;
             registros[31'd30][31:0] <= 32'h00000000;
             registros[31'd31][31:0] <= 32'd42;  //Z en ascii
-            */
+            
 		end
 	else
 		begin

@@ -30,8 +30,8 @@ module MuxLatch(
 
 	//-- Modulo Instruction Decode --
 	input [4:0]		idecode0_outWB, 	//idecode0:outWB -> execute0:inWB
-	input [2:0]		idecode0_outMEM, 	//idecode0:outMEM -> execute0:inMEM
-	input [3:0]		idecode0_outEXE, 	//idecode0:outEXE -> execute0:inEXE
+	input [1:0]		idecode0_outMEM, 	//idecode0:outMEM -> execute0:inMEM
+	input [5:0]		idecode0_outEXE, 	//idecode0:outEXE -> execute0:inEXE
 	input [31:0]	idecode0_outInstructionAddress, //idecode0:outInstructionAddress -> execute0:inInstructionAddress
 	input [31:0]	idecode0_outRegA, 	//idecode0:outRegA -> execute0:inRegA
 	input [31:0]	idecode0_outRegB, 	//idecode0:outRegB -> execute0:inRegB
