@@ -69,6 +69,7 @@ reg [4:0]  wreg;
 reg [31:0] regB_ALU;
 reg [31:0] regA_ALU;
 reg        PCSel;
+reg [31:0] InstructionAddress;
 
 // Cables
 wire [3:0] 	ALUControl;
@@ -92,7 +93,7 @@ assign outALUZero = ALUZero;
 assign outRegB = RegB;
 assign ALU_B = regB_ALU;
 assign ALU_A = regA_ALU;
-assign outInstructionAddress = inInstructionAddress;
+assign outInstructionAddress = InstructionAddress;
 
 //Instancia de "ALU"
 ALU #(.bits(32)) alu0 (
@@ -155,6 +156,7 @@ begin
                 ALUResult <= alu_result;
                 ALUZero <= alu_zero;
                 RegB <= inRegB;
+                InstructionAddress<=inInstructionAddress;
 		  end
 	end
 end

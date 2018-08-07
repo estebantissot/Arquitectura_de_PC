@@ -49,9 +49,9 @@ reg [4:0]	WB;
 //reg [31:0] 	RegF_wd;
 reg [31:0] 	ALUResult;
 reg [4:0] 	RegF_wreg;
-
+reg [31:0]  RegF_word;
 // Cables
-wire [31:0] dm0_RegF_wd;
+
 wire [1:0]  read_write;
 wire [31:0] RegF_wd;
 
@@ -60,7 +60,7 @@ assign outWB = WB;
 assign outALUResult = ALUResult;
 assign outRegF_wreg = RegF_wreg;
 assign read_write = (Debug_on) ? 2'b10:inMEM;
-assign outRegF_wd = (inJL) ? inInstructionAddress : RegF_wd;
+assign outRegF_wd = RegF_word;//(inJL) ? inInstructionAddress : RegF_wd;
 
 
 // Instancia de "Data Memory"
@@ -94,9 +94,15 @@ begin
 			WB <= inWB;
 			ALUResult <= inALUResult;
 			if (inJL)
+			begin
 			     RegF_wreg <= 5'd31;
+			     RegF_word <= inInstructionAddress;
+			end
 			else
+			begin
 			     RegF_wreg <= inRegF_wreg;
+			     RegF_word <= RegF_wd;
+		    end
 		  end
 		end
 end

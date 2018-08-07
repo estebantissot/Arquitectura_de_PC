@@ -42,6 +42,7 @@ module InstructionFetch(
 // Registros
 reg [31:0] pc;
 reg [31:0] instruction_address;
+reg [31:0] instruction_next;
 //reg [31:0] instruction;
 
 // Cables
@@ -49,8 +50,8 @@ reg [31:0] instruction_address;
 wire [31:0] address;
 
 // Asignaciones
-assign outInstructionAddress = pc;
-assign address = (loadProgram) ? addressInstrucctionProgram : pc;
+assign outInstructionAddress = instruction_next;
+assign address = (loadProgram) ? addressInstrucctionProgram : instruction_address;
 //assign outInstruction = instruction;
 
 // Instancia de "Instruction Memory"
@@ -83,12 +84,14 @@ begin
 	if (rst)
 		begin
 			pc <= 32'd0;
+			instruction_next<=32'b1;
 			//instruction <= 32'bX;
 		end
 	else if (inIF_ID_write && (!stop_debug))
 	//else if (inIF_ID_write)
 		begin
 			pc <= instruction_address;
+			instruction_next<= instruction_address + 1;
 			//pc <= pc;
 			//instruction <= mem_instruction;
 		end

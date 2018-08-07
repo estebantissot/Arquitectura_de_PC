@@ -93,9 +93,9 @@ assign outRT_rd = RT_rd;
 assign outInmmediateOpcode	=	InmmediateOpcode; 
 assign write = (Debug_on) ? 1'b0:inRegF_wr;
 
-assign outJumpTake = JUMP[1];//(inInstruction[31:26] == 6'd2)? 1'b1:1'b0;
-assign outAddress_jump= address_jump;
-assign outJL = JUMP[0];
+assign outJumpTake = outControl[14];//(inInstruction[31:26] == 6'd2)? 1'b1:1'b0;
+assign outAddress_jump= address_jump;//(JUMP[1])?{2'b00,inInstructionAddress[31:28],inInstruction[25:0]}:inInstructionAddress;
+assign outJL =  JUMP[0];
 
 // Instancia de "Hazard Detection Unit"
 HazardDetectionUnit hdu0(
@@ -171,15 +171,7 @@ else // Escritura de todos los registros de salida
                 end
             endcase
             
-            if(JUMP[1])
-            begin
-                address_jump = {inInstructionAddress[31:28],inInstruction[25:0],2'b00};
-            end
-                
-            else
-                begin
-                    address_jump = inInstructionAddress;
-                end
+         
             InstructionAddress = inInstructionAddress;
             InmmediateOpcode = inInstruction[31:26];
             //RegA = RegF_outRegA;
@@ -193,6 +185,26 @@ else // Escritura de todos los registros de salida
             
         end
 	end
+end
+
+always @ *
+begin
+    if (rst)
+	begin
+	   address_jump= 31'd0;
+    end
+    else
+    begin
+        if(outControl[14])
+             begin
+                 address_jump = {2'b00,inInstructionAddress[31:28],inInstruction[25:0]};
+             end
+                 
+             else
+                 begin
+                     address_jump = inInstructionAddress;
+                 end
+   end
 end
 
 endmodule

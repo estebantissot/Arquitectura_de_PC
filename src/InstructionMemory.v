@@ -41,11 +41,12 @@ assign outData=Data;
 initial
     begin
 	
-	 for (i=32'd0; i <= 32'd31; i=i+32'b1)
+	 /*for (i=32'd0; i <= 32'd31; i=i+32'b1)
             begin
                RegisterMemory[i][31:0]<= 32'b0;
             end
-       
+       */
+       //-------------------------------Prueba Tipo-R,Tipo-I,Load, Store y brach/jump-----------------------------------------------------
        /*
         RegisterMemory[32'd0]=32'b000000_00001_00010_00011_00000_100000;//R-type add;
         RegisterMemory[32'd1]=32'b000000_00001_00010_00100_00000_100010;//R-type sub;
@@ -67,7 +68,7 @@ initial
         RegisterMemory[32'd15]=32'b001100_11000_11101_0000000000001111;//Y-type andi
         RegisterMemory[32'd16]=32'b000000_10001_00111_01011_00000_100000;
 		RegisterMemory[32'd17]=32'b100011_00000_00010_0000000000000011; // Load
-        //RegisterMemory[32'd16]=32'b001100_11000_11101_0000000000001111;//Y-type andi
+        
         RegisterMemory[32'd18]=32'b000000_00010_00111_01011_00000_100000;//R-type add
         RegisterMemory[32'd19]=32'b000000_01000_00111_01100_00000_100000;//R-type add
 
@@ -122,18 +123,19 @@ initial
        	//----------------------------------------------------------------------------------
 
 
-        /*RegisterMemory[32'd15]=32'b001110_11000_00001_0000000000001111;//Y-type xori
-        RegisterMemory[32'd16]=32'b001100_11000_11101_0000000000001111;//Y-type andi
-        RegisterMemory[32'd17]=32'b000000_01000_00111_01011_00000_100000;//R-type add
-        RegisterMemory[32'd18]=32'b000000_01000_00111_01100_00000_100000;//R-type add
-        RegisterMemory[32'd19]=32'b000000_01000_00000_00100_00000_100000;//R-type add
-        RegisterMemory[32'd20]=32'b000100_10111_10110_0000000000000010; // Store base_rt_offset (rt es el registro que contiene el valor a guardar)
-       	*/
+     	//---------------------------------Jump and link-------------------------------------
+     		RegisterMemory[32'd0]=32'b000000_00001_00010_00011_00000_100000;//R-type add;
+        	RegisterMemory[32'd1]=32'b000000_00001_00010_00100_00000_100010;//R-type sub;
+        	RegisterMemory[32'd2]=32'b000011_00000000000000000000000110;//R-type sub;
+        	RegisterMemory[32'd6]=32'b000000_00001_00100_10000_00000_100000;//R-type add;
+			RegisterMemory[32'd7]=32'b000000_00001_00101_10000_00000_100000;//R-type add;
+			RegisterMemory[32'd8]=32'b000000_00001_00110_10000_00000_100000;//R-type add;
+			RegisterMemory[32'd9]=32'b000000_00001_11111_00010_00000_100000;//R-type add;
+			RegisterMemory[32'd10]=32'b000000_00001_00101_10000_00000_100000;//R-type add;
+			
 
-       /* RegisterMemory[32'd10]=
-        RegisterMemory[32'd11]=
-        RegisterMemory[32'd12]=
-        RegisterMemory[32'd13]=*/
+
+     	//-----------------------------------------------------------------------------------
     end
 
 
