@@ -46,10 +46,9 @@ module ALU #(parameter bits = 8)
 				4'b0100:e=B>>A;
 				4'b0101:e=~(A|B);
 				4'b0110:e=A-B;
-				4'b0111:e=-1;
 				4'b1001:e=A^B;
 				4'b1011:e=B<<A;
-				4'b1100: if (A<B) e=32'hffffffff;
+				4'b0111: if (A<B) e=32'hffffffff;
 				         else e=32'h00000000;
 				default: e=-1;
 			endcase

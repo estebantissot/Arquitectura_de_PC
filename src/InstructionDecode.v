@@ -58,9 +58,7 @@ module InstructionDecode(
     //Jump
     output [31:0]   outAddress_jump,
     output 			outJumpTake
-    
-    	
-    );
+);
 
 //Registros
 reg [4:0] 	WB;
@@ -133,9 +131,6 @@ FileRegister regF0 (
 	.out_regDebug(out_regDebug)
 );
 
-//Equals unit
-//assign Branch_equals = (outRegA==outRegB)?  1'b1:1'b0;
-
 //Logica del Bloque
 always @(negedge clk, posedge rst)
 begin
@@ -145,8 +140,6 @@ if (rst)
 		MEM = 3'd0;
 		EXE = 6'd0;
 		InstructionAddress = 32'd0;
-		//RegA = 32'b0;
-		//RegB = 32'b0;
 		Instruction_ls = 32'd0;
 		rs = 5'd0;
 		rt = 5'd0;

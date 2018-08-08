@@ -43,11 +43,19 @@ always @ (negedge clk, posedge rst)
 begin    
     if(rst)
     begin
+    /*
+           RegisterMemory[32'd0]=32'b000000_00001_00010_00011_00000_100000;//R-type add;
+           RegisterMemory[32'd1]=32'b000000_00001_00010_00100_00000_100010;//R-type sub;
+           RegisterMemory[32'd2]=32'b000000_00001_00010_00101_00000_100100;//R-type and
+           RegisterMemory[32'd3]=32'b000000_00001_00010_00110_00000_100101;//R-type or
+      */
+           
         Data <= 32'b0;//RegisterMemory[1'b0];
         for (i=32'd0; i <= 32'd31; i=i+32'b1)
             begin
                RegisterMemory[i][31:0]<= 32'b0;
             end
+        
     end
     else
         begin
