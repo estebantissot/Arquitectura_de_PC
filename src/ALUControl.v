@@ -37,7 +37,7 @@ begin
 		8'b01_??????:	ALUControl = 4'b0110; // subtract
 		//------------------------------- R-Type ------------------------------------
 		8'b10_100000 :	ALUControl = 4'b0010; // add
-		8'b10_100010 :	ALUControl = 4'b0110; // subtract
+		8'b10_100011 :	ALUControl = 4'b0110; // subtract
 		8'b10_100100 :	ALUControl = 4'b0000; // and
 		8'b10_100101 :	ALUControl = 4'b0001; // or
 		8'b10_101010 :	ALUControl = 4'b0111; // set on less than

@@ -59,7 +59,7 @@ begin
 		for (i=32'd0; i <= 32'd31; i=i+32'b1)
             begin
                data_memory[i][31:0]<= 32'b0;
-            end		
+            end
 	end
 	else
 	begin

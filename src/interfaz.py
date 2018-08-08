@@ -48,19 +48,19 @@ def instruction_set(argument):
 def opcode(argument):
     op = {
     	#KEY	:	(estructura,cant_param, param1,param2,..)
-    	'sll'	:	('000000_00000_RT_RD_SHAMT_000000',4,'REG_D','REG_T','SHAMT'), #
-    	'srl'	:	('000000_00000_RT_RD_SHAMT_000010',4,'REG_D','REG_T','SHAMT'), #
-    	'sra'	:	('000000_00000_RT_RD_SHAMT_000011',4,'REG_D','REG_T','SHAMT'), #
-    	'sllv'	:	('000000_RS_RT_RD_00000_000100',4,'REG_D','REG_T','REG_S'), #
-    	'srlv'	:	('000000_RS_RT_RD_00000_000110',4,'REG_D','REG_T','REG_S'), #
-    	'srav'	:	('000000_RS_RT_RD_00000_000111',4,'REG_D','REG_T','REG_S'), #
-        'addu'	:	('000000_RS_RT_RD_00000_100001',4,'REG_D','REG_T','REG_S'), #100001
-        'subu'	:	('000000_RS_RT_RD_00000_100011',4,'REG_D','REG_T','REG_S'), #100011 
-        'and'	:	('000000_RS_RT_RD_00000_100100',4,'REG_D','REG_T','REG_S'), #100100
-        'or' 	:	('000000_RS_RT_RD_00000_100101',4,'REG_D','REG_T','REG_S'), #100101
-        'xor'	:	('000000_RS_RT_RD_00000_100110',4,'REG_D','REG_T','REG_S'), #100110
-        'nor'	:	('000000_RS_RT_RD_00000_100111',4,'REG_D','REG_T','REG_S'), #100111	
-        'slt'	:	('000000_RS_RT_RD_00000_101010',4,'REG_D','REG_T','REG_S'), #101010
+    	'sll'	:	('000000_00000_RT_RD_SHAMT_000000',4,'REG_D','REG_T','SHAMT'), 
+    	'srl'	:	('000000_00000_RT_RD_SHAMT_000010',4,'REG_D','REG_T','SHAMT'), 
+    	'sra'	:	('000000_00000_RT_RD_SHAMT_000011',4,'REG_D','REG_T','SHAMT'), 
+    	'sllv'	:	('000000_RS_RT_RD_00000_000100',4,'REG_D','REG_T','REG_S'), 
+    	'srlv'	:	('000000_RS_RT_RD_00000_000110',4,'REG_D','REG_T','REG_S'), 
+    	'srav'	:	('000000_RS_RT_RD_00000_000111',4,'REG_D','REG_T','REG_S'), 
+        'addu'	:	('000000_RS_RT_RD_00000_100001',4,'REG_D','REG_S','REG_T'), 
+        'subu'	:	('000000_RS_RT_RD_00000_100011',4,'REG_D','REG_S','REG_T'),  
+        'and'	:	('000000_RS_RT_RD_00000_100100',4,'REG_D','REG_S','REG_T'), 
+        'or' 	:	('000000_RS_RT_RD_00000_100101',4,'REG_D','REG_S','REG_T'), 
+        'xor'	:	('000000_RS_RT_RD_00000_100110',4,'REG_D','REG_S','REG_T'), 
+        'nor'	:	('000000_RS_RT_RD_00000_100111',4,'REG_D','REG_S','REG_T'), 	
+        'slt'	:	('000000_RS_RT_RD_00000_101010',4,'REG_D','REG_S','REG_T'), 
         'lb'	:	('100000_RS_RT_OFFSET',4,'REG_T','REG_S','OFFSET'), #Load byte -> lb rt address
         'lh'	:	('100001_RS_RT_OFFSET',4,'REG_T','REG_S','OFFSET'), #Load halfword -> lh rt address
         'lw'	:	('100011_RS_RT_OFFSET',4,'REG_T','REG_S','OFFSET'), #Load word -> lw rt address
