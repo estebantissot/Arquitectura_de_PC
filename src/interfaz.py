@@ -61,14 +61,14 @@ def opcode(argument):
         'xor'	:	('000000_RS_RT_RD_00000_100110',4,'REG_D','REG_T','REG_S'), #100110
         'nor'	:	('000000_RS_RT_RD_00000_100111',4,'REG_D','REG_T','REG_S'), #100111	
         'slt'	:	('000000_RS_RT_RD_00000_101010',4,'REG_D','REG_T','REG_S'), #101010
-        'lb'	:	('100000_00000_RT_OFFSET',3,'REG_T','OFFSET'), #Load byte -> lb rt address
-        'lh'	:	('100001_00000_RT_OFFSET',3,'REG_T','OFFSET'), #Load halfword -> lh rt address
-        'lw'	:	('100011_00000_RT_OFFSET',3,'REG_T','OFFSET'), #Load word -> lw rt address
-        'lbu'	:	('100100_00000_RT_OFFSET',3,'REG_T','OFFSET'), #Load unsigned byte -> lbu rt address
-        'lhu'	:	('100101_00000_RT_OFFSET',3,'REG_T','OFFSET'), #Load unsigned halfword -> lhu rt address
-        'sb'	:	('101000_00000_RT_OFFSET',3,'REG_T','OFFSET'), #Store byte -> sb rt address
-        'sh'	:	('101001_00000_RT_OFFSET',3,'REG_T','OFFSET'), #Store halfword -> sh rt address
-        'sw'	:	('101011_00000_RT_OFFSET',3,'REG_T','OFFSET'), #Store word -> sw rt address
+        'lb'	:	('100000_RS_RT_OFFSET',3,'REG_T','OFFSET'), #Load byte -> lb rt address
+        'lh'	:	('100001_RS_RT_OFFSET',3,'REG_T','OFFSET'), #Load halfword -> lh rt address
+        'lw'	:	('100011_RS_RT_OFFSET',3,'REG_T','OFFSET'), #Load word -> lw rt address
+        'lbu'	:	('100100_RS_RT_OFFSET',3,'REG_T','OFFSET'), #Load unsigned byte -> lbu rt address
+        'lhu'	:	('100101_RS_RT_OFFSET',3,'REG_T','OFFSET'), #Load unsigned halfword -> lhu rt address
+        'sb'	:	('101000_RS_RT_OFFSET',3,'REG_T','OFFSET'), #Store byte -> sb rt address
+        'sh'	:	('101001_RS_RT_OFFSET',3,'REG_T','OFFSET'), #Store halfword -> sh rt address
+        'sw'	:	('101011_RS_RT_OFFSET',3,'REG_T','OFFSET'), #Store word -> sw rt address
         'addi'	:	('001000_RS_RT_IMMEDIATE',4,'REG_T','REG_S','IMMEDIATE'), #Addition immediate (with overflow) -> addi rt rs im
         'andi'	:	('001100_RS_RT_IMMEDIATE',4,'REG_T','REG_S','IMMEDIATE'), #AND immediate -> andi rt rs im
         'ori'	:	('001110_RS_RT_IMMEDIATE',4,'REG_T','REG_S','IMMEDIATE'), #OR immediate -> ori rt rs im

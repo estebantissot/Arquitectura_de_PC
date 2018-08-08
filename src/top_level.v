@@ -26,8 +26,6 @@ module top_level(
 	//output led1
 );
 
-//assign UART_RXD_OUT = UART_TXD_IN;
-
 // Cables
 
 //-- Modulo Instruction Fetch --
@@ -59,13 +57,13 @@ wire        execute0_JL;
 wire [31:0]	execute0_outPCBranch; 	//execute0:outPCJump -> memaccess0:inPCJump
 wire [31:0] execute0_outInstructionAddress; //execute0:outInstructionAddress -> memaccess0:inInstructionAddress
 wire [31:0]	execute0_outALUResult;//execute0:outALUResult -> memaccess0:inALUResult
-wire 		execute0_outALUZero; 	//execute0:outALUZero -> memaccess0:inALUZero
+//wire 		execute0_outALUZero; 	//execute0:outALUZero -> memaccess0:inALUZero
 wire [31:0] execute0_outRegB; 		//execute0:outRegB -> memaccess0:inRegB
 wire [4:0]	execute0_outRegF_wreg; //execute0:outRegF_wreg -> memaccess0:inRegF_wreg
+wire 		execute0_outPCSel; 		//execute0:outPCSel -> ifetch0:inPCSel
 
 //-- Modulo MemoryAccess --
 wire [4:0]	memaccess0_outWB; 			//memaccess0:outWB -> wb0:inWB
-wire 		memaccess0_outPCSel; 		//memaccess0:outPCSel -> ifetch0:inPCSel
 wire [31:0]	memaccess0_outPCJump; 	//memaccess0:outPCJump -> ifetch0:inPCJump
 wire [31:0] memaccess0_outRegF_wd; 	//memaccess0:outRegF_wd -> wb0:inRegF_wd
 wire [31:0] memaccess0_outALUResult; //memaccess0:outALUResult -> wb0:inALUResult & MEM_AluResult(execute stage)
@@ -83,19 +81,19 @@ wire [6:0]  ControlLatchMux;
 
 wire tx_start;
 wire MIPS_enable;
-wire Debug_on;
 wire [31:0] FRData;
 wire [31:0] MemData;
 wire [31:0] DebugAddress;
 wire wr_program_instruction;
 wire [31:0] program_instruction;
 wire [31:0] addressInstrucctionProgram;
-//wire [31:0] rx_address;
 wire rst;
 wire [31:0]jump_branch;
 
+// Assignaciones
 assign rst = (!reset);
-assign jump_branch= (memaccess0_outPCSel)? execute0_outPCBranch:idecode0_outPCJump;
+assign jump_branch= (execute0_outPCSel)? execute0_outPCBranch:idecode0_outPCJump;
+
 // Instancias
 // Instancia del modulo Instruction Fetch
 InstructionFetch ifetch0(
@@ -113,7 +111,7 @@ InstructionFetch ifetch0(
 	//Input Signals
 	.inPC_write(idecode0_outPC_write),
 	.inIF_ID_write(idecode0_outIF_ID_write),
-	.inPCSel(memaccess0_outPCSel|idecode0_jump),
+	.inPCSel(execute0_outPCSel|idecode0_jump),
 	.inPCJump(jump_branch),
 	
 	//Output Signals
@@ -136,11 +134,11 @@ InstructionDecode idecode0(
 	.inRegF_wd(wb0_outRegF_wd),
 	.EXE_mem_read(idecode0_outMEM[1]),
 	.EXE_rd(idecode0_out_rt), //rt (registro destino en la instruccion load).
-	.Debug_on(Debug_on),
+	.Debug_on(stop_debug),
 	.Debug_read_reg(DebugAddress[4:0]),
 
 	//Branch
-	.ID_flush(memaccess0_outPCSel),
+	.ID_flush(execute0_outPCSel),
 	
 	//Stop Debug
 	.stop_debug(stop_debug),
@@ -201,12 +199,12 @@ Execute execute0(
 	.outJL(execute0_JL),
 
 	//Branch
-   	.outPCSel(memaccess0_outPCSel),
+   	.outPCSel(execute0_outPCSel),
 	.outPCJump(execute0_outPCBranch),
 	.outInstructionAddress(execute0_outInstructionAddress),
 	
 	.outALUResult(execute0_outALUResult),
-	.outALUZero(execute0_outALUZero),
+	//.outALUZero(execute0_outALUZero),
 	.outRegB(execute0_outRegB),
 	.outRegF_wreg(execute0_outRegF_wreg)
 );
@@ -224,10 +222,9 @@ MemoryAccess memaccess0(
 	//.inPCJump(execute0_outPCJump),
 	.inInstructionAddress(execute0_outInstructionAddress),
 	.inALUResult(execute0_outALUResult),
-	.inALUZero(execute0_outALUZero),
 	.inRegB(execute0_outRegB),
 	.inRegF_wreg(execute0_outRegF_wreg),
-	.Debug_on(Debug_on),
+	.Debug_on(stop_debug),
 	.Debug_read_mem(DebugAddress),
     
     //Stop Debug
@@ -282,13 +279,13 @@ MuxLatch ml0(
     .execute0_outMEM(execute0_outMEM), 	
     .execute0_outPCJump(execute0_outPCBranch), 	
     .execute0_outALUResult(execute0_outALUResult),
-    .execute0_outALUZero(execute0_outALUZero), 	
+    //.execute0_outALUZero(execute0_outALUZero), 	
     .execute0_outRegB(execute0_outRegB), 		
-    .execute0_outRegF_wreg(execute0_outRegF_wreg), 
+    .execute0_outRegF_wreg(execute0_outRegF_wreg),
+    .execute0_outPCSel(execute0_outPCSel),  
     
     //-- Modulo MemoryAccess --
     .memaccess0_outWB(memaccess0_outWB),
-    .memaccess0_outPCSel(memaccess0_outPCSel), 			 	
     .memaccess0_outRegF_wd(memaccess0_outRegF_wd), 	
     .memaccess0_outALUResult(memaccess0_outALUResult), 
     .memaccess0_outRegF_wreg(memaccess0_outRegF_wreg), 
@@ -316,7 +313,7 @@ DebugUnit debug(
     .led0(led0),
     //.led1(led1),
     
-    .out_debug_on(Debug_on),
+    //.out_debug_on(Debug_on),
     .outDebugAddress(DebugAddress),
     .loadProgram(loadProgram),
     .addressInstrucctionProgram(addressInstrucctionProgram),

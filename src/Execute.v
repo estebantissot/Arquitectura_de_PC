@@ -52,14 +52,14 @@ module Execute(
     output [31:0]   outPCJump,
     output [31:0]   outInstructionAddress,
     output [31:0]   outALUResult,
-    output 			outALUZero,
+   // output          outALUZero,
     output [31:0]   outRegB,
     output [4:0] 	outRegF_wreg
 );
 
 // Registros
 reg [4:0] 	WB;
-reg [2:0]   MEM;
+reg [1:0]   MEM;
 reg         JL;
 reg [31:0]  ALUResult;
 reg 	   ALUZero;
@@ -89,7 +89,6 @@ assign outMEM = MEM;
 assign outJL = JL;
 assign outRegF_wreg = RegF_wreg;
 assign outALUResult = ALUResult;
-assign outALUZero = ALUZero;
 assign outRegB = RegB;
 assign ALU_B = regB_ALU;
 assign ALU_A = regA_ALU;
@@ -100,16 +99,16 @@ ALU #(.bits(32)) alu0 (
 	.A(ALU_A),
 	.B(ALU_B),
 	.select(ALUControl),
-	.Zero(alu_zero),
+	//.Zero(),
 	.C(alu_result)
 );
 
 // Asignaciones
-//assign JLR = (Opcode == 6'd8 || Opcode == 6'd9) ? 1'b1: 1'b0; 
-assign JLR = {Opcode == 6'd8,Opcode == 6'd9};
-assign outPCJump = (JLR ==2'b11) ? inRegA : (inInstruction_ls + inInstructionAddress);
-assign outPCSel = PCSel;// (inMEM[2] && (inRegA==inRegB))? 1'b1:1'b0;
 assign Opcode = (inEXE[2:1] == 2'b11)? inInmmediateOpcode:inInstruction_ls[5:0];
+assign JLR[1] = ((inInstruction_ls[5:0] == 6'd8) && (inInmmediateOpcode == 6'b0)) ? 1'b1:1'b0; //Jump Register && inEXE[3:2] == 2'b11
+assign JLR[0] = ((inInstruction_ls[5:0] == 6'd9) &&(inInmmediateOpcode == 6'b0)) ? 1'b1:1'b0; //Jump and Link Register
+assign outPCJump = (JLR !=2'b00) ? inRegA : (inInstruction_ls + inInstructionAddress);
+assign outPCSel = PCSel;// (inMEM[2] && (inRegA==inRegB))? 1'b1:1'b0;
 assign shif_variable= ((inEXE[2:1] == 2'b10) && (inInstruction_ls[10:6] != 5'b0))? 1'b1:1'b0;
 
 //Instancia de "ALUControl"
@@ -138,12 +137,12 @@ begin
 	if(rst || JLR[1])
 		begin
 			WB <= 5'b00000;
-			MEM <= 3'b010;
+			MEM <= 2'b10;
 			JL <= 1'b0;
 			RegF_wreg <= 5'bZZZZZ;
 			ALUResult <= 32'b0;
-			ALUZero <= 1'b0;
 			RegB <= 32'b0;	
+			InstructionAddress <= 32'b0;
 		end
 	else
 		begin
@@ -154,7 +153,6 @@ begin
                 JL <= inJL;
                 RegF_wreg <= wreg;
                 ALUResult <= alu_result;
-                ALUZero <= alu_zero;
                 RegB <= inRegB;
                 InstructionAddress<=inInstructionAddress;
 		  end
@@ -168,14 +166,14 @@ always @(*)
 			    regA_ALU <= 32'b0;
 				wreg <= 0;
 				regB_ALU<= 0;
-				PCSel <= 0;
+				PCSel <= 1'b0;
 			end
 		else
 			begin
-			    if(((inEXE[5:4]==2'b01) && (inRegA==inRegB)) || (JLR == 2'b11) || ((inEXE[5:4]==2'b01)&&(inRegA!=inRegB)))
-			         PCSel=1'b1;
+			    if(((inEXE[5:4]==2'b01) && (inRegA==inRegB)) || (JLR != 2'b00) || ((inEXE[5:4]==2'b11)&&(inRegA!=inRegB)))
+			         PCSel <= 1'b1;
 			    else
-			         PCSel=1'b0;
+			         PCSel <= 1'b0;
 			
 				//Jump <= ((inInstruction_ls << 2) + inInstructionAddress);
 				casez(inEXE)

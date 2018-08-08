@@ -28,7 +28,6 @@ module MemoryAccess(
     input           inJL,
     input [31:0]    inInstructionAddress,
     input [31:0] 	inALUResult,
-    input 			inALUZero,
     input [31:0] 	inRegB,
     input [4:0] 	inRegF_wreg,
     input           Debug_on,
@@ -86,6 +85,7 @@ begin
 			WB <= 4'b0000;
 			ALUResult <= 32'b0;
 			RegF_wreg <= 5'b0;
+			RegF_word <= 32'b0;
 		end
 	else
 		begin

@@ -30,19 +30,15 @@ module DebugUnit(
     input [31:0] inMemData,
         
     output led0,
-    output   out_debug_on,
     output [31:0] outDebugAddress,
-    
-   // output [31:0] rx_address,
     output [6:0] outControlLatchMux,
     output loadProgram,
     output [31:0] addressInstrucctionProgram,
     output [31:0] InstructionProgram,
     output write_instruction,
     output TX,
-    output stopPC_debug
-    
-    );
+    output stopPC_debug 
+);
     
 // Registros --- Maquina Transmisora 
 
@@ -99,7 +95,6 @@ reg debug_mode;
 reg [31:0] address;
 reg [3:0]senal;
 reg [2:0]etapa;
-//reg send;
 reg load_program;
 
 assign stopPC_debug =stopPC;
@@ -109,7 +104,6 @@ assign write_instruction   =   WriteRead;
 assign loadProgram = load_program;
 assign outDebugAddress = address;
 assign outControlLatchMux = {etapa,senal};
-assign out_debug_on = debug;
 assign led0 = debug_mode;
 
 
@@ -121,7 +115,6 @@ Top_UART uart(
 	.TX_start(tx_start),
 	.UART_data(sendData),
 	.RX(RX),
-   // .rx_address(rx_address),
 	.TX(TX),
 	.write(write),
 	.dout(dout),
@@ -134,11 +127,11 @@ always @ (posedge clk, posedge rst)
 begin
 	if(rst)
 		begin
-		state_rx <= rx_stop;
-		//send <= 1'b0;
+		state_rx <= rx_init;
 		debug_mode <= 1'b0;
 		rx_direccion <= 32'hffffffff;
 		load_program = 1'b1;
+		WriteRead <= 1'b0;
 		end
 	else
 		begin
@@ -199,12 +192,13 @@ always @(posedge clk,posedge rst)
 begin
 	if(rst)
 		begin
-			stopPC<=1'b0;
+			stopPC<=1'b1;
 			tx_start<=1'b0;
 			state_send <= send_init;
+			state_prev <= send_Rmem;
 			etapa <= 3'b0;
 			senal <= 4'b0;
-			debug <= 1'b0;
+			sendData <= 32'b0;
 		end
 	else
 		begin
@@ -217,9 +211,8 @@ begin
                                 begin
                                     if (inPC == rx_direccion + 32'd4) // Finalizo el programa
                                         begin
-                                            stopPC <= 1'b0;
-                                            state_send<=send_PC;
-                                            debug <= 1'b0;
+                                            stopPC <= 1'b1;
+                                            state_send<=send_PC;                               
                                         end
                                     else
                                         begin
@@ -233,7 +226,6 @@ begin
                                     if (!RX)
                                         begin 
                                             state_send <= send_PC;
-                                            debug <= 1'b1;
                                         end
                                     else
                                         state_send <= send_init;
@@ -275,7 +267,7 @@ begin
                 begin
                     sendData <= inMemData;
                     tx_start<=1'b1;                   
-                    if (address == 32'd19)  //if (address == 32'd20)
+                    if (address == 32'd19)  
                         begin
                             address <= 32'b0;
                             state_prev<=send_Latch;
@@ -294,7 +286,6 @@ begin
                     tx_start<=1'b1;
                     sendData <= inLatch;
                     state_send <= send_waitFinish;
-                    
                     if(etapa == 3'b000)
                         begin
                             state_prev <= send_Latch;
@@ -353,7 +344,6 @@ begin
                                   state_prev <= send_Latch;
                                 end
                           end
-                
                  end
                 
             send_waitFinish:
@@ -367,12 +357,11 @@ begin
                 
             send_Finish:
                 begin
-                    debug <= 1'b0;
+                    stopPC<=1'b0;
                     tx_start<=1'b0;
                     if (debug_mode)
                         begin
                             state_send <= send_init;
-                            stopPC<=1'b0;
                         end
                     else
                         state_send <= send_Finish;
@@ -380,8 +369,6 @@ begin
             
             endcase
         end
-	
 end
-
     
 endmodule

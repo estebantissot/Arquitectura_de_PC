@@ -18,12 +18,19 @@
 // Additional Comments: 
 //
 //////////////////////////////////////////////////////////////////////////////////
-module ALU #(parameter bits = 8)(A,B,select,Zero,C);
+module ALU #(parameter bits = 8)
+(
+    A, 
+    B,
+    select,
+    //Zero,
+    C
+);
 		input  signed [bits-1:0]A;
 		input  signed [bits-1:0]B;
 		input  [3:0]select;
 		output [bits-1:0]C;
-		output Zero;
+		//output Zero;
 		
 		reg [bits-1:0]e;
 		reg alu_zero;
@@ -42,16 +49,14 @@ module ALU #(parameter bits = 8)(A,B,select,Zero,C);
 				4'b0111:e=-1;
 				4'b1001:e=A^B;
 				4'b1011:e=B<<A;
-
-				
-				/*6'b000000:e=A;
-				6'b000001:e=B;*/
+				4'b1100: if (A<B) e=32'hffffffff;
+				         else e=32'h00000000;
 				default: e=-1;
 			endcase
 		end
 		
 assign C=e;
-assign Zero = ((select==4'b0110)&&(C == 0))? 1'b1:1'b0;
+//assign Zero = ((select==4'b0110)&&(C == 0))? 1'b1:1'b0;
 
 endmodule
 

@@ -44,16 +44,16 @@ module MuxLatch(
 
 	//-- Modulo Execute --
 	input [4:0]		execute0_outWB, 		//execute0:outWB -> memaccess0:inWB
-	input [2:0]		execute0_outMEM, 		//execute0:outMEM -> memacces0:inMEM
+	input [1:0]		execute0_outMEM, 		//execute0:outMEM -> memacces0:inMEM
 	input [31:0]	execute0_outPCJump, 	//execute0:outPCJump -> memaccess0:inPCJump
 	input [31:0]	execute0_outALUResult,//execute0:outALUResult -> memaccess0:inALUResult
-	input 			execute0_outALUZero, 	//execute0:outALUZero -> memaccess0:inALUZero
+	//input 			execute0_outALUZero, 	//execute0:outALUZero -> memaccess0:inALUZero
 	input [31:0] 	execute0_outRegB, 		//execute0:outRegB -> memaccess0:inRegB
 	input [4:0]		execute0_outRegF_wreg, //execute0:outRegF_wreg -> memaccess0:inRegF_wreg
+	input           execute0_outPCSel,
 
 	//-- Modulo MemoryAccess --
 	input [4:0]		memaccess0_outWB, 			//memaccess0:outWB -> wb0:inWB
-	input           memaccess0_outPCSel,
 	input [31:0]	memaccess0_outRegF_wd, 	//memaccess0:outRegF_wd -> wb0:inRegF_wd
 	input [31:0] 	memaccess0_outALUResult, //memaccess0:outALUResult -> wb0:inALUResult & MEM_AluResult(execute stage)
 	input [4:0]		memaccess0_outRegF_wreg, //memaccess0:outRegF_wreg -> idecode0:inRegF_wreg
@@ -89,7 +89,7 @@ begin
 	                      
 	            // Send the Latchs of the state Decode
 	            7'b001_0000:
-	            	data <= {8'b0 , {4'b0,idecode0_outEXE} , {5'b0,idecode0_outMEM} , {3'b0,idecode0_outWB}};
+	            	data <= {8'b0 , {2'b0,idecode0_outEXE} , {6'b0,idecode0_outMEM} , {3'b0,idecode0_outWB}};
 	            7'b001_0001:
 	            	data <= idecode0_outInstructionAddress;
 	            7'b001_0010:
@@ -103,7 +103,7 @@ begin
 
 	            // Send the Latchs of the state Execute   
 	      		7'b010_0000:
-	            	data <= {8'b0 , 8'b0 , {5'b0,execute0_outMEM} , {3'b0,execute0_outWB}};
+	            	data <= {8'b0 , 8'b0 , {6'b0,execute0_outMEM} , {3'b0,execute0_outWB}};
 	            7'b010_0001:
 	            	data <= execute0_outPCJump;
 	            7'b010_0011:
@@ -111,7 +111,7 @@ begin
 	            7'b010_0100:
 	            	data <= execute0_outRegB;
 				7'b010_0101:
-	            	data <= { 8'b0, 8'b0 , {7'b0,execute0_outALUZero} , {3'b0,execute0_outRegF_wreg}};
+	            	data <= { 8'b0, 8'b0 , 8'b0 , {3'b0,execute0_outRegF_wreg}}; //execute0_outALUZero
 	             
 	            // Send the Latchs of the state Memory
 	            7'b011_0000:
@@ -121,7 +121,7 @@ begin
 	            7'b011_0010:
 	            	data <= memaccess0_outALUResult;
             	7'b011_0011:		
-	            	data <= {8'b0 , 8'b0 , {7'b0,memaccess0_outPCSel} , {3'b0,memaccess0_outRegF_wreg}};
+	            	data <= {8'b0 , 8'b0 , {7'b0,execute0_outPCSel} , {3'b0,memaccess0_outRegF_wreg}};
 	            	
 	            // Send the Latchs of the state Wite Back
 	            7'b100_0000:
