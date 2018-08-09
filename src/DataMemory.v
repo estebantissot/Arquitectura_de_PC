@@ -56,10 +56,20 @@ begin
 	if(rst)
 	begin
 		Data <=32'hZZZZZZZZ;
+		/*
+		data_memory[32'd0][31:0]<= 32'b0;
+		data_memory[32'd1][31:0]<= 32'd1;
+		data_memory[32'd2][31:0]<= 32'd2;
+		data_memory[32'd3][31:0]<= 32'd3;
+		data_memory[32'd4][31:0]<= 32'd4;
+		data_memory[32'd5][31:0]<= 32'd5;
+		*/
+		
 		for (i=32'd0; i <= 32'd31; i=i+32'b1)
             begin
                data_memory[i][31:0]<= 32'b0;
             end
+        
 	end
 	else
 	begin

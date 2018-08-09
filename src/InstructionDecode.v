@@ -141,6 +141,7 @@ if (rst)
 		EXE = 6'd0;
 		InstructionAddress = 32'd0;
 		Instruction_ls = 32'd0;
+		InmmediateOpcode = 6'b0;
 		rs = 5'd0;
 		rt = 5'd0;
 		RT_rd = 5'd0;

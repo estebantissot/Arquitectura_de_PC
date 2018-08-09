@@ -83,7 +83,7 @@ begin
 			pc <= 32'hffffffff;
 			instruction_next<=32'b0;
 		end
-	else if (inIF_ID_write && (!stop_debug))
+	else if (inIF_ID_write && (!stop_debug) && (pc <= addressInstrucctionProgram))
 		begin
 			pc <= instruction_address;
 			instruction_next<= instruction_address + 1;

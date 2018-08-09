@@ -70,7 +70,11 @@ always@ (posedge clk, posedge rst)
 begin
 	if (rst)
 		begin
-           for (i=32'd0; i <= 32'd31; i=i+32'b1)
+            //registros[32'd0][31:0]<= 32'b0;
+            //registros[32'd1][31:0]<= 32'd7;
+            //registros[32'd2][31:0]<= 32'd10;
+            
+            for (i=32'd0; i <= 32'd31; i=i+32'b1)
                 begin
                    registros[i][31:0]<= 32'b0;
                 end
