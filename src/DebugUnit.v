@@ -132,6 +132,7 @@ begin
 		rx_direccion <= 32'hffffffff;
 		load_program = 1'b1;
 		WriteRead <= 1'b0;
+		rx_Instruccion <= 32'b0;
 		end
 	else
 		begin
@@ -199,6 +200,7 @@ begin
 			etapa <= 3'b0;
 			senal <= 4'b0;
 			sendData <= 32'b0;
+            address <= 32'b0;
 		end
 	else
 		begin
@@ -223,7 +225,7 @@ begin
                            else // Envio todo despues de cada instruccion
                                begin
                                     stopPC<=1'b1; 
-                                    if (!RX)
+                                    if (!RX) // && inPC >= 32'd0;
                                         begin 
                                             state_send <= send_PC;
                                         end

@@ -35,8 +35,9 @@ module InstructionFetch(
     input           wr_instruction,
  	 
 //Output Signals
-    output [31:0] outInstructionAddress,
-    output [31:0] outInstruction
+    output [31:0] outNextInstructionAddress,
+    output [31:0] outInstruction,
+    output [31:0] outPC
     );
 
 // Registros
@@ -48,8 +49,9 @@ reg [31:0] instruction_next;
 wire [31:0] address;
 
 // Asignaciones
-assign outInstructionAddress = instruction_next;
 assign address = (loadProgram) ? addressInstrucctionProgram : instruction_address;
+assign outNextInstructionAddress = instruction_next;
+assign outPC = pc;
 
 // Instancia de "Instruction Memory"
 InstructionMemory imem0 (
@@ -65,7 +67,7 @@ InstructionMemory imem0 (
 always @ (*)
 begin
 	if(rst)
-		instruction_address<=0;
+		instruction_address<=32'h0;
 	else
 		begin
 			casez ({inPCSel,inPC_write})
@@ -81,12 +83,12 @@ begin
 	if (rst)
 		begin
 			pc <= 32'hffffffff;
-			instruction_next<=32'b0;
+			instruction_next<=32'h0;
 		end
-	else if (inIF_ID_write && (!stop_debug) && (pc <= addressInstrucctionProgram))
+	else if (inIF_ID_write && (!stop_debug))//&& (instruction_address < addressInstrucctionProgram+1))
 		begin
 			pc <= instruction_address;
-			instruction_next<= instruction_address + 1;
+			instruction_next<= instruction_address + 1; //???'
 		end
 end
 

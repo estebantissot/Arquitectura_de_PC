@@ -27,7 +27,7 @@ module Execute(
     input [1:0] 	inMEM,
     input [5:0] 	inEXE,
     input           inJL,
-    input [31:0] 	inInstructionAddress,
+    input [31:0] 	inNextInstructionAddress,
     input [31:0] 	MEM_AluResult,
     input [31:0]    WB_regF_wd,
     input [31:0] 	inRegA,
@@ -50,7 +50,7 @@ module Execute(
     output          outJL,
     output 			outPCSel,
     output [31:0]   outPCJump,
-    output [31:0]   outInstructionAddress,
+    output [31:0]   outNextInstructionAddress,
     output [31:0]   outALUResult,
    // output          outALUZero,
     output [31:0]   outRegB,
@@ -69,7 +69,7 @@ reg [4:0]  wreg;
 reg [31:0] regB_ALU;
 reg [31:0] regA_ALU;
 reg        PCSel;
-reg [31:0] InstructionAddress;
+reg [31:0] NextInstructionAddress;
 
 // Cables
 wire [3:0] 	ALUControl;
@@ -92,7 +92,7 @@ assign outALUResult = ALUResult;
 assign outRegB = RegB;
 assign ALU_B = regB_ALU;
 assign ALU_A = regA_ALU;
-assign outInstructionAddress = InstructionAddress;
+assign outNextInstructionAddress = NextInstructionAddress;
 
 //Instancia de "ALU"
 ALU #(.bits(32)) alu0 (
@@ -107,7 +107,7 @@ ALU #(.bits(32)) alu0 (
 assign Opcode = (inEXE[2:1] == 2'b11)? inInmmediateOpcode:inInstruction_ls[5:0];
 assign JLR[1] = ((inInstruction_ls[5:0] == 6'd8) && (inInmmediateOpcode == 6'b0)) ? 1'b1:1'b0; //Jump Register && inEXE[3:2] == 2'b11
 assign JLR[0] = ((inInstruction_ls[5:0] == 6'd9) &&(inInmmediateOpcode == 6'b0)) ? 1'b1:1'b0; //Jump and Link Register
-assign outPCJump = (JLR !=2'b00) ? inRegA : (inInstruction_ls + inInstructionAddress);
+assign outPCJump = (JLR !=2'b00) ? inRegA : (inInstruction_ls + inNextInstructionAddress);
 assign outPCSel = PCSel;// (inMEM[2] && (inRegA==inRegB))? 1'b1:1'b0;
 assign shif_variable= ((inEXE[2:1] == 2'b10) && (inInstruction_ls[10:6] != 5'b0))? 1'b1:1'b0;
 
@@ -142,7 +142,7 @@ begin
 			RegF_wreg <= 5'bZZZZZ;
 			ALUResult <= 32'b0;
 			RegB <= 32'b0;	
-			InstructionAddress <= 32'b0;
+			NextInstructionAddress <= 32'b0;
 		end
 	else
 		begin
@@ -154,7 +154,7 @@ begin
                 RegF_wreg <= wreg;
                 ALUResult <= alu_result;
                 RegB <= inRegB;
-                InstructionAddress<=inInstructionAddress;
+                NextInstructionAddress<=inNextInstructionAddress;
 		  end
 	end
 end
@@ -189,7 +189,7 @@ always @(*)
 				    4'b0000: regA_ALU <= inRegA;
 				    4'b0001: regA_ALU <= WB_regF_wd;
 				    4'b0010: regA_ALU <= MEM_AluResult;
-				    4'b1???: regA_ALU <= inInstructionAddress;
+				    4'b1???: regA_ALU <= inNextInstructionAddress;
 				    4'b01??: regA_ALU <= inInstruction_ls[10:6];
 				    default:regA_ALU <= inRegA;
 				endcase

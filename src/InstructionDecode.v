@@ -24,7 +24,7 @@ module InstructionDecode(
 	 
 //Input Signals
     input           inRegF_wr,
-    input [31:0] 	inInstructionAddress,
+    input [31:0] 	inNextInstructionAddress,
     input [31:0] 	inInstruction,
     input [4:0] 	inRegF_wreg,
     input [31:0] 	inRegF_wd,
@@ -43,7 +43,7 @@ module InstructionDecode(
     output  [1:0] 	outMEM,
     output  [5:0] 	outEXE,
     output          outJL,
-    output  [31:0]  outInstructionAddress,
+    output  [31:0]  outNextInstructionAddress,
     output  [31:0]  outRegA,
     output  [31:0]  outRegB,
     output  [31:0]  outInstruction_ls,
@@ -65,7 +65,7 @@ reg [4:0] 	WB;
 reg [1:0] 	MEM;
 reg [5:0] 	EXE;
 reg         JUMP;
-reg [31:0] 	InstructionAddress;
+reg [31:0] 	NextInstructionAddress;
 reg signed [31:0]	Instruction_ls;
 reg [4:0]   rs;
 reg [4:0] 	rt;
@@ -84,7 +84,7 @@ assign outWB = WB;// (ControlMux & (ID_flush)) ? 5'b0 :
 assign outMEM = MEM;
 assign outEXE = EXE;
 
-assign outInstructionAddress = InstructionAddress;
+assign outNextInstructionAddress = NextInstructionAddress;
 assign outInstruction_ls = (inInstruction[31:26]!=6'd8)? Instruction_ls>>16:Instruction_ls >>> 16;
 assign out_rs = rs;
 assign out_rt = rt;
@@ -139,7 +139,7 @@ if (rst)
 		WB = 5'd0;
 		MEM = 3'd0;
 		EXE = 6'd0;
-		InstructionAddress = 32'd0;
+		NextInstructionAddress = 32'd0;
 		Instruction_ls = 32'd0;
 		InmmediateOpcode = 6'b0;
 		rs = 5'd0;
@@ -166,7 +166,7 @@ else // Escritura de todos los registros de salida
                         JUMP = outControl[13];
                     end
             endcase
-            InstructionAddress = inInstructionAddress;
+            NextInstructionAddress = inNextInstructionAddress;
             InmmediateOpcode = inInstruction[31:26];
             Instruction_ls = {inInstruction[15:0],16'b0};
             rs = inInstruction[25:21];
@@ -186,11 +186,11 @@ begin
     begin
         if(outControl[14])
              begin
-                 address_jump = {2'b00,inInstructionAddress[31:28],inInstruction[25:0]};
+                 address_jump = {2'b00,inNextInstructionAddress[31:28],inInstruction[25:0]};
              end    
          else
              begin
-                 address_jump = inInstructionAddress;
+                 address_jump = inNextInstructionAddress;
              end
      end
 end

@@ -31,12 +31,11 @@ module TestBench_IntegrationTest;
 	//reg led0;
 	reg UART_TXD_IN;  
 	
-	
 
-    // Cables
+// Cables
     
     //-- Modulo Instruction Fetch --
-    wire [31:0]    ifetch0_outInstructionAddress; //ifetch0:outInstructionAddress -> idecode0:inInstructionAddress
+    wire [31:0]    ifetch0_outNextInstructionAddress; //ifetch0:outInstructionAddress -> idecode0:inInstructionAddress
     wire [31:0]    ifetch0_outInstruction;             //ifetch0:outInstruction -> idecode0:inInstruction
     
     //-- Modulo Instruction Decode --
@@ -44,7 +43,7 @@ module TestBench_IntegrationTest;
     wire [1:0]    idecode0_outMEM;     //idecode0:outMEM -> execute0:inMEM
     wire [5:0]    idecode0_outEXE;     //idecode0:outEXE -> execute0:inEXE
     wire        idecode0_JL;
-    wire [31:0]    idecode0_outInstructionAddress; //idecode0:outInstructionAddress -> execute0:inInstructionAddress
+    wire [31:0]    idecode0_outNextInstructionAddress; //idecode0:outInstructionAddress -> execute0:inInstructionAddress
     wire [31:0]    idecode0_outRegA;     //idecode0:outRegA -> execute0:inRegA
     wire [31:0]    idecode0_outRegB;     //idecode0:outRegB -> execute0:inRegB
     wire [31:0]    idecode0_outInstruction_ls; //idecode0:outInstruction_ls -> execute0:inInstruction_ls
@@ -60,9 +59,9 @@ module TestBench_IntegrationTest;
     //-- Modulo Execute --
     wire [4:0]    execute0_outWB;         //execute0:outWB -> memaccess0:inWB
     wire [1:0]    execute0_outMEM;         //execute0:outMEM -> memacces0:inMEM
-    wire        execute0_JL;
+    wire        execute0_outJL;
     wire [31:0]    execute0_outPCBranch;     //execute0:outPCJump -> memaccess0:inPCJump
-    wire [31:0] execute0_outInstructionAddress; //execute0:outInstructionAddress -> memaccess0:inInstructionAddress
+    wire [31:0] execute0_outNextInstructionAddress; //execute0:outInstructionAddress -> memaccess0:inInstructionAddress
     wire [31:0]    execute0_outALUResult;//execute0:outALUResult -> memaccess0:inALUResult
     //wire         execute0_outALUZero;     //execute0:outALUZero -> memaccess0:inALUZero
     wire [31:0] execute0_outRegB;         //execute0:outRegB -> memaccess0:inRegB
@@ -95,11 +94,12 @@ module TestBench_IntegrationTest;
     wire [31:0] program_instruction;
     wire [31:0] addressInstrucctionProgram;
     wire [31:0]jump_branch;
+    wire [31:0] PC;
     
     // Assignaciones
     assign jump_branch= (execute0_outPCSel)? execute0_outPCBranch:idecode0_outPCJump;
     assign stop_debug = 1'b0;
-    assign loadProgram = 1'b0;
+    assign loadProgram = 1'b0;    
     
     // Instancias
     // Instancia del modulo Instruction Fetch
@@ -122,8 +122,9 @@ module TestBench_IntegrationTest;
         .inPCJump(jump_branch),
         
         //Output Signals
-        .outInstructionAddress(ifetch0_outInstructionAddress),
-        .outInstruction(ifetch0_outInstruction)
+        .outNextInstructionAddress(ifetch0_outNextInstructionAddress),
+        .outInstruction(ifetch0_outInstruction),
+        .outPC(PC)
     );
     
     
@@ -135,7 +136,7 @@ module TestBench_IntegrationTest;
             
         //Input Signals
         .inRegF_wr(wb0_outRegF_wr),
-        .inInstructionAddress(ifetch0_outInstructionAddress),
+        .inNextInstructionAddress(ifetch0_outNextInstructionAddress),
         .inInstruction(ifetch0_outInstruction),
         .inRegF_wreg(memaccess0_outRegF_wreg),
         .inRegF_wd(wb0_outRegF_wd),
@@ -154,7 +155,7 @@ module TestBench_IntegrationTest;
         .outMEM(idecode0_outMEM),
         .outEXE(idecode0_outEXE),
         .outJL(idecode0_JL),
-        .outInstructionAddress(idecode0_outInstructionAddress),
+        .outNextInstructionAddress(idecode0_outNextInstructionAddress),
         .outRegA(idecode0_outRegA),
         .outRegB(idecode0_outRegB),
         .outInstruction_ls(idecode0_outInstruction_ls),
@@ -182,7 +183,7 @@ module TestBench_IntegrationTest;
         .inMEM(idecode0_outMEM),
         .inEXE(idecode0_outEXE),
         .inJL(idecode0_JL),
-        .inInstructionAddress(idecode0_outInstructionAddress),
+        .inNextInstructionAddress(idecode0_outNextInstructionAddress),
         .MEM_AluResult(execute0_outALUResult),
         .WB_regF_wd(wb0_outRegF_wd),
         .inRegA(idecode0_outRegA),
@@ -203,12 +204,12 @@ module TestBench_IntegrationTest;
         //Output Signals
         .outWB(execute0_outWB),
         .outMEM(execute0_outMEM),
-        .outJL(execute0_JL),
+        .outJL(execute0_outJL),
     
         //Branch
            .outPCSel(execute0_outPCSel),
         .outPCJump(execute0_outPCBranch),
-        .outInstructionAddress(execute0_outInstructionAddress),
+        .outNextInstructionAddress(execute0_outNextInstructionAddress),
         
         .outALUResult(execute0_outALUResult),
         //.outALUZero(execute0_outALUZero),
@@ -225,9 +226,9 @@ module TestBench_IntegrationTest;
         //Input Signals
         .inWB(execute0_outWB),
         .inMEM(execute0_outMEM),
-        .inJL(execute0_JL),
+        .inJL(execute0_outJL),
         //.inPCJump(execute0_outPCJump),
-        .inInstructionAddress(execute0_outInstructionAddress),
+        .inNextInstructionAddress(execute0_outNextInstructionAddress),
         .inALUResult(execute0_outALUResult),
         .inRegB(execute0_outRegB),
         .inRegF_wreg(execute0_outRegF_wreg),
@@ -264,14 +265,14 @@ module TestBench_IntegrationTest;
         .inControl(ControlLatchMux),
         
         //-- Modulo Instruction Fetch --
-        .ifetch0_outInstructionAddress(ifetch0_outInstructionAddress), 
+        .ifetch0_outNextInstructionAddress(ifetch0_outNextInstructionAddress), 
         .ifetch0_outInstruction(ifetch0_outInstruction),             
         
         //-- Modulo Instruction Decode --
         .idecode0_outWB(idecode0_outWB),     
         .idecode0_outMEM(idecode0_outMEM),     
         .idecode0_outEXE(idecode0_outEXE),     
-        .idecode0_outInstructionAddress(idecode0_outInstructionAddress), 
+        .idecode0_outNextInstructionAddress(idecode0_outNextInstructionAddress), 
         .idecode0_outRegA(idecode0_outRegA),
         .idecode0_outRegB(idecode0_outRegB),
         .idecode0_outInstruction_ls(idecode0_outInstruction_ls),
@@ -283,7 +284,9 @@ module TestBench_IntegrationTest;
         
         //-- Modulo Execute --
         .execute0_outWB(execute0_outWB),         
-        .execute0_outMEM(execute0_outMEM),     
+        .execute0_outMEM(execute0_outMEM),
+        .execute0_outJL(execute0_outJL),
+        .execute0_outNextInstructionAddress(execute0_outNextInstructionAddress),     
         .execute0_outPCJump(execute0_outPCBranch),     
         .execute0_outALUResult(execute0_outALUResult),
         //.execute0_outALUZero(execute0_outALUZero),     
@@ -312,7 +315,7 @@ module TestBench_IntegrationTest;
         // INPUT
         .RX(UART_TXD_IN),
         .inLatch(muxLatch_outData),
-        .inPC(ifetch0_outInstructionAddress),
+        .inPC(PC),
         .inFRData(FRData),
         .inMemData(MemData),
         
@@ -320,18 +323,17 @@ module TestBench_IntegrationTest;
         .led0(),
         //.led1(led1),
         
-        //.out_debug_on(Debug_on),
         .outDebugAddress(DebugAddress),
-        .loadProgram(), //loadProgram
+        .loadProgram(),
         .addressInstrucctionProgram(addressInstrucctionProgram),
         .InstructionProgram(program_instruction),
         .write_instruction(wr_program_instruction),
-        //.rx_address(rx_address),
         .TX(), 
-        .stopPC_debug(), //stop_debug
+        .stopPC_debug(),
         .outControlLatchMux(ControlLatchMux)
     
     );
+
 
 
 always #5 clk=~clk;
