@@ -9,9 +9,9 @@ ADDI R10 R0 34
 ADDU R5  R1 R2	 // (1)R1  + (2)R2  = (3)R5
 
 //----TESTEO FORWARDING ETAPA EXECUTE ----
-SUBU R6  R1 R2   // (1)R1  - (2)R2  = (-1)R6
-AND  R7  R1 R3   // (8)R1  & (14)R3 = (8)R7
-AND  R8  R1 R6   // (1)R1 & (-1)R6 = (1)R8
+SUBU R6  R1 R2   // (1)R1 - (2)R2  = (-1)R6
+ADDU  R7  R4 R6   // (10)R4 & (-1)R6 = (9)R7
+AND  R8  R1 R6   // (1)R1 & (-1)R6 = (0)R8
 //----------------------------------------
 
 SLL  R9 R3 6 	// R3(0000_1110) << 6 = R9(1100_0000)
