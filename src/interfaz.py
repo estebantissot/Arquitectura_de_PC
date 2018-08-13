@@ -232,7 +232,7 @@ load_mode = raw_input("Select the number of the mode: ")
 if (load_mode != '2'):
 	print ('  ---------------------------------- PROGRAM ----------------------------------\n')
 	try:
-		f = open ('TEST1.txt','r') #program_addi	
+		f = open ('TEST2.txt','r') #program_addi	
 		while True:
 			line = f.readline()
 			if not line:

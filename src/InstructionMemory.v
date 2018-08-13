@@ -44,7 +44,7 @@ begin
     if(rst)
     begin         
         Data <= 32'd0;//RegisterMemory[1'b0];
-///*          
+/*          
         RegisterMemory[32'h00]=32'b001000_00000_00001_0000000000001000;     // ADDI R1 R0 8     R1 <- R0(0) + 8
         RegisterMemory[32'h01]=32'b001000_00000_00010_0000000000000011;     // ADDI R2 R0 3     R2 <- R0(0) + 3
         RegisterMemory[32'h02]=32'b001000_00000_00110_0000000000000001;     // ADDI R6 R0 1     R6 <- R0(0) + 1
@@ -59,7 +59,7 @@ begin
         RegisterMemory[32'h0b]=32'b000000_00001_01001_00100_00000_100100;   // AND R4 R1 R9     R4 <- R1(8) & R9(14)
         RegisterMemory[32'h0c]=32'b000000_01001_00010_00101_00000_100101;   // OR R5 R9 R2      R5 <- R9(14) | R2(3)  
         RegisterMemory[32'h0d]=32'b000000_00001_01001_00110_00000_100110;   // XOR R6 R1 R9     R6 <- R1(8) XOR R9(14)      
-        RegisterMemory[32'h0e]=32'b000100_00001_00011_0000000000010001;     // BEQ R1 R3 17     PC <- 17 SI R3(7) SEA IGUAL A R1(8)
+        RegisterMemory[32'h0e]=32'b000100_00001_00011_0000000000000010;     // BEQ R1 R3 17     PC <- 17 SI R3(7) SEA IGUAL A R1(8)
         RegisterMemory[32'h0f]=32'b000000_00110_00011_00011_00000_100001;   // ADDU R3 R6 R3    R3 <- R6(1) + R3(7)
         RegisterMemory[32'h10]=32'b000010_00000000000000000000001011;       // J 11             PC <- 11
         RegisterMemory[32'h11]=32'b000000_00000_00011_00001_00110_000000;   // SLL R1 R3 6      R1[8:0](0000_0110) << 6 = R3[8:0](1000_0000)
@@ -72,8 +72,8 @@ begin
         RegisterMemory[32'h18]=32'b000000_00000_01001_00110_00001_000000;   // SLL R6 R9 1      SLL  R6 R9 1
         RegisterMemory[32'h19]=32'b000000_00000_01001_01010_00001_000011;   // SRA R10 R9 1     R10 <- R9(1110) >> 1
 
-//*/
-        for (i=32'h1a; i <= 32'h20; i=i+32'b1)
+*/
+        for (i=32'd0; i <= 32'd40; i=i+32'b1)
             begin
                RegisterMemory[i][31:0]<= 32'b0;
             end

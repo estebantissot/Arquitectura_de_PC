@@ -108,13 +108,13 @@ begin
 	            	data <= {8'b0 , 8'b0 , {6'b0,execute0_outMEM} , {3'b0,execute0_outWB}};
 	            7'b010_0001:
 	               data <= execute0_outNextInstructionAddress;
-	            7'b010_0011:
+	            7'b010_0010:
 	            	data <= execute0_outPCJump;
-	            7'b010_0100:
+	            7'b010_0011:
 	            	data <= execute0_outALUResult;
-	            7'b010_0101:
+	            7'b010_0100:
 	            	data <= execute0_outRegB;
-				7'b010_0110:
+				7'b010_0101:
 	            	data <= { 8'b0, {7'b0,execute0_outJL} , {7'b0,execute0_outPCSel} , {3'b0,execute0_outRegF_wreg}}; //execute0_outALUZero
 	             
 	            // Send the Latchs of the state Memory
